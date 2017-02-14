@@ -24,6 +24,37 @@ dependencies {
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
-    compile 'com.android.support:appcompat-v7:25.0.1'
     testCompile 'junit:junit:4.12'
+
+    // To use AppCompatActivity & other v7-support features
+    compile 'com.android.support:appcompat-v7:25.0.1'
+
+    // To use the support versions of Fragment, CursorLoader & other v4-support features
+    compile 'com.android.support:support-v4:25.0.1'
+
+    // To use Recycler Views
+    compile 'com.android.support:recyclerview-v7:25.0.1'
+
+    // To use snack messages on screen
+    compile 'com.android.support:design:25.0.1'
+
+    // Gson (to easily parse JSON documents)
+    compile 'com.google.code.gson:gson:2.8.0'
+
+    // Volley (to easily manage network operations)
+    compile 'com.android.volley:volley:1.0.0'
+
+    // Picasso (to easily download and cache images)
+    compile 'com.squareup.picasso:picasso:2.5.2'
+
+    // OkHttp3Downloader (downloader & disk cache for Picasso)
+    compile 'com.squareup.okhttp3:okhttp:3.3.0'
+    compile 'com.jakewharton.picasso:picasso2-okhttp3-downloader:1.0.2'
+
+    // Butterknife (to easily bind views)
+    compile 'com.jakewharton:butterknife:8.4.0'
+    annotationProcessor 'com.jakewharton:butterknife-compiler:8.4.0'
+
+    // Google Maps
+    compile 'com.google.android.gms:play-services-maps:10.0.0'
 }
