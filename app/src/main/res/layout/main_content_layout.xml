@@ -1,0 +1,16 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical">
+
+    <!-- Toolbar for the actvity -->
+    <include layout="@layout/toolbar_main"/>
+
+    <!-- This layout will be replaced by a fragment during runtime -->
+    <RelativeLayout
+        android:id="@+id/mainContentFragment_placeholder"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
+
+</LinearLayout>

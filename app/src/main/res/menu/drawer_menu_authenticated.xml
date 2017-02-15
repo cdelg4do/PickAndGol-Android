@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+
+        <item
+            android:id="@+id/navItem1"
+            android:icon="@android:drawable/ic_menu_camera"
+            android:title="Menu Item #1"
+            android:checked="true"/>
+
+        <item
+            android:id="@+id/navItem2"
+            android:icon="@android:drawable/ic_menu_gallery"
+            android:title="Menu Item #2"/>
+
+        <item
+            android:id="@+id/navItem3"
+            android:icon="@android:drawable/ic_menu_mapmode"
+            android:title="Menu Item #3"/>
+
+        <item
+            android:id="@+id/navItem4"
+            android:icon="@android:drawable/ic_menu_search"
+            android:title="Menu Item #4"/>
+
+        <item
+            android:id="@+id/navItem5"
+            android:icon="@android:drawable/ic_menu_today"
+            android:title="Menu Item #5"/>
+
+        <item
+            android:id="@+id/account_section"
+            android:title="Your account">
+            <menu>
+                <item
+                    android:id="@+id/log_out"
+                    android:icon="@android:drawable/ic_menu_close_clear_cancel"
+                    android:title="Log out" />
+            </menu>
+        </item>
+
+    </group>
+
+</menu>
