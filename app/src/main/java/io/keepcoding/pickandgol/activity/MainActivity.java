@@ -1,5 +1,6 @@
 package io.keepcoding.pickandgol.activity;
 
+import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -14,9 +15,17 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import io.keepcoding.pickandgol.R;
 import io.keepcoding.pickandgol.fragment.MainContentFragment;
+import io.keepcoding.pickandgol.interactor.LoginInteractor;
+import io.keepcoding.pickandgol.model.Login;
 import io.keepcoding.pickandgol.util.Utils;
+
+import static io.keepcoding.pickandgol.interactor.LoginInteractor.REQUEST_PARAM_KEY_EMAIL;
+import static io.keepcoding.pickandgol.interactor.LoginInteractor.REQUEST_PARAM_KEY_PASSWORD;
 
 
 /**
@@ -162,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
         switch (selectedItem) {
 
             case "Log in":
-                Utils.shortSnack(this, "Log in selected");
+                remoteLogin("pepe@yahoo.com", "Pepe1234567");
                 mainDrawer.closeDrawers();
                 break;
 
@@ -182,6 +191,36 @@ public class MainActivity extends AppCompatActivity {
                 actionBarTitle = selectedItem;
                 setTitle(actionBarTitle);
         }
+    }
+
+
+    // Login operation
+    private void remoteLogin(final @NonNull String email, final @NonNull String password) {
+
+        final ProgressDialog pDialog = Utils.newProgressDialog(this, "Login in progress...", "Please wait");
+        pDialog.show();
+
+        Map<String,String> loginParams = new HashMap<>();
+        loginParams.put(REQUEST_PARAM_KEY_EMAIL, email);
+        loginParams.put(REQUEST_PARAM_KEY_PASSWORD, password);
+
+        // Use a LoginInteractor to download perform the operation
+        new LoginInteractor().execute(this, loginParams, new LoginInteractor.LoginInteractorListener() {
+
+            @Override
+            public void onLoginFail(Exception e) {
+                pDialog.dismiss();
+                Log.e("MainActivity","Failed to login: "+ e.toString() );
+                Utils.shortSnack(MainActivity.this, "Failed to login");
+            }
+
+            @Override
+            public void onLoginSuccess(Login login) {
+                pDialog.dismiss();
+                Log.d("MainActivity","User '"+ login.getName() +"' has logged in");
+                Utils.shortSnack(MainActivity.this, "User '"+ login.getName() +"' has logged in");
+            }
+        });
     }
 
 }

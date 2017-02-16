@@ -1,6 +1,7 @@
 package io.keepcoding.pickandgol.util;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.support.design.widget.Snackbar;
 import android.view.View;
@@ -41,5 +42,18 @@ public class Utils {
 
     private static void showToastMessage(Context context, String msg, int duration) {
         Toast.makeText(context, msg, duration).show();
+    }
+
+
+    // Returns a new indeterminate, non-cancelable progress dialog with a given message and title
+    public static ProgressDialog newProgressDialog(Context ctx, String msg, String title) {
+
+        final ProgressDialog pDialog = new ProgressDialog(ctx);
+        pDialog.setTitle(title);
+        pDialog.setMessage(msg);
+        pDialog.setIndeterminate(true);
+        pDialog.setCancelable(false);
+
+        return pDialog;
     }
 }
