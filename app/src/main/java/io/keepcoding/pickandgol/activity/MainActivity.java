@@ -15,17 +15,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import io.keepcoding.pickandgol.R;
+import io.keepcoding.pickandgol.dialog.LoginDialog;
 import io.keepcoding.pickandgol.fragment.MainContentFragment;
 import io.keepcoding.pickandgol.interactor.LoginInteractor;
+import io.keepcoding.pickandgol.interactor.LoginInteractor.LoginInteractorListener;
+import io.keepcoding.pickandgol.interactor.UserDetailInteractor;
+import io.keepcoding.pickandgol.interactor.UserDetailInteractor.UserDetailInteractorListener;
 import io.keepcoding.pickandgol.model.Login;
+import io.keepcoding.pickandgol.model.User;
 import io.keepcoding.pickandgol.util.Utils;
-
-import static io.keepcoding.pickandgol.interactor.LoginInteractor.REQUEST_PARAM_KEY_EMAIL;
-import static io.keepcoding.pickandgol.interactor.LoginInteractor.REQUEST_PARAM_KEY_PASSWORD;
 
 
 /**
@@ -34,7 +33,7 @@ import static io.keepcoding.pickandgol.interactor.LoginInteractor.REQUEST_PARAM_
 public class MainActivity extends AppCompatActivity {
 
     private final String ACTIONBAR_TITLE_SAVED_STATE = "ACTIONBAR_TITLE_SAVED_STATE";
-    private final String DEFAULT_DRAWER_ITEM = "Menu Item #1";  // This should be a string from "drawer_menu"
+    private final String DEFAULT_DRAWER_ITEM = "Menu Item #1";  // Should be a string from "menu/drawer_menu"
 
     private DrawerLayout mainDrawer;
     private View drawerHeader;
@@ -135,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public boolean onNavigationItemSelected(MenuItem menuItem) {
                         menuItem.setChecked(true);
-                        doDrawerMenuAction( menuItem.getTitle().toString() );
+                        onDrawerItemSelected( menuItem.getTitle().toString() );
                         return true;
                     }
                 }
@@ -147,18 +146,18 @@ public class MainActivity extends AppCompatActivity {
             drawerHeader.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    doDrawerHeaderAction();
+                    onDrawerHeaderSelected();
                 }
             });
         }
 
         if (forceSelectDefaultItem)
-            doDrawerMenuAction(DEFAULT_DRAWER_ITEM);
+            onDrawerItemSelected(DEFAULT_DRAWER_ITEM);
     }
 
 
     // Action to perform when the drawer header is selected
-    private void doDrawerHeaderAction() {
+    private void onDrawerHeaderSelected() {
 
         Utils.shortSnack(this, "Profile selected");
         mainDrawer.closeDrawers();
@@ -166,12 +165,24 @@ public class MainActivity extends AppCompatActivity {
 
 
     // Action to perform when an item of the drawer menu is selected
-    private void doDrawerMenuAction(String selectedItem) {
+    private void onDrawerItemSelected(String selectedItem) {
 
         switch (selectedItem) {
 
+            case "User detail":
+                doGetUserDetailOperation("58a1f35ec26dc719c5ffd466");
+                mainDrawer.closeDrawers();
+                break;
+
             case "Log in":
-                remoteLogin("pepe@yahoo.com", "Pepe1234567");
+
+                new LoginDialog(this, new LoginDialog.LoginDialogListener() {
+                    @Override
+                    public void onLoginClick(String email, String password) {
+                        doLoginOperation(email,password);
+                    }
+                }).show();
+
                 mainDrawer.closeDrawers();
                 break;
 
@@ -194,31 +205,65 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    // Login operation
-    private void remoteLogin(final @NonNull String email, final @NonNull String password) {
+    // Use a LoginInteractor to perform the login operation
+    private void doLoginOperation(final @NonNull String email, final @NonNull String password) {
 
-        final ProgressDialog pDialog = Utils.newProgressDialog(this, "Login in progress...", "Please wait");
+        final ProgressDialog pDialog = Utils.newProgressDialog(this, "Login in progress...");
         pDialog.show();
 
-        Map<String,String> loginParams = new HashMap<>();
-        loginParams.put(REQUEST_PARAM_KEY_EMAIL, email);
-        loginParams.put(REQUEST_PARAM_KEY_PASSWORD, password);
-
-        // Use a LoginInteractor to download perform the operation
-        new LoginInteractor().execute(this, loginParams, new LoginInteractor.LoginInteractorListener() {
+        new LoginInteractor().execute(this, email, password, new LoginInteractorListener() {
 
             @Override
             public void onLoginFail(Exception e) {
                 pDialog.dismiss();
                 Log.e("MainActivity","Failed to login: "+ e.toString() );
-                Utils.shortSnack(MainActivity.this, "Failed to login");
+                Utils.simpleDialog(MainActivity.this, "Login error", e.getMessage());
             }
 
             @Override
             public void onLoginSuccess(Login login) {
                 pDialog.dismiss();
-                Log.d("MainActivity","User '"+ login.getName() +"' has logged in");
-                Utils.shortSnack(MainActivity.this, "User '"+ login.getName() +"' has logged in");
+
+                Utils.simpleDialog(MainActivity.this, "Login successful",
+                        "Id: "+ login.getId()
+                        +"\nName: "+ login.getName()
+                        +"\n\nToken: \n"+ login.getToken());
+            }
+        });
+    }
+
+
+    // Use a UserDetailInteractor to perform the user detail operation
+    private void doGetUserDetailOperation(final @NonNull String id) {
+
+        final ProgressDialog pDialog = Utils.newProgressDialog(this, "Fetching user '"+ id +"' info...");
+        pDialog.show();
+
+        new UserDetailInteractor().execute(this, id, new UserDetailInteractorListener() {
+
+            @Override
+            public void onUserDetailFail(Exception e) {
+                pDialog.dismiss();
+                Log.e("MainActivity","Failed to retrieve detail for user '"+ id +"': "+ e.toString() );
+                Utils.simpleDialog(MainActivity.this, "User detail error", e.getMessage());
+            }
+
+            @Override
+            public void onUserDetailSuccess(User user) {
+                pDialog.dismiss();
+
+                String photoUrl = (user.getPhotoUrl() != null) ? user.getPhotoUrl() : "<none>";
+
+                String favorites = "";
+                for (Integer i : user.getFavorites())
+                    favorites += i.toString() +" ";
+
+                Utils.simpleDialog(MainActivity.this, "User detail",
+                        "Id: "+ user.getId()
+                        +"\nName: "+ user.getName()
+                        +"\nEmail: "+ user.getEmail()
+                        +"\nFavorites: "+ favorites
+                        +"\n\nPhoto: \n"+ photoUrl);
             }
         });
     }

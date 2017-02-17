@@ -15,7 +15,8 @@ public class UserDataToUserMapper {
                 data.getId(),
                 data.getEmail(),
                 data.getName(),
-                data.getFavoritePubs()
+                data.getFavoritePubs(),
+                data.getPhotoUrl()
         );
 
         return user;

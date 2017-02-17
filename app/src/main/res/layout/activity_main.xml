@@ -20,7 +20,7 @@
         android:fitsSystemWindows="true"
         android:background="@drawable/drawer_menu_background"
         app:headerLayout="@layout/navigation_drawer_header"
-        app:menu="@menu/drawer_menu_anonymous"
+        app:menu="@menu/drawer_menu"
         app:arc_cropDirection="cropOutside"
         app:arc_width="96dp"/>
 

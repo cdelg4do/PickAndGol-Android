@@ -3,9 +3,13 @@ package io.keepcoding.pickandgol.util;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.widget.Toast;
+
+import java.util.regex.Pattern;
 
 
 /**
@@ -45,15 +49,69 @@ public class Utils {
     }
 
 
-    // Returns a new indeterminate, non-cancelable progress dialog with a given message and title
-    public static ProgressDialog newProgressDialog(Context ctx, String msg, String title) {
+    // Returns a new indeterminate, non-cancelable progress dialog with a given message
+    public static ProgressDialog newProgressDialog(Context ctx, String msg) {
 
         final ProgressDialog pDialog = new ProgressDialog(ctx);
-        pDialog.setTitle(title);
+        pDialog.setTitle("Please wait");
         pDialog.setMessage(msg);
         pDialog.setIndeterminate(true);
         pDialog.setCancelable(false);
 
         return pDialog;
     }
+
+
+    // Shows the user a dialog with Accept button only and its corresponding listener
+    public static void simpleDialog(Context ctx, String title, String msg, DialogInterface.OnClickListener acceptListener) {
+
+        final AlertDialog dialog;
+
+        if (acceptListener == null)
+            acceptListener = new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                }
+            };
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
+        builder.setTitle(title);
+        builder.setMessage(msg);
+        builder.setPositiveButton(ctx.getResources().getString(android.R.string.ok), acceptListener);
+
+        dialog = builder.create();
+        dialog.show();
+    }
+
+    // Shows the user a dialog with Accept button (with the default listener)
+    public static void simpleDialog(Context ctx, String title, String msg) {
+        simpleDialog(ctx, title, msg, null);
+    }
+
+
+    public static boolean isValidEmail(String email) {
+        boolean isValid = false;
+
+        String expression = "^[\\w\\.-]+@([\\w\\-]+\\.)+[A-Z]{2,4}$";
+        CharSequence cs = email;
+
+        Pattern patron = Pattern.compile(expression, Pattern.CASE_INSENSITIVE);
+        if ( patron.matcher(cs).matches() )
+            isValid = true;
+
+        return isValid;
+    }
+
+
+    public static boolean isValidPassword(String password) {
+
+        return (password.length() >= 6) && (password.length() <= 30);
+    }
+
+
+    public static String encryptPassword(String password) {
+        //TODO: implement password encryption
+        return password;
+    }
+
 }

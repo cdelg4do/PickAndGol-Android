@@ -1,6 +1,7 @@
 package io.keepcoding.pickandgol.model;
 
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import java.io.Serializable;
 import java.util.List;
@@ -16,6 +17,7 @@ public class User implements Serializable {
     private @NonNull String email;
     private @NonNull String name;
     private @NonNull List<Integer> favorites;
+    private @Nullable String photoUrl;
 
 
     // The default constructor will not be public
@@ -25,12 +27,14 @@ public class User implements Serializable {
     public User(final @NonNull String id,
                 final @NonNull String email,
                 final @NonNull String name,
-                final @NonNull List<Integer> favorites) {
+                final @NonNull List<Integer> favorites,
+                final @Nullable String photoUrl) {
 
         this.id = id;
         this.email = email;
         this.name = name;
         this.favorites = favorites;
+        this.photoUrl = photoUrl;
     }
 
 
@@ -54,5 +58,10 @@ public class User implements Serializable {
     @NonNull
     public List<Integer> getFavorites() {
         return favorites;
+    }
+
+    @Nullable
+    public String getPhotoUrl() {
+        return photoUrl;
     }
 }

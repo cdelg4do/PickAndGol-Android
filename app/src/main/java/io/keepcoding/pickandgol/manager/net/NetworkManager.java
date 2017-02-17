@@ -5,6 +5,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -18,11 +19,9 @@ import com.google.gson.GsonBuilder;
 import java.io.Reader;
 import java.io.StringReader;
 import java.lang.ref.WeakReference;
-import java.net.URLEncoder;
 import java.util.Map;
 
 import io.keepcoding.pickandgol.manager.net.response.LoginResponse;
-import io.keepcoding.pickandgol.manager.net.response.ParsedResponse;
 import io.keepcoding.pickandgol.manager.net.response.UserResponse;
 
 import static android.content.Context.CONNECTIVITY_SERVICE;
@@ -30,9 +29,13 @@ import static io.keepcoding.pickandgol.manager.net.NetworkManagerSettings.JsonRe
 
 
 /**
- * This class manages the app network operations:
- * sending requests, parsing JSON responses and detecting the connection status
- * (does not include image requests).
+ * This class manages the following network operations:
+ *
+ * - Detecting the device connection status
+ * - Sending requests to remote URLs
+ * - Parsing JSON responses and returning the data to a listener
+ *
+ * Does not include image requests, see the ImageManager for that.
  */
 public class NetworkManager {
 
@@ -47,11 +50,9 @@ public class NetworkManager {
      *
      * onNetworkRequestSuccess() should be called only if the JSON request was parsed successfully
      * and the 'result' field value was OK. Otherwise, call onNetworkRequestFail().
-     *
      */
     public interface NetworkRequestListener {
-
-        void onNetworkRequestSuccess(ParsedResponse.ParsedData parsedData); // Cast to appropriate subclass
+        void onNetworkRequestSuccess(ParsedData parsedData);
         void onNetworkRequestFail(Exception e);
     }
 
@@ -66,73 +67,57 @@ public class NetworkManager {
     }
 
     /**
-     * Determines the device's current connection type (static method).
+     * Determines the device's current connection type, if any (static method).
      *
      * @param context a context for the operation.
      * @return the type of internet connection
      */
-    public static ConnectionType getInternetConnectionType(final @NonNull Context context)
-    {
+    public static ConnectionType getInternetConnectionType(final @NonNull Context context) {
+
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = cm.getActiveNetworkInfo();
 
-        if (activeNetworkInfo.isConnectedOrConnecting()) {
-
-            if (activeNetworkInfo.getType() == ConnectivityManager.TYPE_WIFI)
-                return ConnectionType.WIFI;
-            else
-                return ConnectionType.OTHER;
-        }
-        else {
+        if ( !activeNetworkInfo.isConnectedOrConnecting() )
             return ConnectionType.NONE;
-        }
+
+        if (activeNetworkInfo.getType() == ConnectivityManager.TYPE_WIFI)
+            return ConnectionType.WIFI;
+
+        return ConnectionType.OTHER;
     }
 
 
     /**
      * Queues a new GET request through the network.
      *
+     * If the request was successful, will call listener.onNetworkRequestSuccess() passing
+     * a ParsedData object to the listener (the listener should cast it to the appropriate class).
+     *
+     * Otherwise, it will call listener.onNetworkRequestFail() passing the error to the listener.
+     *
      * @param url the url to address the request
      * @param urlParams a Map with the parameters to add to the request url
-     * @param expectedResponseType the response type expected for the request
+     * @param expectedResponseType the expected response type for the request
      * @param listener the listener that will be waiting for the response
      */
     public void launchGETStringRequest(
             final @NonNull String url,
-            final @NonNull Map<String,String> urlParams,
+            final @NonNull RequestParams urlParams,
             final JsonResponseType expectedResponseType,
             final @NonNull NetworkRequestListener listener) {
 
         if (url == null || urlParams == null || listener == null)
             return;
 
-        String urlWithParams = addParamsToUrl(url, urlParams);
+        String urlWithParams = urlParams.addParamsToUrl(url);
 
         StringRequest getRequest = new StringRequest(
                 Request.Method.GET,
                 urlWithParams,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        ParsedResponse parsedResponse = parseStringResponse(response, expectedResponseType);
+                getNewInternalListener(expectedResponseType, listener),
+                getNewInternalErrorListener(listener));
 
-                        if ( parsedResponse != null && parsedResponse.wasSuccessful() ) {
-                            listener.onNetworkRequestSuccess(parsedResponse.getData());
-                        }
-                        else {
-                            String errorMsg = parsedResponse.getData().getErrorCode() +": "+ parsedResponse.getData().getErrorDescription();
-                            listener.onNetworkRequestFail(new IncorrectResponseException(errorMsg));
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        listener.onNetworkRequestFail(error);
-                    }
-                }
-        );
-
+        Log.d("NetworkManager", "Launching GET request...\n"+ urlWithParams);
         RequestQueue queue = Volley.newRequestQueue( context.get() );
         queue.add(getRequest);
     }
@@ -141,6 +126,11 @@ public class NetworkManager {
     /**
      * Queues a new POST request through the network.
      *
+     * If the request was successful, will call listener.onNetworkRequestSuccess() passing
+     * a ParsedData object to the listener (the listener should cast it to the appropriate class).
+     *
+     * Otherwise, it will call listener.onNetworkRequestFail() passing the error to the listener.
+     *
      * @param url the url to address the request
      * @param bodyParams a Map with the parameters to add to the request body
      * @param expectedResponseType the response type expected for the request
@@ -148,7 +138,7 @@ public class NetworkManager {
      */
     public void launchPOSTStringRequest(
             final @NonNull String url,
-            final @NonNull Map<String,String> bodyParams,
+            final @NonNull RequestParams bodyParams,
             final JsonResponseType expectedResponseType,
             final @NonNull NetworkRequestListener listener) {
 
@@ -158,37 +148,17 @@ public class NetworkManager {
         StringRequest postRequest = new StringRequest(
                 Request.Method.POST,
                 url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        ParsedResponse parsedResponse = parseStringResponse(response, expectedResponseType);
-
-                        if ( parsedResponse != null && parsedResponse.wasSuccessful() ) {
-                            listener.onNetworkRequestSuccess(parsedResponse.getData());
-                        }
-                        else {
-                            String errorMsg = "NULL parsed response";
-                            if (parsedResponse != null)
-                                errorMsg = parsedResponse.getData().getErrorCode() +": "+ parsedResponse.getData().getErrorDescription();
-
-                            listener.onNetworkRequestFail( new IncorrectResponseException(errorMsg) );
-                        }
-                    }
-                },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        listener.onNetworkRequestFail(error);
-                    }
-                }
-        )
+                getNewInternalListener(expectedResponseType, listener),
+                getNewInternalErrorListener(listener))
         {
+            // This override is necessary in order to pass params to the POST request
             @Override
-            protected Map<String,String> getParams(){
-                return bodyParams;
+            protected Map<String,String> getParams() {
+                return bodyParams.urlEncodeParams().getParams();
             }
         };
 
+        Log.d("NetworkManager", "Launching POST request... \n"+ url);
         RequestQueue queue = Volley.newRequestQueue( context.get() );
         queue.add(postRequest);
     }
@@ -196,33 +166,55 @@ public class NetworkManager {
 
     // Auxiliary methods:
 
-    // Add the parameters in the map to a given url
-    private String addParamsToUrl(final @NonNull String url, final @Nullable Map<String,String> urlParams) {
+    // Creates a new custom Volley listener for a String request
+    private Response.Listener<String> getNewInternalListener(
+            final JsonResponseType expectedResponseType,
+            final NetworkRequestListener externalListener) {
 
-        StringBuilder strBuilder;
+        Response.Listener<String> newResponseListener;
 
-        if (urlParams == null || urlParams.size() == 0)
-            return url;
+        newResponseListener = new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                Log.d("NetworkManager", "Response retrieved");
 
-        try {
-            strBuilder = new StringBuilder(url);
-            strBuilder.append("?");
+                ParsedResponse parsedResponse = parseStringResponse(response, expectedResponseType);
+                //LoginResponse lr = (LoginResponse) parsedResponse;
 
-            for (Map.Entry<String,String> entry : urlParams.entrySet()) {
-                String paramKey = entry.getKey();
-                String paramValue = URLEncoder.encode(entry.getValue(), "UTF-8");
+                if ( parsedResponse != null && parsedResponse.resultIsOK() ) {
+                    externalListener.onNetworkRequestSuccess(parsedResponse.getData());
+                }
+                else {
+                    String errorMsg = "NULL parsed response";
+                    if (parsedResponse != null)
+                        errorMsg = parsedResponse.getData().getErrorCode()
+                                +": "+ parsedResponse.getData().getErrorDescription();
 
-                strBuilder.append(paramKey +"="+ paramValue +"&");
+                    externalListener.onNetworkRequestFail( new IncorrectResponseException(errorMsg) );
+                }
             }
+        };
 
-            strBuilder.setLength(strBuilder.length()-1);    // to remove the last '&'
-        }
-        catch (Exception e) {
-            return url;
-        }
-
-        return strBuilder.toString();
+        return newResponseListener;
     }
+
+    // Creates a new custom Volley error listener for a request
+    private Response.ErrorListener getNewInternalErrorListener(
+            final NetworkRequestListener externalListener) {
+
+        Response.ErrorListener newResponseErrorListener;
+
+        newResponseErrorListener = new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("NetworkManager", "Unable to get response");
+                externalListener.onNetworkRequestFail(error);
+            }
+        };
+
+        return newResponseErrorListener;
+    }
+
 
     // This method tries to parse a String response according to the given expected response type
     @Nullable
