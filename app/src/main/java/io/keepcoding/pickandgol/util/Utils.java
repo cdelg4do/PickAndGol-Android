@@ -18,6 +18,10 @@ import java.util.regex.Pattern;
  */
 public class Utils {
 
+    /*
+        Screen messages and dialogs
+     */
+
     public static void shortSnack(Activity activity, String msg) {
         showSnackMessage(activity, msg, Snackbar.LENGTH_SHORT);
     }
@@ -67,6 +71,7 @@ public class Utils {
 
         final AlertDialog dialog;
 
+        // If no listener was provided, use a default one
         if (acceptListener == null)
             acceptListener = new DialogInterface.OnClickListener() {
                 @Override
@@ -89,6 +94,10 @@ public class Utils {
     }
 
 
+    /*
+        String operations and validators
+     */
+
     public static boolean isValidEmail(String email) {
         boolean isValid = false;
 
@@ -101,7 +110,6 @@ public class Utils {
 
         return isValid;
     }
-
 
     public static boolean isValidPassword(String password) {
 

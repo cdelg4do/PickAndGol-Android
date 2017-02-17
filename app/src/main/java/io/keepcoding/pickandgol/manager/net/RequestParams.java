@@ -4,10 +4,10 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Created by Carlos on 16/02/2017.
- */
 
+/**
+ * This class represents a set of parameters passed to a Network request
+ */
 public class RequestParams {
 
     private Map<String,String> params;

@@ -1,5 +1,8 @@
 package io.keepcoding.pickandgol.manager.net.response;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import com.google.gson.annotations.SerializedName;
 
 import java.util.List;
@@ -22,7 +25,7 @@ public class UserResponse implements ParsedResponse {
         return (result != null && result.equals(JSON_RESULT_OK));
     }
 
-    public UserData getData() {
+    public @NonNull UserData getData() {
         return data;
     }
 
@@ -44,11 +47,11 @@ public class UserResponse implements ParsedResponse {
         @SerializedName("photo_url")        private String photoUrl;    // Optional field
 
 
-        public String getErrorCode() {
+        public @Nullable String getErrorCode() {
             return errorCode;
         }
 
-        public String getErrorDescription() {
+        public @Nullable String getErrorDescription() {
             return errorDescription;
         }
 

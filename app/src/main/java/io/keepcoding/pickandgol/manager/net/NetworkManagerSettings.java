@@ -17,7 +17,7 @@ public class NetworkManagerSettings {
     // Available JSON response types expected from the server
     public static enum JsonResponseType {
 
-        LOGIN,
-        USER
+        LOGIN,      // LoginResponse
+        USER        // UserResponse
     }
 }
