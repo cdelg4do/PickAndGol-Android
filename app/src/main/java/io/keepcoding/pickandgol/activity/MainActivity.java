@@ -14,6 +14,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
+
+import com.squareup.picasso.Picasso;
 
 import io.keepcoding.pickandgol.R;
 import io.keepcoding.pickandgol.dialog.LoginDialog;
@@ -228,6 +231,12 @@ public class MainActivity extends AppCompatActivity {
                         "Id: "+ login.getId()
                         +"\nName: "+ login.getName()
                         +"\n\nToken: \n"+ login.getToken());
+
+                ImageView circleImageView = (ImageView) drawerHeader.findViewById(R.id.circle_image);
+
+                Picasso.with(MainActivity.this)
+                        .load(login.getPhotoUrl())
+                        .into(circleImageView);
             }
         });
     }

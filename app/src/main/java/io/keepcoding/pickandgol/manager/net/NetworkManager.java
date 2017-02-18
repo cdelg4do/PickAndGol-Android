@@ -154,7 +154,7 @@ public class NetworkManager {
             // This override is necessary in order to pass params to the POST request
             @Override
             protected Map<String,String> getParams() {
-                return bodyParams.urlEncodeParams().getParams();
+                return bodyParams.getParams();
             }
         };
 
