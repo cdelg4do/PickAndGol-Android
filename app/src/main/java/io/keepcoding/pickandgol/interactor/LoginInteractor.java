@@ -7,6 +7,7 @@ import io.keepcoding.pickandgol.manager.net.NetworkManager;
 import io.keepcoding.pickandgol.manager.net.ParsedData;
 import io.keepcoding.pickandgol.manager.net.RequestParams;
 import io.keepcoding.pickandgol.manager.net.response.LoginResponse.LoginData;
+import io.keepcoding.pickandgol.manager.session.SessionManager;
 import io.keepcoding.pickandgol.model.Login;
 import io.keepcoding.pickandgol.model.mapper.LoginDataToLoginMapper;
 
@@ -17,8 +18,8 @@ import static io.keepcoding.pickandgol.manager.net.NetworkManagerSettings.URL_LO
 /**
  * This class is an interactor in charge of:
  *
- * - First (in background): requests a new login into the remote server and builds a new model object with the login info.
- * - Second (in the main thread): pass the model object to the received LoginInteractorListener.
+ * - First (in background): requests a new login into the remote server and locally stores the session data.
+ * - Second (in the main thread): returns control to the received LoginInteractorListener.
  */
 public class LoginInteractor {
 
@@ -29,7 +30,7 @@ public class LoginInteractor {
 
     // This interface describes the behavior of a listener waiting for the the async operation
     public interface LoginInteractorListener {
-        void onLoginSuccess(Login login);
+        void onLoginSuccess();
         void onLoginFail(Exception e);
     }
 
@@ -62,14 +63,20 @@ public class LoginInteractor {
         networkMgr.launchPOSTStringRequest(remoteUrl, loginParams, LOGIN, new NetworkManager.NetworkRequestListener() {
 
             @Override
-            public void onNetworkRequestSuccess(ParsedData parsedData) {
-                Login login = new LoginDataToLoginMapper().map( (LoginData) parsedData );
-                listener.onLoginSuccess(login);
+            public void onNetworkRequestFail(Exception e) {
+                listener.onLoginFail(e);
             }
 
             @Override
-            public void onNetworkRequestFail(Exception e) {
-                listener.onLoginFail(e);
+            public void onNetworkRequestSuccess(ParsedData parsedData) {
+                Login login = new LoginDataToLoginMapper().map( (LoginData) parsedData );
+
+                boolean sessionStored = SessionManager.getInstance(context).storeSession(login);
+
+                if (sessionStored)
+                    listener.onLoginSuccess();
+                else
+                    listener.onLoginFail( new Exception("Unable to store the session data") );
             }
         });
     }

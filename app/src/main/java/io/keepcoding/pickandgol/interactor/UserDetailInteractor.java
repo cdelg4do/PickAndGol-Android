@@ -23,9 +23,8 @@ import static io.keepcoding.pickandgol.manager.net.NetworkManagerSettings.URL_US
  */
 public class UserDetailInteractor {
 
-    // Param keynames for the login operation
-    public static final String REQUEST_PARAM_KEY_EMAIL = "email";
-    public static final String REQUEST_PARAM_KEY_PASSWORD = "password";
+    // Param keynames for the user detail operation// Param keynames for the login operation
+    public static final String REQUEST_PARAM_KEY_TOKEN = "token";
 
 
     // This interface describes the behavior of a listener waiting for the the async operation
@@ -40,17 +39,22 @@ public class UserDetailInteractor {
      *
      * @param context   context for the operation.
      * @param id        id of the user we are asking for
+     * @param token     session token to send to the server
      * @param listener  listener that will process the result of the operation.
      */
     public void execute(final @NonNull Context context,
                         final @NonNull String id,
+                        final @NonNull String token,
                         final @NonNull UserDetailInteractorListener listener) {
 
         if (listener == null)
             return;
 
         NetworkManager networkMgr = new NetworkManager(context);
-        RequestParams userDetailParams = new RequestParams();   // no params needed
+        RequestParams userDetailParams = new RequestParams();
+
+        userDetailParams
+                .addParam(REQUEST_PARAM_KEY_TOKEN, token);
 
         String remoteUrl = getUrl(id);
 

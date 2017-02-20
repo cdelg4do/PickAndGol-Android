@@ -9,4 +9,5 @@ public interface ParsedResponse {
 
     boolean resultIsOK();
     @NonNull ParsedData getData();
+    String debugString();
 }

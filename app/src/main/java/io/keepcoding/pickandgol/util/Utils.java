@@ -116,10 +116,17 @@ public class Utils {
         return (password.length() >= 6) && (password.length() <= 30);
     }
 
-
     public static String encryptPassword(String password) {
         //TODO: implement password encryption
         return password;
+    }
+
+    public static String safeString(String string) {
+
+        if (string == null)
+            return "'null'";
+
+        return string;
     }
 
 }

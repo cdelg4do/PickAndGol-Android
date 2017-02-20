@@ -7,6 +7,7 @@ import com.google.gson.annotations.SerializedName;
 
 import io.keepcoding.pickandgol.manager.net.ParsedData;
 import io.keepcoding.pickandgol.manager.net.ParsedResponse;
+import io.keepcoding.pickandgol.util.Utils;
 
 import static io.keepcoding.pickandgol.manager.net.NetworkManagerSettings.JSON_RESULT_OK;
 
@@ -72,5 +73,25 @@ public class LoginResponse implements ParsedResponse {
         public String getPhotoUrl() {
             return photoUrl;
         }
+    }
+
+
+    // Outputs the response data as a String (for debugging purposes)
+    public String debugString() {
+
+        StringBuilder str = new StringBuilder();
+
+        str.append("result: "+ Utils.safeString(result) +"\n");
+
+        str.append("code: "+ Utils.safeString(data.errorCode) +"\n");
+        str.append("description: "+ Utils.safeString(data.errorDescription) +"\n");
+
+        str.append("id: "+ Utils.safeString(data.id) +"\n");
+        str.append("email: "+ Utils.safeString(data.email) +"\n");
+        str.append("name: "+ Utils.safeString(data.name) +"\n");
+        str.append("token: "+ Utils.safeString(data.token) +"\n");
+        str.append("photoUrl: "+ Utils.safeString(data.photoUrl) +"\n");
+
+        return str.toString();
     }
 }

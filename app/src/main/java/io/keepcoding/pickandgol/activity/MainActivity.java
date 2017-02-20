@@ -15,9 +15,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import io.keepcoding.pickandgol.R;
 import io.keepcoding.pickandgol.dialog.LoginDialog;
 import io.keepcoding.pickandgol.fragment.MainContentFragment;
@@ -25,7 +28,7 @@ import io.keepcoding.pickandgol.interactor.LoginInteractor;
 import io.keepcoding.pickandgol.interactor.LoginInteractor.LoginInteractorListener;
 import io.keepcoding.pickandgol.interactor.UserDetailInteractor;
 import io.keepcoding.pickandgol.interactor.UserDetailInteractor.UserDetailInteractorListener;
-import io.keepcoding.pickandgol.model.Login;
+import io.keepcoding.pickandgol.manager.session.SessionManager;
 import io.keepcoding.pickandgol.model.User;
 import io.keepcoding.pickandgol.util.Utils;
 
@@ -36,11 +39,17 @@ import io.keepcoding.pickandgol.util.Utils;
 public class MainActivity extends AppCompatActivity {
 
     private final String ACTIONBAR_TITLE_SAVED_STATE = "ACTIONBAR_TITLE_SAVED_STATE";
-    private final String DEFAULT_DRAWER_ITEM = "Menu Item #1";  // Should be a string from "menu/drawer_menu"
+    private final int DEFAULT_DRAWER_ITEM = R.id.drawer_menu_item1;  // Should be an item from "menu/drawer_menu"
 
+    private SessionManager sm;
     private DrawerLayout mainDrawer;
     private View drawerHeader;
     private String actionBarTitle;
+
+    // Reference to UI elements to be bind with Butterknife (not before the header is inflated)
+    @BindView(R.id.drawer_profile_username) TextView profileNameText;
+    @BindView(R.id.drawer_profile_email) TextView profileEmailText;
+    @BindView(R.id.drawer_profile_image) ImageView profileImage;
 
 
     @Override
@@ -48,18 +57,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        sm = SessionManager.getInstance(this);
         setupActionBar();
 
-        boolean selectDefault = (savedInstanceState == null);
-        setupDrawer(selectDefault);
-
-        if (savedInstanceState == null) {
-            setupDrawer(true);
-        }
-        else {
+        if (savedInstanceState != null)
             restoreActivityState(savedInstanceState);
-            setupDrawer(false);
-        }
+
+        setupDrawer(savedInstanceState);
+
+        updateHeaderFromSessionInfo();
     }
 
     @Override
@@ -121,41 +127,71 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    // Set listeners for the header and the drawer items.
-    // Also, force the selection of the default drawer item if needed.
-    private void setupDrawer(boolean forceSelectDefaultItem) {
+    // Get references to the drawer and the drawer header.
+    // Bind the header inner views (with Butterknife).
+    // Set listeners for the drawer items and drawer header.
+    // Forces the selection of the default item (if savedInstanceState == null)
+    private void setupDrawer(Bundle savedInstanceState) {
 
         mainDrawer = (DrawerLayout) findViewById(R.id.drawer_layout);
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        if (navigationView != null) {
+        if (navigationView == null)
+            return;
 
-            drawerHeader = navigationView.getHeaderView(0);
+        drawerHeader = navigationView.getHeaderView(0);
+        if (drawerHeader == null)
+            return;
 
-            navigationView.setNavigationItemSelectedListener(
+        ButterKnife.bind(this, drawerHeader);
+
+        navigationView.setNavigationItemSelectedListener(
                 new NavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(MenuItem menuItem) {
-                        menuItem.setChecked(true);
-                        onDrawerItemSelected( menuItem.getTitle().toString() );
+                        onDrawerItemSelected( menuItem );
                         return true;
                     }
                 }
-            );
+        );
+
+        drawerHeader.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                onDrawerHeaderSelected();
+            }
+        });
+
+        if (savedInstanceState == null) {
+            MenuItem defaultDrawerItem = navigationView.getMenu().findItem(DEFAULT_DRAWER_ITEM);
+            onDrawerItemSelected(defaultDrawerItem);
+        }
+    }
+
+
+    // Updates the header views with the information in the device's session
+    // (if there is no session stored, just update the views with the default values)
+    private void updateHeaderFromSessionInfo() {
+
+        if (sm.hasSessionStored()) {
+
+            profileNameText.setText( sm.getUserName() );
+            profileEmailText.setText( sm.getUserEmail() );
+
+            if ( sm.getUserPhotoUrl() != null ) {
+                Picasso.with(MainActivity.this)
+                        .load(sm.getUserPhotoUrl())
+                        .into(profileImage);
+            }
         }
 
-        if (drawerHeader != null) {
-
-            drawerHeader.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    onDrawerHeaderSelected();
-                }
-            });
+        else {
+            profileNameText.setText("Please register or log in");
+            profileEmailText.setText("to Pick And Gol");
+            Picasso.with(MainActivity.this)
+                    .load(R.drawable.default_avatar)
+                    .into(profileImage);
         }
-
-        if (forceSelectDefaultItem)
-            onDrawerItemSelected(DEFAULT_DRAWER_ITEM);
     }
 
 
@@ -168,16 +204,11 @@ public class MainActivity extends AppCompatActivity {
 
 
     // Action to perform when an item of the drawer menu is selected
-    private void onDrawerItemSelected(String selectedItem) {
+    private void onDrawerItemSelected(MenuItem menuItem) {
 
-        switch (selectedItem) {
+        switch (menuItem.getItemId()) {
 
-            case "User detail":
-                doGetUserDetailOperation("58a1f35ec26dc719c5ffd466");
-                mainDrawer.closeDrawers();
-                break;
-
-            case "Log in":
+            case R.id.drawer_menu_log_in:
 
                 new LoginDialog(this, new LoginDialog.LoginDialogListener() {
                     @Override
@@ -189,21 +220,34 @@ public class MainActivity extends AppCompatActivity {
                 mainDrawer.closeDrawers();
                 break;
 
-            case "Register":
-                Utils.shortSnack(this, "Register selected");
+            case R.id.drawer_menu_log_out:
+                doLogOutOperation();
+                mainDrawer.closeDrawers();
+                break;
+
+            case R.id.drawer_menu_user_detail:
+                doGetUserDetailOperation( sm.getUserId() );     // ask for our own user
+                mainDrawer.closeDrawers();
+                break;
+
+            case R.id.drawer_menu_session_info:
+                doShowSessionInfoOperation();
                 mainDrawer.closeDrawers();
                 break;
 
             default:
-                Fragment newFragment = MainContentFragment.newInstance(selectedItem);
+
+                Fragment newFragment = MainContentFragment.newInstance(menuItem.getTitle().toString());
                 getSupportFragmentManager()
                         .beginTransaction()
                         .replace(R.id.mainContentFragment_placeholder, newFragment)
                         .commit();
 
-                mainDrawer.closeDrawers();
-                actionBarTitle = selectedItem;
+                actionBarTitle = menuItem.getTitle().toString();
                 setTitle(actionBarTitle);
+
+                Utils.shortSnack(this, menuItem.toString() +" selected");
+                mainDrawer.closeDrawers();
         }
     }
 
@@ -224,31 +268,48 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onLoginSuccess(Login login) {
+            public void onLoginSuccess() {
                 pDialog.dismiss();
 
-                Utils.simpleDialog(MainActivity.this, "Login successful",
-                        "Id: "+ login.getId()
-                        +"\nName: "+ login.getName()
-                        +"\n\nToken: \n"+ login.getToken());
+                updateHeaderFromSessionInfo();
 
-                ImageView circleImageView = (ImageView) drawerHeader.findViewById(R.id.circle_image);
-
-                Picasso.with(MainActivity.this)
-                        .load(login.getPhotoUrl())
-                        .into(circleImageView);
+                Utils.simpleDialog(MainActivity.this,
+                        "Login successful",
+                        "Now you are logged as '"+ sm.getUserName() +"'.");
             }
         });
+    }
+
+
+    // Destroy the stored session and update the header views
+    private void doLogOutOperation() {
+
+        if ( sm.hasSessionStored() ) {
+            sm.destroySession();
+            updateHeaderFromSessionInfo();
+            Utils.simpleDialog(this, "Log out", "You just finished your session.");
+        }
+        else {
+            Utils.simpleDialog(this, "Log out", "You are already logged out.");
+        }
     }
 
 
     // Use a UserDetailInteractor to perform the user detail operation
     private void doGetUserDetailOperation(final @NonNull String id) {
 
+        // Only authenticated users should ask for user details
+        if ( !sm.hasSessionStored() ) {
+            Utils.simpleDialog(this, "Unauthorized operation", "You must be logged in to perform this operation.");
+            return;
+        }
+
+        String token = sm.getSessionToken();
+
         final ProgressDialog pDialog = Utils.newProgressDialog(this, "Fetching user '"+ id +"' info...");
         pDialog.show();
 
-        new UserDetailInteractor().execute(this, id, new UserDetailInteractorListener() {
+        new UserDetailInteractor().execute(this, id, token, new UserDetailInteractorListener() {
 
             @Override
             public void onUserDetailFail(Exception e) {
@@ -263,18 +324,42 @@ public class MainActivity extends AppCompatActivity {
 
                 String photoUrl = (user.getPhotoUrl() != null) ? user.getPhotoUrl() : "<none>";
 
-                String favorites = "";
+                String favorites = "[ ";
                 for (Integer i : user.getFavorites())
                     favorites += i.toString() +" ";
+                favorites += "]";
 
                 Utils.simpleDialog(MainActivity.this, "User detail",
                         "Id: "+ user.getId()
                         +"\nName: "+ user.getName()
                         +"\nEmail: "+ user.getEmail()
                         +"\nFavorites: "+ favorites
-                        +"\n\nPhoto: \n"+ photoUrl);
+                        +"\nPhoto: "+ photoUrl);
             }
         });
+    }
+
+
+    // Shows the info from the local stored session
+    private void doShowSessionInfoOperation() {
+
+        if ( !sm.hasSessionStored() ) {
+            Utils.simpleDialog(this, "Session info", "No session stored on this device.");
+            return;
+        }
+
+        String id = sm.getUserId();
+        String email = sm.getUserEmail();
+        String name = sm.getUserName();
+        String photoUrl = sm.getUserPhotoUrl();
+        String token = sm.getSessionToken();
+
+        Utils.simpleDialog(this, "Session info",
+                "Id: "+ id
+                +"\nEmail: "+ email
+                +"\nName: "+ name
+                +"\nPhoto: \n"+ photoUrl
+                +"\n\nToken: \n"+ token);
     }
 
 }

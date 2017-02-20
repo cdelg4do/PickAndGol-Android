@@ -179,7 +179,6 @@ public class NetworkManager {
                 Log.d("NetworkManager", "Response retrieved");
 
                 ParsedResponse parsedResponse = parseStringResponse(response, expectedResponseType);
-                //LoginResponse lr = (LoginResponse) parsedResponse;
 
                 if ( parsedResponse != null && parsedResponse.resultIsOK() ) {
                     externalListener.onNetworkRequestSuccess(parsedResponse.getData());
@@ -220,17 +219,30 @@ public class NetworkManager {
     @Nullable
     private ParsedResponse parseStringResponse(String response, JsonResponseType expectedType) {
 
+        if (response != null)
+            Log.d("NetworkManager","Received response: \n" +response);
+
+        ParsedResponse parsedResponse;
+
         switch (expectedType) {
 
             case LOGIN:
-                return parseLoginResponse(response);
+                parsedResponse = parseLoginResponse(response);
+                break;
 
             case USER:
-                return parseUserResponse(response);
+                parsedResponse = parseUserResponse(response);
+                break;
 
             default:
-                return null;
+                parsedResponse = null;
+                break;
         }
+
+        if (parsedResponse != null)
+            Log.d("NetworkManager","Parsed response (expected type '"+ expectedType.toString() +"'): \n" +parsedResponse.debugString());
+
+        return parsedResponse;
     }
 
 
