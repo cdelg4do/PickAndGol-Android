@@ -36,7 +36,7 @@ public class Login implements Serializable {
         this.token = token;
         this.photoUrl = photoUrl;
 
-        anonymousSession = (id != null && email != null && name != null && token != null);
+        anonymousSession = (id == null || email == null || name == null || token == null);
     }
 
 

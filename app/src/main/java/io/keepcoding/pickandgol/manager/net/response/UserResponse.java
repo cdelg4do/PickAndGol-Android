@@ -9,6 +9,7 @@ import java.util.List;
 
 import io.keepcoding.pickandgol.manager.net.ParsedData;
 import io.keepcoding.pickandgol.manager.net.ParsedResponse;
+import io.keepcoding.pickandgol.util.Utils;
 
 import static io.keepcoding.pickandgol.manager.net.NetworkManagerSettings.JSON_RESULT_OK;
 
@@ -40,10 +41,10 @@ public class UserResponse implements ParsedResponse {
         @SerializedName("description")  private String errorDescription;
 
         // These fields only in case of 'OK' result
-        @SerializedName("id")               private String id;
+        @SerializedName("_id")              private String id;
         @SerializedName("email")            private String email;
         @SerializedName("name")             private String name;
-        @SerializedName("pubs")             private List<Integer> favoritePubs;
+        @SerializedName("favorite_pubs")    private List<Integer> favoritePubs;
         @SerializedName("photo_url")        private String photoUrl;    // Optional field
 
 
@@ -74,5 +75,37 @@ public class UserResponse implements ParsedResponse {
         public String getPhotoUrl() {
             return photoUrl;
         }
+    }
+
+
+    // Outputs the response data as a String (for debugging purposes)
+    public String debugString() {
+
+        StringBuilder str = new StringBuilder();
+
+        str.append("result: "+ Utils.safeString(result) +"\n");
+
+        str.append("code: "+ Utils.safeString(data.errorCode) +"\n");
+        str.append("description: "+ Utils.safeString(data.errorDescription) +"\n");
+
+        str.append("id: "+ Utils.safeString(data.id) +"\n");
+        str.append("email: "+ Utils.safeString(data.email) +"\n");
+        str.append("name: "+ Utils.safeString(data.name) +"\n");
+        str.append("photoUrl: "+ Utils.safeString(data.photoUrl) +"\n");
+
+        if (data.favoritePubs == null || data.favoritePubs.size() == 0)
+            str.append("pubs: [ ] \n");
+
+        else {
+            str.append("pubs: [ ");
+
+            for (Integer pub : data.favoritePubs)
+                str.append(pub.toString() +", ");
+
+            str.setLength(str.length() - 2);    // to remove the last ', '
+            str.append(" ] \n");
+        }
+
+        return str.toString();
     }
 }
