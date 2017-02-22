@@ -15,9 +15,9 @@
             android:title="Menu Item #2"/>
 
         <item
-            android:id="@+id/drawer_menu_item3"
+            android:id="@+id/drawer_menu_upload_image"
             android:icon="@android:drawable/ic_menu_mapmode"
-            android:title="Menu Item #3"/>
+            android:title="Upload image"/>
 
         <item
             android:id="@+id/drawer_menu_user_detail"

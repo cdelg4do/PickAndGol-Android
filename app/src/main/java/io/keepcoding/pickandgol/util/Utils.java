@@ -129,4 +129,16 @@ public class Utils {
         return string;
     }
 
+    public static String getFileExtension(String filePath) {
+
+        String extension = "";
+
+        if (filePath != null) {
+            String filePathArray[] = filePath.split("\\.");
+            extension = filePathArray[filePathArray.length-1];
+        }
+
+        return extension;
+    }
+
 }
