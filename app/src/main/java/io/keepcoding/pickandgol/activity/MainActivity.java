@@ -1,14 +1,10 @@
 package io.keepcoding.pickandgol.activity;
 
-import android.app.Activity;
 import android.app.ProgressDialog;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -39,11 +35,15 @@ import io.keepcoding.pickandgol.interactor.UserDetailInteractor.UserDetailIntera
 import io.keepcoding.pickandgol.manager.image.ImageManager;
 import io.keepcoding.pickandgol.manager.session.SessionManager;
 import io.keepcoding.pickandgol.model.User;
+import io.keepcoding.pickandgol.util.PermissionChecker;
+import io.keepcoding.pickandgol.util.PermissionChecker.CheckPermissionListener;
 import io.keepcoding.pickandgol.util.Utils;
 
-import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
-import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
-import static android.support.v4.content.PermissionChecker.PERMISSION_GRANTED;
+import static io.keepcoding.pickandgol.util.PermissionChecker.PermissionTag.CAMERA_SET;
+import static io.keepcoding.pickandgol.util.PermissionChecker.PermissionTag.RW_STORAGE_SET;
+import static io.keepcoding.pickandgol.util.PermissionChecker.REQUEST_FOR_CAMERA_PERMISSION;
+import static io.keepcoding.pickandgol.util.PermissionChecker.REQUEST_FOR_LOCATION_PERMISSION;
+import static io.keepcoding.pickandgol.util.PermissionChecker.REQUEST_FOR_STORAGE_PERMISSION;
 
 
 /**
@@ -58,9 +58,17 @@ public class MainActivity extends AppCompatActivity {
 
     private SessionManager sm;
     private ImageManager im;
+
+    // There should be as many Permission Checkers as permission requests we need on this activity
+    private PermissionChecker storageChecker;
+    private PermissionChecker cameraChecker;
+
+    private Fragment mainFragment;
+
     private DrawerLayout mainDrawer;
     private View drawerHeader;
     private String actionBarTitle;
+    private ImageView fragmentImage;
 
     // Reference to UI elements to be bind with Butterknife (not before the header is inflated)
     @BindView(R.id.drawer_profile_username) TextView profileNameText;
@@ -73,18 +81,30 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        checkStorageAccessPermission(this);
-
         sm = SessionManager.getInstance(this);
         im = ImageManager.getInstance(this);
+
         setupActionBar();
 
         if (savedInstanceState != null)
             restoreActivityState(savedInstanceState);
 
         setupDrawer(savedInstanceState);
-
         updateHeaderFromSessionInfo();
+
+        checkStoragePermission(new CheckPermissionListener() {
+            @Override
+            public void onPermissionDenied() {
+                String title = "Storage access required";
+                String msg = "Pick And Gol will not be able to access your device storage.";
+                Utils.simpleDialog(MainActivity.this, title, msg);
+            }
+
+            @Override
+            public void onPermissionGranted() {
+                Utils.shortSnack(MainActivity.this, "Storage access granted");
+            }
+        });
     }
 
     @Override
@@ -259,19 +279,29 @@ public class MainActivity extends AppCompatActivity {
                 new ChooseFileDialog(this, "/storage/emulated/0/Download", "test.jpg", new ChooseFileDialog.ChooseFileDialogListener() {
                     @Override
                     public void onChooseFileClick(String filePath) {
-                        doUploadFileOperation(filePath);
+                        doUploadImageOperation(filePath);
                     }
                 }).show();
 
                 mainDrawer.closeDrawers();
                 break;
 
+            case R.id.drawer_menu_load_image:
+
+                fragmentImage = ((MainContentFragment)mainFragment).getImage();
+
+                if (fragmentImage != null)
+                    doDownloadImageOperation(fragmentImage, "https://pickandgol.s3.amazonaws.com/test.jpg");
+
+                mainDrawer.closeDrawers();
+                break;
+
             default:
 
-                Fragment newFragment = MainContentFragment.newInstance(menuItem.getTitle().toString());
+                mainFragment = MainContentFragment.newInstance(menuItem.getTitle().toString());
                 getSupportFragmentManager()
                         .beginTransaction()
-                        .replace(R.id.mainContentFragment_placeholder, newFragment)
+                        .replace(R.id.mainContentFragment_placeholder, mainFragment)
                         .commit();
 
                 actionBarTitle = menuItem.getTitle().toString();
@@ -395,7 +425,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     // Upload file to Amazon S3 bucket
-    private void doUploadFileOperation(final String filePath) {
+    private void doUploadImageOperation(final String filePath) {
 
         if( new File(filePath).isFile() ) {
 
@@ -407,7 +437,7 @@ public class MainActivity extends AppCompatActivity {
             im.uploadImage(new File(filePath), imageKey, new ImageManager.ImageTransferListener() {
 
                 @Override
-                public void onProgressChanged(long bytesCurrent, long bytesTotal) {
+                public void onProgressChanged(int transferId, long bytesCurrent, long bytesTotal) {
                     int percent = (int) ((bytesCurrent * 100.0f) / bytesTotal);
                     int kbTotal = (int) (bytesTotal / 1024.0f);
 
@@ -415,12 +445,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public void onStatusChanged(ImageManager.ImageTransferStatus newStatus) {
-                    Log.d("File Upload", "Status changed to: " + newStatus.toString());
-                }
-
-                @Override
-                public void onImageTransferError(Exception e) {
+                public void onImageTransferError(int transferId, Exception e) {
                     pDialog.dismiss();
 
                     Log.e("File Upload", "An error occurred: " + e.toString());
@@ -428,7 +453,7 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 @Override
-                public void onImageTransferCompletion() {
+                public void onImageTransferCompletion(int transferId) {
                     pDialog.dismiss();
                     Utils.simpleDialog(MainActivity.this, "Upload successful", "The file '" + filePath + "' has been stored as '" + imageKey + "'.");
                 }
@@ -437,57 +462,48 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void checkStorageAccessPermission(final Activity activity) {
+    // Load remote image to an ImageView
+    private void doDownloadImageOperation(ImageView view, String url) {
 
-        // Starting on API 23, it is necessary to perform a runtime check to see
-        // if the app has been granted permission to do something, before doing it.
-        if (ContextCompat.checkSelfPermission(activity,READ_EXTERNAL_STORAGE) == PERMISSION_GRANTED) {
-            //...
-        }
-
-        // If the app has not been granted permission yet, ask the user to grant it
-        // (if he already rejected this in the past, show him a short explanation first)
-        else {
-
-            if (ActivityCompat.shouldShowRequestPermissionRationale(activity,READ_EXTERNAL_STORAGE)) {
-
-                String title = "Storage access required";
-                String msg = "This is needed in order to read from files stored on your device";
-                Utils.simpleDialog(this, title, msg, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialogInterface, int i) {
-
-                        ActivityCompat.requestPermissions(activity,
-                                new String[]{READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE},
-                                REQUEST_CODE_ASK_FOR_STORAGE_PERMISSION
-                        );
-                    }
-                });
-
-            }
-            else {
-                ActivityCompat.requestPermissions(activity, new String[]{READ_EXTERNAL_STORAGE, WRITE_EXTERNAL_STORAGE},
-                        REQUEST_CODE_ASK_FOR_STORAGE_PERMISSION
-                );
-            }
-        }
+        im.loadImage(view, url, null, null);
     }
+
+
+    /** Permission checking methods **/
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
 
-        if (requestCode == REQUEST_CODE_ASK_FOR_STORAGE_PERMISSION) {
+        // Request for permissions
+        if (requestCode == REQUEST_FOR_STORAGE_PERMISSION)
+            this.storageChecker.checkAfterAsking();
 
-            if (ContextCompat.checkSelfPermission(this, READ_EXTERNAL_STORAGE) == PERMISSION_GRANTED) {
+        else if (requestCode == REQUEST_FOR_CAMERA_PERMISSION)
+            this.cameraChecker.checkAfterAsking();
 
-                Utils.shortSnack(this, "Permission granted");
-            }
-            else {
-                String title = "Storage access required";
-                String msg = "Pick And Gol will not be able to access your device storage.";
-                Utils.simpleDialog(this, title, msg);
-            }
-        }
+        else if (requestCode == REQUEST_FOR_LOCATION_PERMISSION);
+    }
+
+    // Checks the storage permissions
+    private void checkStoragePermission(@NonNull CheckPermissionListener listener) {
+
+        String explanationTitle = "Storage access required";
+        String explanationMsg = "Pick And Gol will request access to your device storage in order to load and send pictures.";
+
+        // Keep a reference to the checker, to use it at onRequestPermissionsResult()
+        this.storageChecker = new PermissionChecker(RW_STORAGE_SET, this, explanationTitle, explanationMsg, listener);
+        this.storageChecker.checkBeforeAsking();
+    }
+
+    // Checks the camera permissions
+    private void checkCameraPermission(@NonNull CheckPermissionListener listener) {
+
+        String explanationTitle = "Camera access required";
+        String explanationMsg = "Pick And Gol will request access to your device camera in order take pictures.";
+
+        // Keep a reference to the checker, to use it at onRequestPermissionsResult()
+        this.cameraChecker = new PermissionChecker(CAMERA_SET, this, explanationTitle, explanationMsg, listener);
+        this.cameraChecker.checkBeforeAsking();
     }
 
 }

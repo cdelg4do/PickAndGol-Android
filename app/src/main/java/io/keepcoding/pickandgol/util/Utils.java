@@ -66,6 +66,22 @@ public class Utils {
     }
 
 
+    // Returns a new determinate, non-cancelable progress dialog with a progress bar
+    public static ProgressDialog newProgressBarDialog(Context ctx, int max, String msg) {
+
+        final ProgressDialog pDialog = new ProgressDialog(ctx);
+        pDialog.setTitle("Please wait");
+        pDialog.setMessage(msg);
+        pDialog.setIndeterminate(false);
+        pDialog.setCancelable(false);
+        pDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        pDialog.setProgress(0);
+        pDialog.setMax(max);
+
+        return pDialog;
+    }
+
+
     // Shows the user a dialog with Accept button only and its corresponding listener
     public static void simpleDialog(Context ctx, String title, String msg, DialogInterface.OnClickListener acceptListener) {
 

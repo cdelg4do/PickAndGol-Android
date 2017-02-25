@@ -5,6 +5,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import io.keepcoding.pickandgol.R;
@@ -17,6 +18,7 @@ public class MainContentFragment extends Fragment {
 
     public static final String FRAGMENT_TITLE_KEY = "FRAGMENT_TITLE_KEY";
 
+    private ImageView image;
 
     /**
      * Creates a new instance of {@link MainContentFragment}
@@ -53,7 +55,14 @@ public class MainContentFragment extends Fragment {
         TextView fragmentText = (TextView) view.findViewById(R.id.fragment_text);
         fragmentText.setText(title);
 
+        image = (ImageView) view.findViewById(R.id.fragment_image);
+
         return view;
+    }
+
+
+    public ImageView getImage() {
+        return image;
     }
 
 }
