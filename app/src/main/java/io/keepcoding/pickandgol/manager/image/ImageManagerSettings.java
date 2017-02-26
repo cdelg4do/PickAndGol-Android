@@ -2,6 +2,9 @@ package io.keepcoding.pickandgol.manager.image;
 
 import com.amazonaws.regions.Regions;
 
+import io.keepcoding.pickandgol.PickAndGolApp;
+import io.keepcoding.pickandgol.R;
+
 import static com.amazonaws.regions.Regions.EU_WEST_1;
 
 /**
@@ -16,15 +19,7 @@ public class ImageManagerSettings {
     public static final boolean DEBUG_INDICATORS = true;
 
     // Settings for AWS SDK
-    /**
-    public static final String S3_BUCKET = "pickandgol-images";
-    public static final String S3_POOL_ID = "us-east-1:e131590f-7525-4a4e-aaa8-ff76a5e764da";
-    public static final Regions S3_POOL_REGION = US_EAST_1;
-    **/
-
-    /**/
     public static final String S3_BUCKET = "pickandgol";
-    public static final String S3_POOL_ID = "eu-west-1:45da37a2-d874-4a37-b94e-752a9120c937";
+    public static final String S3_POOL_ID = PickAndGolApp.getAppContext().getString(R.string.aws_identity_pool_id);
     public static final Regions S3_POOL_REGION = EU_WEST_1;
-    /**/
 }
