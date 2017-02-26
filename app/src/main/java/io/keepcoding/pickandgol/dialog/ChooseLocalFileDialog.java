@@ -17,7 +17,7 @@ import io.keepcoding.pickandgol.util.Utils;
 /**
  * This class represent a filepath choose dialog
  */
-public class ChooseFileDialog {
+public class ChooseLocalFileDialog {
 
     private EditText txtFolder, txtFile;
 
@@ -28,11 +28,11 @@ public class ChooseFileDialog {
         void onChooseFileClick(String filePath);
     }
 
-    public ChooseFileDialog(final Activity context, String defaultFolder, String defaultFile, final ChooseFileDialogListener listener) {
+    public ChooseLocalFileDialog(final Activity context, String defaultFolder, String defaultFile, final ChooseFileDialogListener listener) {
         this.listener = listener;
 
         LayoutInflater inflater = LayoutInflater.from(context);
-        View contentView = inflater.inflate(R.layout.dialog_choose_file, null);
+        View contentView = inflater.inflate(R.layout.dialog_choose_local_file, null);
 
         this.txtFolder = (EditText) contentView.findViewById(R.id.dialog_choose_file_text_folder);
         this.txtFile = (EditText) contentView.findViewById(R.id.dialog_choose_file_text_file);
@@ -87,8 +87,8 @@ public class ChooseFileDialog {
         });
     }
 
-    public ChooseFileDialog(final Activity context, final ChooseFileDialogListener listener) {
-        new ChooseFileDialog(context, null, null, listener);
+    public ChooseLocalFileDialog(final Activity context, final ChooseFileDialogListener listener) {
+        new ChooseLocalFileDialog(context, null, null, listener);
     }
 
     public void show() {

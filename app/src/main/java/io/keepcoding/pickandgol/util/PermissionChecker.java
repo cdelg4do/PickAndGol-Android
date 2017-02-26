@@ -3,7 +3,6 @@ package io.keepcoding.pickandgol.util;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 
@@ -49,8 +48,8 @@ public class PermissionChecker {
     private static Map<PermissionTag, PermissionSet> permissionMap;
     private Activity activity;
     private PermissionTag tag;
-    private String title;
-    private String msg;
+    private String explanationTitle;
+    private String explanationMsg;
     private CheckPermissionListener listener;
 
 
@@ -59,41 +58,64 @@ public class PermissionChecker {
      *
      * @param tag       the tag that identifies the set of permissions to check.
      * @param activity  the activity in where the operation takes place.
-     * @param title     dialog title to show the user (in case explanation is needed).
-     * @param msg       dialog message to show the user (in case explanation is needed).
-     * @param listener  listener for the operation.
+     //* @param listener  listener for the operation.
      */
     public PermissionChecker(@NonNull PermissionTag tag,
-                            final Activity activity,
-                             @Nullable String title,
-                             @Nullable String msg,
-                             @NonNull CheckPermissionListener listener) {
-
-        this.tag = tag;
-        this.activity = activity;
-        this.title = title;
-        this.msg = msg;
-        this.listener = listener;
+                            final @NonNull Activity activity) {
 
         if (permissionMap == null)
             initMap();
+
+        this.tag = tag;
+        this.activity = activity;
+        this.listener = listener;
+
+        switch (tag) {
+
+            case RW_STORAGE_SET:
+                explanationTitle = "Storage access required";
+                explanationMsg = "Pick And Gol will request access to your device storage " +
+                        "in order to load and send pictures.";
+                break;
+
+            case CAMERA_SET:
+                explanationTitle = "Camera access required";
+                explanationMsg = "Pick And Gol will request access to your device camera " +
+                        "in order take pictures.";
+                break;
+
+            case LOCATION_SET:
+                explanationTitle = "Access to device's location";
+                explanationMsg = "In order to show your current position on the map, " +
+                        "Pick And Gol will ask you to grant access to this device's location.";
+                break;
+
+            default:
+                break;
+        }
     }
 
     /**
      * Checks if the given permission set has been granted. If not, asks the user for them.
      * (the calling activity should implement onRequestPermissionsResult() to handle the answer)
+     *
+     * @param listener a listener for the operation.
      */
-    public void checkBeforeAsking() {
+    public void checkBeforeAsking(@NonNull CheckPermissionListener listener) {
+
+        if (listener == null)
+            return;
+
+        this.listener = listener;
 
         PermissionSet pSet = permissionMap.get(tag);
-
         String permissionToCheck = pSet.getPermissionToCheck();
         final String[] permissionsToRequest = pSet.getPermissionArray();
         final int requestCode = pSet.getRequestCode();
 
         boolean showExplanation = (
-                title != null
-                && msg != null
+                explanationTitle != null
+                && explanationMsg != null
                 && shouldShowRequestPermissionRationale(activity,permissionToCheck)
         );
 
@@ -103,7 +125,7 @@ public class PermissionChecker {
         else {
 
             if (showExplanation)
-                Utils.simpleDialog(activity, title, msg, new DialogInterface.OnClickListener() {
+                Utils.simpleDialog(activity, explanationTitle, explanationMsg, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
                         requestPermissions(permissionsToRequest, requestCode);
@@ -117,9 +139,13 @@ public class PermissionChecker {
 
     /**
      * Checks if the given permission set has been granted, then calls the listener.
-     * (this should be called in onRequestPermissionsResult() only)
+     * Never call this method before calling first checkBeforeAsking(), as it will not work.
+     * (this should be called in activity.onRequestPermissionsResult() only)
      */
     public void checkAfterAsking() {
+
+        if (listener == null)
+            return;
 
         String permissionToCheck = permissionMap.get(tag).getPermissionToCheck();
 

@@ -49,11 +49,17 @@ public class ImageManager {
         void onImageCachingSuccess();
     }
 
-    // Listener interface for image transfer operations
-    public interface ImageTransferListener {
+    // Listener interface for image upload operations
+    public interface ImageUploadListener {
         void onProgressChanged(int transferId, long bytesCurrent, long bytesTotal);
-        void onImageTransferError(int transferId, Exception e);
-        void onImageTransferCompletion(int transferId);
+        void onImageUploadError(int transferId, Exception e);
+        void onImageUploadCompletion(int transferId);
+    }
+
+    // Listener interface for image load operations
+    public interface ImageLoadListener {
+        void onImageLoadError();
+        void onImageLoadCompletion();
     }
 
     // Listener interface for image deletion operations
@@ -185,27 +191,36 @@ public class ImageManager {
      * Asynchronously loads a remote image into an ImageView, then calls a listener.
      * (first it will look for the image in the local caches, before looking for it on the internet)
      *
-     * @param target        the ImageView to load the image on.
      * @param imageUrl      the url of the image to load.
-     * @param placeholderId resource id of the image used as placeholder during the operation.
+     * @param target        the ImageView to load the image on.
      * @param brokenImageId resource id of the image to show in case the operation fails.
+     * @param placeholderId resource id of the image used as placeholder during the operation.
      * @param listener      listener for the operation.
      */
-    public void loadImage(final @NonNull ImageView target,
-                          final @NonNull String imageUrl,
-                          final @Nullable Integer placeholderId,
+    public void loadImage(final @NonNull String imageUrl,
+                          final @NonNull ImageView target,
                           final @Nullable Integer brokenImageId,
-                          final @Nullable Callback listener) {
+                          final @Nullable Integer placeholderId,
+                          final @Nullable ImageLoadListener listener) {
+
+        if (target == null || imageUrl == null ) {
+            Log.e(LOG_TAG, "Failed to load remote image: either the source or the target is null");
+
+            if (listener != null)
+                listener.onImageLoadError();
+
+            return;
+        }
 
         Log.d(LOG_TAG, "Loading remote image: "+ imageUrl);
 
         RequestCreator loadRequest = Picasso.with(context.get()).load(imageUrl);
 
-        if (placeholderId != null)
-            loadRequest.placeholder(placeholderId);
-
         if (brokenImageId != null)
             loadRequest.error(brokenImageId);
+
+        if (placeholderId != null)
+            loadRequest.placeholder(placeholderId);
 
         loadRequest.into(target, new Callback() {
 
@@ -214,7 +229,7 @@ public class ImageManager {
                 Log.e(LOG_TAG, "Failed to load remote image: "+ imageUrl);
 
                 if (listener != null)
-                    listener.onError();
+                    listener.onImageLoadError();
             }
 
             @Override
@@ -222,7 +237,7 @@ public class ImageManager {
                 Log.d(LOG_TAG, "Successfully loaded remote image: "+ imageUrl);
 
                 if (listener != null)
-                    listener.onSuccess();
+                    listener.onImageLoadCompletion();
             }
         });
     }
@@ -232,17 +247,105 @@ public class ImageManager {
      * Asynchronously loads a remote image into an ImageView, without using any listener.
      * (first it will look for the image in the local caches, before looking for it on the internet)
      *
-     * @param target        the ImageView to load the image on.
      * @param imageUrl      the url of the image to load.
+     * @param target        the ImageView to load the image on.
+     * @param brokenImageId resource id of the image to show in case the operation fails.
      * @param placeholderId resource id of the image used as placeholder during the operation.
+     */
+    public void loadImage(final @NonNull String imageUrl,
+                          final @NonNull ImageView target,
+                          final @Nullable Integer brokenImageId,
+                          final @Nullable Integer placeholderId) {
+
+        loadImage(imageUrl, target, brokenImageId, placeholderId, null);
+    }
+
+
+    /**
+     * Asynchronously loads a remote image into an ImageView, without using any listener nor default placeholder.
+     * (first it will look for the image in the local caches, before looking for it on the internet)
+     *
+     * @param imageUrl      the url of the image to load.
+     * @param target        the ImageView to load the image on.
      * @param brokenImageId resource id of the image to show in case the operation fails.
      */
-    public void loadImage(final @NonNull ImageView target,
-                          final @NonNull String imageUrl,
-                          final @Nullable Integer placeholderId,
+    public void loadImage(final @NonNull String imageUrl,
+                          final @NonNull ImageView target,
                           final @Nullable Integer brokenImageId) {
 
-        loadImage(target, imageUrl, placeholderId, brokenImageId, null);
+        loadImage(imageUrl, target, brokenImageId, null, null);
+    }
+
+
+    /**
+     * Asynchronously loads a remote image into an ImageView, without using any listener nor placeholder.
+     * (first it will look for the image in the local caches, before looking for it on the internet)
+     *
+     * @param imageUrl      the url of the image to load.
+     * @param target        the ImageView to load the image on.
+     */
+    public void loadImage(final @NonNull ImageView target,
+                          final @NonNull String imageUrl) {
+
+        loadImage(imageUrl, target, null, null, null);
+    }
+
+
+    /**
+     * Asynchronously loads a local image resource into an ImageView, then calls a listener.
+     *
+     * @param imageResource id of the image resource to load.
+     * @param target        the ImageView to load the image on.
+     * @param listener      listener for the operation.
+     */
+    public void loadImage(final int imageResource,
+                          final @NonNull ImageView target,
+                          final @Nullable ImageLoadListener listener) {
+
+        if (target == null) {
+            Log.e(LOG_TAG, "Failed to load local resource: the target is null");
+
+            if (listener != null)
+                listener.onImageLoadError();
+
+            return;
+        }
+
+        Log.d(LOG_TAG, "Loading local resource: "+ imageResource);
+
+        RequestCreator loadRequest = Picasso.with(context.get()).load(imageResource);
+
+        loadRequest.into(target, new Callback() {
+
+            @Override
+            public void onError() {
+                Log.e(LOG_TAG, "Failed to load local resource: "+ imageResource);
+
+                if (listener != null)
+                    listener.onImageLoadError();
+            }
+
+            @Override
+            public void onSuccess() {
+                Log.d(LOG_TAG, "Successfully loaded local resource: "+ imageResource);
+
+                if (listener != null)
+                    listener.onImageLoadCompletion();
+            }
+        });
+    }
+
+
+    /**
+     * Asynchronously loads a local image resource into an ImageView, without using any listener.
+     *
+     * @param imageResource id of the image resource to load.
+     * @param target        the ImageView to load the image on.
+     */
+    public void loadImage(final int imageResource,
+                          final @NonNull ImageView target) {
+
+        loadImage(imageResource, target, null);
     }
 
 
@@ -256,11 +359,11 @@ public class ImageManager {
      */
     public void uploadImage(@NonNull File imageFile,
                             @NonNull String remoteFilename,
-                            @NonNull final ImageTransferListener listener) {
+                            @NonNull final ImageUploadListener listener) {
 
         String filePath = "";
         try                 {   filePath = imageFile.getCanonicalPath();    }
-        catch (Exception e) {   listener.onImageTransferError(-1, e);       }
+        catch (Exception e) {   listener.onImageUploadError(-1, e);       }
 
         TransferObserver observer = s3TransferUtility.upload(S3_BUCKET, remoteFilename, imageFile);
         setTransferListener(observer, listener);
@@ -281,11 +384,22 @@ public class ImageManager {
         new DeleteImageTask(remoteFilename, listener).execute();
     }
 
+    /**
+     * Forms the complete url for a given image stored in the S3 bucket (static method).
+     *
+     * @param imageName     the name name of the image we are asking for.
+     * @return
+     */
+    public static String getImageUrl(String imageName) {
+
+        return "https://"+ S3_BUCKET +".s3.amazonaws.com/"+ imageName;
+    }
+
 
     /* Private methods and classes */
 
     // Auxiliary method: assigns our TransferListener listener to a given S3 TransferObserver object
-    private void setTransferListener(TransferObserver observer, final ImageTransferListener listener) {
+    private void setTransferListener(TransferObserver observer, final ImageUploadListener listener) {
 
         if (observer == null || listener == null )
             return;
@@ -300,7 +414,7 @@ public class ImageManager {
             @Override
             public void onError(int id, Exception ex) {
                 Log.d(LOG_TAG, "Error transferring image (id "+ id +"): "+ ex.toString());
-                listener.onImageTransferError(id, ex);
+                listener.onImageUploadError(id, ex);
             }
 
             @Override
@@ -308,19 +422,18 @@ public class ImageManager {
 
                 switch(state) {
 
-                    case CANCELED:
-                        Log.d(LOG_TAG, "Image transfer canceled (id "+ id +")");
-                        listener.onImageTransferError(id, new Exception("Transfer cancelled"));
+                    case FAILED:
+                        // will be treated at onError (see above)
                         break;
 
-                    case FAILED:
-                        Log.d(LOG_TAG, "Image transfer failed (id "+ id +")");
-                        listener.onImageTransferError(id, new Exception("Transfer failed"));
+                    case CANCELED:
+                        Log.d(LOG_TAG, "Image transfer canceled (id "+ id +")");
+                        listener.onImageUploadError(id, new Exception("Transfer cancelled"));
                         break;
 
                     case COMPLETED:
                         Log.d(LOG_TAG, "Image transfer completed (id "+ id +")");
-                        listener.onImageTransferCompletion(id);
+                        listener.onImageUploadCompletion(id);
                         break;
 
                     default:

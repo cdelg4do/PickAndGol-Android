@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import io.keepcoding.pickandgol.R;
+import io.keepcoding.pickandgol.manager.image.ImageManager;
 
 
 /**
@@ -16,9 +17,10 @@ import io.keepcoding.pickandgol.R;
  */
 public class MainContentFragment extends Fragment {
 
-    public static final String FRAGMENT_TITLE_KEY = "FRAGMENT_TITLE_KEY";
+    public static final String FRAGMENT_IMAGE_URL_KEY = "FRAGMENT_IMAGE_URL_KEY";
+    public static final String FRAGMENT_CAPTION_KEY = "FRAGMENT_CAPTION_KEY";
 
-    private ImageView image;
+    private ImageView fragmentImage;
 
     /**
      * Creates a new instance of {@link MainContentFragment}
@@ -26,14 +28,19 @@ public class MainContentFragment extends Fragment {
      * @param title the string to show in the fragment
      * @return a new instance of the fragment
      */
-    public static MainContentFragment newInstance(String title) {
+    public static MainContentFragment newInstance(String imageUrl, String title) {
 
         MainContentFragment fragment = new MainContentFragment();
 
         Bundle args = new Bundle();
-        args.putString(FRAGMENT_TITLE_KEY, title);
-        fragment.setArguments(args);
 
+        if (title != null)
+            args.putString(FRAGMENT_CAPTION_KEY, title);
+
+        if (imageUrl != null)
+            args.putString(FRAGMENT_IMAGE_URL_KEY, imageUrl);
+
+        fragment.setArguments(args);
         return fragment;
     }
 
@@ -49,20 +56,23 @@ public class MainContentFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_main_content, container, false);
 
         // Recover the arguments passed from newInstance()
-        String title = getArguments().getString(FRAGMENT_TITLE_KEY);
+        String imageUrl = getArguments().getString(FRAGMENT_IMAGE_URL_KEY, null);
+        String caption = getArguments().getString(FRAGMENT_CAPTION_KEY, null);
 
         // Update the fragment content
-        TextView fragmentText = (TextView) view.findViewById(R.id.fragment_text);
-        fragmentText.setText(title);
+        fragmentImage = (ImageView) view.findViewById(R.id.fragment_image);
 
-        image = (ImageView) view.findViewById(R.id.fragment_image);
+        if (imageUrl != null && fragmentImage != null)
+            ImageManager.getInstance(getActivity()).loadImage(
+                    imageUrl,
+                    fragmentImage,
+                    R.drawable.error_placeholder);
+
+        TextView fragmentText = (TextView) view.findViewById(R.id.fragment_text);
+        if (caption != null && fragmentText != null)
+            fragmentText.setText(caption);
 
         return view;
-    }
-
-
-    public ImageView getImage() {
-        return image;
     }
 
 }

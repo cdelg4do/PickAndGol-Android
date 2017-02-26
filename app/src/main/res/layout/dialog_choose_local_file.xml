@@ -10,6 +10,8 @@
         android:id="@+id/dialog_choose_file_text_folder"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:inputType="text"
+        android:maxLines="1"
         android:hint="Folder Path (ended without '/')">
 
         <requestFocus />
@@ -20,6 +22,8 @@
         android:id="@+id/dialog_choose_file_text_file"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:inputType="text"
+        android:maxLines="1"
         android:hint="File Name"/>
 
 </LinearLayout>
