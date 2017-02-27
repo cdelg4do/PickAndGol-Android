@@ -6,7 +6,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
+import android.util.Patterns;
 import android.view.View;
+import android.webkit.URLUtil;
 import android.widget.Toast;
 
 import java.util.regex.Pattern;
@@ -66,6 +68,22 @@ public class Utils {
     }
 
 
+    // Returns a new determinate, non-cancelable progress dialog with a progress bar
+    public static ProgressDialog newProgressBarDialog(Context ctx, int max, String msg) {
+
+        final ProgressDialog pDialog = new ProgressDialog(ctx);
+        pDialog.setTitle("Please wait");
+        pDialog.setMessage(msg);
+        pDialog.setIndeterminate(false);
+        pDialog.setCancelable(false);
+        pDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        pDialog.setProgress(0);
+        pDialog.setMax(max);
+
+        return pDialog;
+    }
+
+
     // Shows the user a dialog with Accept button only and its corresponding listener
     public static void simpleDialog(Context ctx, String title, String msg, DialogInterface.OnClickListener acceptListener) {
 
@@ -111,6 +129,11 @@ public class Utils {
         return isValid;
     }
 
+    public static boolean isValidUrl(String urlString) {
+
+        return Patterns.WEB_URL.matcher(urlString).matches() && URLUtil.isValidUrl(urlString);
+    }
+
     public static boolean isValidPassword(String password) {
 
         return (password.length() >= 6) && (password.length() <= 30);
@@ -127,6 +150,28 @@ public class Utils {
             return "'null'";
 
         return string;
+    }
+
+    // Returns a string with the given byte size escalated to the appropriate unit (B, KB, MB, etc)
+    public static String readableSize(long bytes) {
+        int unit = 1024;
+        if (bytes < unit) return bytes + " B";
+        int exp = (int) (Math.log(bytes) / Math.log(unit));
+        String pre = "KMGTPE".charAt(exp-1) + "";
+        return String.format("%.1f %sB", bytes / Math.pow(unit, exp), pre);
+    }
+
+    // Gets the file extension from a file path string
+    public static String getFileExtension(String filePath) {
+
+        String extension = "";
+
+        if (filePath != null) {
+            String filePathArray[] = filePath.split("\\.");
+            extension = filePathArray[filePathArray.length-1];
+        }
+
+        return extension;
     }
 
 }

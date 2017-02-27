@@ -1,6 +1,7 @@
 package io.keepcoding.pickandgol.activity;
 
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -17,20 +18,34 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.squareup.picasso.Picasso;
+import java.io.File;
+import java.util.UUID;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.keepcoding.pickandgol.R;
+import io.keepcoding.pickandgol.dialog.ChooseRemoteUrlDialog;
 import io.keepcoding.pickandgol.dialog.LoginDialog;
 import io.keepcoding.pickandgol.fragment.MainContentFragment;
 import io.keepcoding.pickandgol.interactor.LoginInteractor;
-import io.keepcoding.pickandgol.interactor.LoginInteractor.LoginInteractorListener;
 import io.keepcoding.pickandgol.interactor.UserDetailInteractor;
-import io.keepcoding.pickandgol.interactor.UserDetailInteractor.UserDetailInteractorListener;
+import io.keepcoding.pickandgol.manager.image.ImageManager;
+import io.keepcoding.pickandgol.manager.image.ImageManager.ImageResizeListener;
 import io.keepcoding.pickandgol.manager.session.SessionManager;
 import io.keepcoding.pickandgol.model.User;
+import io.keepcoding.pickandgol.util.PermissionChecker;
 import io.keepcoding.pickandgol.util.Utils;
+
+import static io.keepcoding.pickandgol.activity.MainActivity.ImagePurpose.UPLOAD_TO_CLOUD;
+import static io.keepcoding.pickandgol.dialog.ChooseRemoteUrlDialog.ChooseRemoteUrlListener;
+import static io.keepcoding.pickandgol.interactor.LoginInteractor.LoginInteractorListener;
+import static io.keepcoding.pickandgol.interactor.UserDetailInteractor.UserDetailInteractorListener;
+import static io.keepcoding.pickandgol.manager.image.ImageManagerSettings.IMAGE_PICKER_REQUEST_CODE;
+import static io.keepcoding.pickandgol.util.PermissionChecker.CheckPermissionListener;
+import static io.keepcoding.pickandgol.util.PermissionChecker.PermissionTag.CAMERA_SET;
+import static io.keepcoding.pickandgol.util.PermissionChecker.PermissionTag.RW_STORAGE_SET;
+import static io.keepcoding.pickandgol.util.PermissionChecker.REQUEST_FOR_CAMERA_PERMISSION;
+import static io.keepcoding.pickandgol.util.PermissionChecker.REQUEST_FOR_STORAGE_PERMISSION;
 
 
 /**
@@ -38,13 +53,29 @@ import io.keepcoding.pickandgol.util.Utils;
  */
 public class MainActivity extends AppCompatActivity {
 
+    // When choosing an image from the picker, this helps to know what to do with it
+    // (like upload the selected image to the cloud, load it into an ImageView, etc.)
+    public enum ImagePurpose {
+        UPLOAD_TO_CLOUD
+    }
+
     private final String ACTIONBAR_TITLE_SAVED_STATE = "ACTIONBAR_TITLE_SAVED_STATE";
-    private final int DEFAULT_DRAWER_ITEM = R.id.drawer_menu_item1;  // Should be an item from "menu/drawer_menu"
+    private final int DEFAULT_DRAWER_ITEM = R.id.drawer_menu_item_1;
 
     private SessionManager sm;
+    private ImageManager im;
+
+    private ImagePurpose lastPickedImagePurpose;  // stores the purpose of the last picked image
+
+    private Fragment mainFragment;
+
     private DrawerLayout mainDrawer;
     private View drawerHeader;
     private String actionBarTitle;
+
+    // Declare as many Permission Checkers as permission requests we need on this activity
+    private PermissionChecker storageChecker;
+    private PermissionChecker cameraChecker;
 
     // Reference to UI elements to be bind with Butterknife (not before the header is inflated)
     @BindView(R.id.drawer_profile_username) TextView profileNameText;
@@ -52,18 +83,26 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.drawer_profile_image) ImageView profileImage;
 
 
+    /*** Activity life cycle and setup methods ***/
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Init all the permission checkers that will be used in this activity
+        storageChecker = new PermissionChecker(RW_STORAGE_SET, this);
+        cameraChecker = new PermissionChecker(CAMERA_SET, this);
+
+        // Init all the managers used in this activity
         sm = SessionManager.getInstance(this);
+        im = ImageManager.getInstance(this);
+
         setupActionBar();
+        setupDrawer(savedInstanceState);
 
         if (savedInstanceState != null)
             restoreActivityState(savedInstanceState);
-
-        setupDrawer(savedInstanceState);
 
         updateHeaderFromSessionInfo();
     }
@@ -84,8 +123,8 @@ public class MainActivity extends AppCompatActivity {
                 mainDrawer.openDrawer(GravityCompat.START);
                 return true;
 
-            case R.id.main_menu_action_settings:
-                Utils.shortSnack(this, "Settings selected");
+            case R.id.main_menu_clear_image_cache:
+                doClearImageCacheOperation();
                 return true;
 
             default:
@@ -101,7 +140,6 @@ public class MainActivity extends AppCompatActivity {
         super.onSaveInstanceState(outState);
     }
 
-
     // Restore the state the activity had just before it was destroyed
     private void restoreActivityState(final @NonNull Bundle savedInstanceState) {
         Log.d("MainActivity","Restoring activity state...");
@@ -109,7 +147,6 @@ public class MainActivity extends AppCompatActivity {
         actionBarTitle = savedInstanceState.getString(ACTIONBAR_TITLE_SAVED_STATE, "");
         setTitle(actionBarTitle);
     }
-
 
     // Set the layout toolbar as the activity action bar
     // and show the icon to open/close the drawer as the home button
@@ -125,7 +162,6 @@ public class MainActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
     }
-
 
     // Get references to the drawer and the drawer header.
     // Bind the header inner views (with Butterknife).
@@ -148,7 +184,7 @@ public class MainActivity extends AppCompatActivity {
         navigationView.setNavigationItemSelectedListener(
                 new NavigationView.OnNavigationItemSelectedListener() {
                     @Override
-                    public boolean onNavigationItemSelected(MenuItem menuItem) {
+                    public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
                         onDrawerItemSelected( menuItem );
                         return true;
                     }
@@ -169,44 +205,102 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    // Updates the header views with the information in the device's session
-    // (if there is no session stored, just update the views with the default values)
-    private void updateHeaderFromSessionInfo() {
+    /*** Handlers for activity requests (permissions, intents) ***/
 
-        if (sm.hasSessionStored()) {
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
 
-            profileNameText.setText( sm.getUserName() );
-            profileEmailText.setText( sm.getUserEmail() );
+        if (requestCode == REQUEST_FOR_STORAGE_PERMISSION)
+            storageChecker.checkAfterAsking();
 
-            if ( sm.getUserPhotoUrl() != null ) {
-                Picasso.with(MainActivity.this)
-                        .load(sm.getUserPhotoUrl())
-                        .into(profileImage);
-            }
-        }
+        else if (requestCode == REQUEST_FOR_CAMERA_PERMISSION)
+            cameraChecker.checkAfterAsking();
+    }
 
-        else {
-            profileNameText.setText("Please register or log in");
-            profileEmailText.setText("to Pick And Gol");
-            Picasso.with(MainActivity.this)
-                    .load(R.drawable.default_avatar)
-                    .into(profileImage);
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // If we are coming from the image picker
+        if (requestCode == IMAGE_PICKER_REQUEST_CODE) {
+
+            im.handleImagePickerResult(MainActivity.this, requestCode, resultCode, data, new ImageManager.ImagePickingListener() {
+                @Override
+                public void onImagePicked(String imagePath) {
+
+                    if (imagePath == null) {
+                        Log.e("MainActivity","Failed to get the path from the image picker");
+                        return;
+                    }
+
+                    else if (lastPickedImagePurpose == UPLOAD_TO_CLOUD) {
+                        doImageResizeThenUploadOperation( new File(imagePath) );
+                    }
+
+                    /*
+                    else if (lastPickedImagePurpose == SHOW_IN_FRAGMENT) {
+                        doShowLocalImageOperation( new File(imagePath) );
+                    }
+                    */
+
+                }
+            });
         }
     }
 
+
+    /** Menu action selectors (from the drawer & the action bar) **/
 
     // Action to perform when the drawer header is selected
     private void onDrawerHeaderSelected() {
 
-        Utils.shortSnack(this, "Profile selected");
+        doShowSessionInfoOperation();
         mainDrawer.closeDrawers();
     }
 
-
     // Action to perform when an item of the drawer menu is selected
-    private void onDrawerItemSelected(MenuItem menuItem) {
+    private void onDrawerItemSelected(final MenuItem menuItem) {
 
         switch (menuItem.getItemId()) {
+
+            case R.id.drawer_menu_upload_image:
+
+                // Check if we have permission to access the camera, before opening the image picker
+                cameraChecker.checkBeforeAsking(new CheckPermissionListener() {
+                    @Override
+                    public void onPermissionDenied() {
+                        String title = "Camera access denied";
+                        String msg = "Pick And Gol will not be able to take images from your device camera.";
+                        Utils.simpleDialog(MainActivity.this, title, msg);
+                    }
+
+                    @Override
+                    public void onPermissionGranted() {
+                        lastPickedImagePurpose = UPLOAD_TO_CLOUD;
+                        im.showImagePicker(MainActivity.this);
+                    }
+                });
+
+                mainDrawer.closeDrawers();
+                break;
+
+            case R.id.drawer_menu_show_remote_image:
+
+                new ChooseRemoteUrlDialog(MainActivity.this,
+                                          "Enter a remote image url to load",
+                                          "https://pickandgol.s3.amazonaws.com/test.jpg",
+                                          new ChooseRemoteUrlListener() {
+                    @Override
+                    public void onChooseRemoteUrl(String url) {
+                        doShowRemoteImageOperation(menuItem.getTitle().toString(), url);
+                    }
+                }).show();
+                break;
+
+            case R.id.drawer_menu_user_detail:
+                doGetUserDetailOperation( sm.getUserId() );     // ask for our own user
+                mainDrawer.closeDrawers();
+                break;
 
             case R.id.drawer_menu_log_in:
 
@@ -225,32 +319,87 @@ public class MainActivity extends AppCompatActivity {
                 mainDrawer.closeDrawers();
                 break;
 
-            case R.id.drawer_menu_user_detail:
-                doGetUserDetailOperation( sm.getUserId() );     // ask for our own user
-                mainDrawer.closeDrawers();
-                break;
-
-            case R.id.drawer_menu_session_info:
-                doShowSessionInfoOperation();
-                mainDrawer.closeDrawers();
-                break;
-
             default:
 
-                Fragment newFragment = MainContentFragment.newInstance(menuItem.getTitle().toString());
-                getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.mainContentFragment_placeholder, newFragment)
-                        .commit();
+                updateFragment(menuItem.getTitle().toString(), null);
 
                 actionBarTitle = menuItem.getTitle().toString();
                 setTitle(actionBarTitle);
 
                 Utils.shortSnack(this, menuItem.toString() +" selected");
                 mainDrawer.closeDrawers();
+                break;
         }
     }
 
+
+    /*** Operations triggered by the menu action selectors ***/
+
+    // Resize and upload the given image file
+    private void doImageResizeThenUploadOperation(File imageFile) {
+
+        if (imageFile == null || ! imageFile.isFile() )
+            return;
+
+        im.resizeImage(imageFile, new ImageResizeListener() {
+            @Override
+            public void onResizeError(Exception error) {
+                Utils.simpleDialog(MainActivity.this, "Unable to resize image", error.toString());
+            }
+
+            @Override
+            public void onResizeSuccess(File resizedFile) {
+                doUploadImageOperation(resizedFile.getAbsolutePath());
+            }
+        });
+    }
+
+    // Upload file to Amazon S3 bucket
+    private void doUploadImageOperation(final String filePath) {
+
+        if( ! new File(filePath).isFile() ) {
+            Log.e("File Upload", "An error occurred: '"+ filePath +"' does not exist or is not a file");
+            Utils.simpleDialog(MainActivity.this, "Upload error",
+                    "The file '" + filePath + "' could not be uploaded: \n\nFile does not exist or is not a file");
+            return;
+        }
+
+        File sourceFile = new File(filePath);
+        final String remoteFileName = UUID.randomUUID().toString() +".jpg";
+
+        int kbTotal = (int) (sourceFile.length() / 1024.0f);        // progress will be measured in KB
+        String fileSize = Utils.readableSize(sourceFile.length());   // a string ended with B/KB/MB/...
+
+        final ProgressDialog pDialog = Utils.newProgressBarDialog(this, kbTotal, "Uploading file ("+ fileSize +")...");
+        pDialog.show();
+
+        Log.d("File Upload", "Uploading file '"+ filePath +"' ("+ fileSize +")...");
+
+        im.uploadImage(new File(filePath), remoteFileName, new ImageManager.ImageUploadListener() {
+
+            @Override
+            public void onProgressChanged(int transferId, long bytesCurrent, long bytesTotal) {
+                int kbCurrent = (int) (bytesCurrent / 1024.0f);
+                pDialog.setProgress( kbCurrent );
+            }
+
+            @Override
+            public void onImageUploadError(int transferId, Exception e) {
+                pDialog.dismiss();
+                Log.e("File Upload", "[id "+ transferId +"] An error occurred: "+ e.toString());
+                Utils.simpleDialog(MainActivity.this, "Upload error",
+                        "The file '" + filePath + "' could not be uploaded: \n\n"+ e.toString());
+            }
+
+            @Override
+            public void onImageUploadCompletion(int transferId) {
+                pDialog.dismiss();
+                Log.d("File Upload", "[id "+ transferId +"] File '" + filePath + "' has been stored as: "+ remoteFileName);
+                Utils.simpleDialog(MainActivity.this, "Upload successful",
+                        "The file has been stored as '" + remoteFileName + "'.");
+            }
+        });
+    }
 
     // Use a LoginInteractor to perform the login operation
     private void doLoginOperation(final @NonNull String email, final @NonNull String password) {
@@ -280,7 +429,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-
     // Destroy the stored session and update the header views
     private void doLogOutOperation() {
 
@@ -294,13 +442,17 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
     // Use a UserDetailInteractor to perform the user detail operation
-    private void doGetUserDetailOperation(final @NonNull String id) {
+    private void doGetUserDetailOperation(final String id) {
+
+        if (id == null) {
+            Utils.simpleDialog(this, "User detail error", "No user id to ask for (try logging in first).");
+            return;
+        }
 
         // Only authenticated users should ask for user details
         if ( !sm.hasSessionStored() ) {
-            Utils.simpleDialog(this, "Unauthorized operation", "You must be logged in to perform this operation.");
+            Utils.simpleDialog(this, "User detail error", "You must be logged in to perform this operation.");
             return;
         }
 
@@ -331,14 +483,13 @@ public class MainActivity extends AppCompatActivity {
 
                 Utils.simpleDialog(MainActivity.this, "User detail",
                         "Id: "+ user.getId()
-                        +"\nName: "+ user.getName()
-                        +"\nEmail: "+ user.getEmail()
-                        +"\nFavorites: "+ favorites
-                        +"\nPhoto: "+ photoUrl);
+                                +"\nName: "+ user.getName()
+                                +"\nEmail: "+ user.getEmail()
+                                +"\nFavorites: "+ favorites
+                                +"\nPhoto: "+ photoUrl);
             }
         });
     }
-
 
     // Shows the info from the local stored session
     private void doShowSessionInfoOperation() {
@@ -356,10 +507,61 @@ public class MainActivity extends AppCompatActivity {
 
         Utils.simpleDialog(this, "Session info",
                 "Id: "+ id
-                +"\nEmail: "+ email
-                +"\nName: "+ name
-                +"\nPhoto: \n"+ photoUrl
-                +"\n\nToken: \n"+ token);
+                        +"\nEmail: "+ email
+                        +"\nName: "+ name
+                        +"\nPhoto: \n"+ photoUrl
+                        +"\n\nToken: \n"+ token);
+    }
+
+    // Show remote image from remote url
+    private void doShowRemoteImageOperation(final String fragmentCaption, final String url) {
+
+        updateFragment(fragmentCaption, url);
+
+        actionBarTitle = fragmentCaption;
+        setTitle(actionBarTitle);
+
+        Utils.shortSnack(MainActivity.this, fragmentCaption +" selected");
+        mainDrawer.closeDrawers();
+    }
+
+    // Clear the image cache
+    private void doClearImageCacheOperation() {
+
+        im.clearCache();
+        Utils.shortSnack(this, "Image cache cleared");
+    }
+
+
+    /*** Auxiliary recurrent methods ***/
+
+    // Updates the header views with the information in the device's session
+    // (if there is no session stored, just update the views with the default values)
+    private void updateHeaderFromSessionInfo() {
+
+        if (sm.hasSessionStored()) {
+
+            profileNameText.setText( sm.getUserName() );
+            profileEmailText.setText( sm.getUserEmail() );
+            if ( sm.getUserPhotoUrl() != null )
+                im.loadImage(sm.getUserPhotoUrl(), profileImage, R.drawable.default_avatar);
+        }
+
+        else {
+            profileNameText.setText("Please register or log in");
+            profileEmailText.setText("to Pick And Gol");
+            im.loadImage(R.drawable.default_avatar, profileImage);
+        }
+    }
+
+    // Update content fragment
+    private void updateFragment(String caption, String imageUri) {
+
+        mainFragment = MainContentFragment.newInstance(imageUri, caption);
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.mainContentFragment_placeholder, mainFragment)
+                .commit();
     }
 
 }

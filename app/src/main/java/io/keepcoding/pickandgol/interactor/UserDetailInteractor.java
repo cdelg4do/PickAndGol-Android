@@ -47,7 +47,7 @@ public class UserDetailInteractor {
                         final @NonNull String token,
                         final @NonNull UserDetailInteractorListener listener) {
 
-        if (listener == null)
+        if (listener == null || token == null)
             return;
 
         NetworkManager networkMgr = new NetworkManager(context);

@@ -5,9 +5,9 @@
       tools:context=".MainActivity">
 
     <item
-        android:id="@+id/main_menu_action_settings"
+        android:id="@+id/main_menu_clear_image_cache"
         android:orderInCategory="100"
-        android:title="Settings"
+        android:title="Clear image cache"
         app:showAsAction="never" />
 
 </menu>

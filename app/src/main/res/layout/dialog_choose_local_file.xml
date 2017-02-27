@@ -7,23 +7,23 @@
               android:padding="10dp">
 
     <EditText
-        android:id="@+id/dialog_login_text_email"
+        android:id="@+id/dialog_choose_file_text_folder"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="textEmailAddress"
+        android:inputType="text"
         android:maxLines="1"
-        android:hint="Email">
+        android:hint="Folder Path (ended without '/')">
 
         <requestFocus />
 
     </EditText>
 
     <EditText
-        android:id="@+id/dialog_login_text_password"
+        android:id="@+id/dialog_choose_file_text_file"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:inputType="textPassword"
+        android:inputType="text"
         android:maxLines="1"
-        android:hint="Password"/>
+        android:hint="File Name"/>
 
 </LinearLayout>

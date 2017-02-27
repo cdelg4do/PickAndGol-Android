@@ -66,4 +66,8 @@ dependencies {
 
     // Secure-preferences (custom-encrypted shared preferences)
     compile 'com.scottyab:secure-preferences-lib:0.1.4'
+
+    // Amazon AWS Mobile SDK (Core + S3)
+    compile 'com.amazonaws:aws-android-sdk-core:2.3.9'
+    compile 'com.amazonaws:aws-android-sdk-s3:2.3.9'
 }
