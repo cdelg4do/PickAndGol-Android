@@ -31,7 +31,7 @@ public class PickAndGolApp extends Application {
     }
 
     // Get the app context
-    public static Context getAppContext() {
+    public static Context getContext() {
         return appContext.get();
     }
 }

@@ -47,7 +47,7 @@ public class ChooseLocalFileDialog {
                 .setView(contentView)
                 .setCancelable(false)
                 .setTitle("Enter a file to upload")
-                .setPositiveButton("Choose File", null)   // Will be set after dialog creation
+                .setPositiveButton("Accept", null)   // Will be set after dialog creation
                 .setNegativeButton("Cancel", null)
                 .create();
 

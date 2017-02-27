@@ -9,39 +9,38 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import io.keepcoding.pickandgol.R;
-import io.keepcoding.pickandgol.manager.image.ImageManager;
 import io.keepcoding.pickandgol.util.Utils;
 
 
 /**
- * This class represent a filepath choose dialog
+ * This class represent an url choose dialog
  */
-public class ChooseRemoteFileDialog {
+public class ChooseRemoteUrlDialog {
 
-    private EditText txtRemoteFileName;
+    private EditText txtRemoteUrl;
 
     private AlertDialog dialog;
-    private ChooseRemoteFileListener listener;
+    private ChooseRemoteUrlListener listener;
 
-    public interface ChooseRemoteFileListener {
-        void onChooseRemoteFile(String url);
+    public interface ChooseRemoteUrlListener {
+        void onChooseRemoteUrl(String url);
     }
 
-    public ChooseRemoteFileDialog(final Activity context, String title, String defaultFileName, final ChooseRemoteFileListener listener) {
+    public ChooseRemoteUrlDialog(final Activity context, String title, String defaultUrl, final ChooseRemoteUrlListener listener) {
 
         LayoutInflater inflater = LayoutInflater.from(context);
-        View contentView = inflater.inflate(R.layout.dialog_choose_remote_file, null);
+        View contentView = inflater.inflate(R.layout.dialog_choose_remote_url, null);
 
-        this.txtRemoteFileName = (EditText) contentView.findViewById(R.id.dialog_choose_remote_file_text);
+        this.txtRemoteUrl = (EditText) contentView.findViewById(R.id.dialog_choose_remote_url_text);
 
-        String dFileName = (defaultFileName != null) ? defaultFileName : "";
-        txtRemoteFileName.setText(dFileName);
+        String dUrl = (defaultUrl != null) ? defaultUrl : "";
+        txtRemoteUrl.setText(dUrl);
 
         this.dialog = new AlertDialog.Builder(context)
                 .setView(contentView)
                 .setCancelable(false)
                 .setTitle(title)
-                .setPositiveButton("Choose File Name", null)   // Will be set after dialog creation
+                .setPositiveButton("Accept", null)   // Will be set after dialog creation
                 .setNegativeButton("Cancel", null)
                 .create();
 
@@ -56,16 +55,15 @@ public class ChooseRemoteFileDialog {
                     @Override
                     public void onClick(View view) {
 
-                        String fileName = txtRemoteFileName.getText().toString();
+                        String url = txtRemoteUrl.getText().toString();
 
-                        if ( fileName.equals("") ) {
-                            Utils.simpleDialog(context, "Empty file name", "Please enter a valid file name.");
-                            txtRemoteFileName.requestFocus();
+                        if ( ! Utils.isValidUrl(url) ) {
+                            Utils.simpleDialog(context, "Invalid url", "Please enter a valid url.");
+                            txtRemoteUrl.requestFocus();
                         }
 
                         else {
-                            String url = ImageManager.getImageUrl(fileName);
-                            listener.onChooseRemoteFile(url);
+                            listener.onChooseRemoteUrl(url);
                             dialog.dismiss();
                         }
                     }
@@ -74,8 +72,8 @@ public class ChooseRemoteFileDialog {
         });
     }
 
-    public ChooseRemoteFileDialog(final Activity context, String title, final ChooseRemoteFileListener listener) {
-        new ChooseRemoteFileDialog(context, title, null, listener);
+    public ChooseRemoteUrlDialog(final Activity context, String title, final ChooseRemoteUrlListener listener) {
+        new ChooseRemoteUrlDialog(context, title, null, listener);
     }
 
     public void show() {

@@ -11,6 +11,11 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
 
+    <!-- Camera permissions -->
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-feature android:name="android.hardware.camera"/>
+    <uses-feature android:name="android.hardware.camera.autofocus"/>
+
     <!-- Permissions for the Google Maps API (apart from internet access & write to storage) -->
     <permission
         android:name="io.keepcoding.pickandgol.permission.MAPS_RECEIVE"

@@ -6,7 +6,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
+import android.util.Patterns;
 import android.view.View;
+import android.webkit.URLUtil;
 import android.widget.Toast;
 
 import java.util.regex.Pattern;
@@ -125,6 +127,11 @@ public class Utils {
             isValid = true;
 
         return isValid;
+    }
+
+    public static boolean isValidUrl(String urlString) {
+
+        return Patterns.WEB_URL.matcher(urlString).matches() && URLUtil.isValidUrl(urlString);
     }
 
     public static boolean isValidPassword(String password) {

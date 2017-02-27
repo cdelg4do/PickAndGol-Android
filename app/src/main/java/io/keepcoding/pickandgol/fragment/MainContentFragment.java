@@ -17,7 +17,7 @@ import io.keepcoding.pickandgol.manager.image.ImageManager;
  */
 public class MainContentFragment extends Fragment {
 
-    public static final String FRAGMENT_IMAGE_URL_KEY = "FRAGMENT_IMAGE_URL_KEY";
+    public static final String FRAGMENT_IMAGE_URI_KEY = "FRAGMENT_IMAGE_URI_KEY";
     public static final String FRAGMENT_CAPTION_KEY = "FRAGMENT_CAPTION_KEY";
 
     private ImageView fragmentImage;
@@ -25,8 +25,9 @@ public class MainContentFragment extends Fragment {
     /**
      * Creates a new instance of {@link MainContentFragment}
      *
+     * @imageUrl    url of the image to show in the fragment, if any
      * @param title the string to show in the fragment
-     * @return a new instance of the fragment
+     * @return      a new instance of the fragment
      */
     public static MainContentFragment newInstance(String imageUrl, String title) {
 
@@ -34,11 +35,11 @@ public class MainContentFragment extends Fragment {
 
         Bundle args = new Bundle();
 
+        if (imageUrl != null)
+            args.putString(FRAGMENT_IMAGE_URI_KEY, imageUrl);
+
         if (title != null)
             args.putString(FRAGMENT_CAPTION_KEY, title);
-
-        if (imageUrl != null)
-            args.putString(FRAGMENT_IMAGE_URL_KEY, imageUrl);
 
         fragment.setArguments(args);
         return fragment;
@@ -56,17 +57,23 @@ public class MainContentFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_main_content, container, false);
 
         // Recover the arguments passed from newInstance()
-        String imageUrl = getArguments().getString(FRAGMENT_IMAGE_URL_KEY, null);
+        String imageUrl = getArguments().getString(FRAGMENT_IMAGE_URI_KEY, null);
         String caption = getArguments().getString(FRAGMENT_CAPTION_KEY, null);
 
         // Update the fragment content
         fragmentImage = (ImageView) view.findViewById(R.id.fragment_image);
 
-        if (imageUrl != null && fragmentImage != null)
+        if (imageUrl != null) {
+
+            fragmentImage.setVisibility(View.VISIBLE);
+
             ImageManager.getInstance(getActivity()).loadImage(
                     imageUrl,
                     fragmentImage,
                     R.drawable.error_placeholder);
+        }
+        else
+            fragmentImage.setVisibility(View.GONE);
 
         TextView fragmentText = (TextView) view.findViewById(R.id.fragment_text);
         if (caption != null && fragmentText != null)

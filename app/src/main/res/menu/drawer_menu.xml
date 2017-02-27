@@ -4,34 +4,34 @@
     <group android:checkableBehavior="single">
 
         <item
-            android:id="@+id/drawer_menu_item1"
-            android:icon="@android:drawable/ic_menu_camera"
-            android:title="Menu Item #1"
-            android:checked="true"/>
+            android:id="@+id/drawer_menu_item_1"
+            android:icon="@android:drawable/ic_menu_gallery"
+            android:checked = "true"
+            android:title="Drawer Item #1"/>
 
         <item
-            android:id="@+id/drawer_menu_load_image"
-            android:icon="@android:drawable/ic_menu_gallery"
-            android:checkable = "false"
-            android:title="Load image"/>
+            android:id="@+id/drawer_menu_item_2"
+            android:icon="@android:drawable/ic_menu_today"
+            android:checkable = "true"
+            android:title="Drawer Item #2"/>
 
         <item
             android:id="@+id/drawer_menu_upload_image"
-            android:icon="@android:drawable/ic_menu_mapmode"
-            android:checkable = "false"
-            android:title="Upload image"/>
+            android:icon="@android:drawable/stat_sys_upload"
+            android:checkable="false"
+            android:title="Upload an image"/>
+
+        <item
+            android:id="@+id/drawer_menu_show_remote_image"
+            android:icon="@android:drawable/stat_sys_download"
+            android:checkable = "true"
+            android:title="Show a remote image"/>
 
         <item
             android:id="@+id/drawer_menu_user_detail"
-            android:icon="@android:drawable/ic_menu_today"
+            android:icon="@android:drawable/ic_menu_mapmode"
             android:checkable = "false"
             android:title="User detail"/>
-
-        <item
-            android:id="@+id/drawer_menu_session_info"
-            android:icon="@android:drawable/ic_input_add"
-            android:checkable = "false"
-            android:title="Show session info" />
 
         <item
             android:id="@+id/account_section"
@@ -40,13 +40,13 @@
 
                 <item
                     android:id="@+id/drawer_menu_log_in"
-                    android:icon="@android:drawable/stat_notify_more"
+                    android:icon="@android:drawable/ic_input_add"
                     android:checkable = "false"
                     android:title="Log in" />
 
                 <item
                     android:id="@+id/drawer_menu_log_out"
-                    android:icon="@android:drawable/stat_sys_upload"
+                    android:icon="@android:drawable/stat_notify_more"
                     android:checkable = "false"
                     android:title="Log out" />
             </menu>

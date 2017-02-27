@@ -24,6 +24,16 @@ import static io.keepcoding.pickandgol.util.PermissionChecker.PermissionTag.RW_S
 
 /**
  * This class simplifies all the boilerplate code to request permissions from an activity.
+ *
+ * USAGE:
+ *
+ * 1- In your activity, create as many PermissionChecker objects as permission requests are needed.
+ *
+ * 2- When there is an operation that requires some permission, call checkBeforeAsking() and pass it
+ *      a CheckPermissionListener. Put your operation inside onPermissionGranted().
+ *
+ * 3- In the onRequestPermissionsResult() of the activity, check the appropriate request code and
+ *      call checkAfterAsking(). The previous CheckPermissionListener code will be used.
  */
 public class PermissionChecker {
 
@@ -81,7 +91,7 @@ public class PermissionChecker {
             case CAMERA_SET:
                 explanationTitle = "Camera access required";
                 explanationMsg = "Pick And Gol will request access to your device camera " +
-                        "in order take pictures.";
+                        "and storage in order take pictures.";
                 break;
 
             case LOCATION_SET:
@@ -158,7 +168,7 @@ public class PermissionChecker {
 
     /** Private methods and classes **/
 
-    // Inits the static class map, building the necessary PermissionSet objects
+    // Init the static class map, building the necessary PermissionSet objects
     // and assigning them to their respective Permission Tags
     private void initMap() {
 
@@ -168,13 +178,14 @@ public class PermissionChecker {
                 REQUEST_FOR_STORAGE_PERMISSION,
                 READ_EXTERNAL_STORAGE,
                 new String[] {  READ_EXTERNAL_STORAGE,
-                        WRITE_EXTERNAL_STORAGE  }
+                                WRITE_EXTERNAL_STORAGE  }
         );
 
         PermissionSet cameraSet = new PermissionSet(
                 REQUEST_FOR_CAMERA_PERMISSION,
                 CAMERA,
-                new String[] {  CAMERA  }
+                new String[] {  CAMERA,
+                                WRITE_EXTERNAL_STORAGE  }
         );
 
         PermissionSet locationSet = new PermissionSet(

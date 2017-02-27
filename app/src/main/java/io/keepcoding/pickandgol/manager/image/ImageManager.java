@@ -1,7 +1,9 @@
 package io.keepcoding.pickandgol.manager.image;
 
+import android.app.Activity;
 import android.content.Context;
-import android.os.AsyncTask;
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -43,6 +45,9 @@ public class ImageManager {
 
     private final static String LOG_TAG = "ImageManager";
 
+
+    /** Interfaces used by the Image Manager **/
+
     // Listener interface for image catching operations
     public interface ImageCachingListener {
         void onImageCachingError();
@@ -66,6 +71,23 @@ public class ImageManager {
     public interface ImageDeletionListener {
         void onDeletionError(Exception error);
         void onDeletionSuccess();
+    }
+
+    // Listener interface for image resize operations
+    public interface ImageResizeListener {
+        void onResizeError(Exception error);
+        void onResizeSuccess(File resizedFile);
+    }
+
+    // Listener interface for image saving operations
+    public interface ImageSavingListener {
+        void onSavingError(Exception error);
+        void onSavingSuccess(File savedFile);
+    }
+
+    // Listener interface for the image picker operations
+    public interface ImagePickingListener {
+        void onImagePicked(String imagePath);
     }
 
 
@@ -132,6 +154,8 @@ public class ImageManager {
     }
 
 
+    /** Operations about caching images **/
+
     /**
      * Removes both the memory and the disk image caches
      */
@@ -186,6 +210,8 @@ public class ImageManager {
                 });
     }
 
+
+    /** Different ways to load an image into an ImageView **/
 
     /**
      * Asynchronously loads a remote image into an ImageView, then calls a listener.
@@ -242,7 +268,6 @@ public class ImageManager {
         });
     }
 
-
     /**
      * Asynchronously loads a remote image into an ImageView, without using any listener.
      * (first it will look for the image in the local caches, before looking for it on the internet)
@@ -260,7 +285,6 @@ public class ImageManager {
         loadImage(imageUrl, target, brokenImageId, placeholderId, null);
     }
 
-
     /**
      * Asynchronously loads a remote image into an ImageView, without using any listener nor default placeholder.
      * (first it will look for the image in the local caches, before looking for it on the internet)
@@ -276,7 +300,6 @@ public class ImageManager {
         loadImage(imageUrl, target, brokenImageId, null, null);
     }
 
-
     /**
      * Asynchronously loads a remote image into an ImageView, without using any listener nor placeholder.
      * (first it will look for the image in the local caches, before looking for it on the internet)
@@ -289,7 +312,6 @@ public class ImageManager {
 
         loadImage(imageUrl, target, null, null, null);
     }
-
 
     /**
      * Asynchronously loads a local image resource into an ImageView, then calls a listener.
@@ -335,7 +357,6 @@ public class ImageManager {
         });
     }
 
-
     /**
      * Asynchronously loads a local image resource into an ImageView, without using any listener.
      *
@@ -348,6 +369,75 @@ public class ImageManager {
         loadImage(imageResource, target, null);
     }
 
+    /**
+     * Asynchronously loads a local image file into an ImageView, then calls a listener.
+     *
+     * @param sourceFile    the file containing the image to load.
+     * @param target        the ImageView to load the image on.
+     * @param brokenImageId resource id of the image to show in case the operation fails.
+     * @param listener      listener for the operation.
+     */
+    public void loadImage(final File sourceFile,
+                          final @NonNull ImageView target,
+                          final @Nullable Integer brokenImageId,
+                          final @Nullable ImageLoadListener listener) {
+
+        if ( !sourceFile.isFile() || target == null) {
+            Log.e(LOG_TAG, "Failed to load local image file: either source file or the target is null");
+
+            if (listener != null)
+                listener.onImageLoadError();
+
+            return;
+        }
+
+        Log.d(LOG_TAG, "Loading local image file: "+ sourceFile.getAbsolutePath());
+
+        RequestCreator loadRequest = Picasso
+                .with(context.get())
+                .load(sourceFile)
+                .memoryPolicy(MemoryPolicy.NO_CACHE);   // Do not use the memory cache here
+
+        if (brokenImageId != null)
+            loadRequest.error(brokenImageId);
+
+        loadRequest
+                .into(target, new Callback() {
+
+            @Override
+            public void onError() {
+                Log.e(LOG_TAG, "Failed to load local image file: "+ sourceFile.getAbsolutePath());
+
+                if (listener != null)
+                    listener.onImageLoadError();
+            }
+
+            @Override
+            public void onSuccess() {
+                Log.d(LOG_TAG, "Successfully loaded local image file: "+ sourceFile.getAbsolutePath());
+
+                if (listener != null)
+                    listener.onImageLoadCompletion();
+            }
+        });
+    }
+
+    /**
+     * Asynchronously loads a local image file into an ImageView, without using any listener.
+     *
+     * @param sourceFile    the file containing the image to load.
+     * @param target        the ImageView to load the image on.
+     * @param brokenImageId resource id of the image to show in case the operation fails.
+     */
+    public void loadImage(final File sourceFile,
+                          final @NonNull ImageView target,
+                          final @Nullable Integer brokenImageId) {
+
+        loadImage(sourceFile, target, brokenImageId, null);
+    }
+
+
+    /** Operations with remote images on the S3 Bucket **/
 
     /**
      * Attempts to upload the contents of a given file to the S3 bucket
@@ -366,40 +456,85 @@ public class ImageManager {
         catch (Exception e) {   listener.onImageUploadError(-1, e);       }
 
         TransferObserver observer = s3TransferUtility.upload(S3_BUCKET, remoteFilename, imageFile);
-        setTransferListener(observer, listener);
+        setUploadListener(observer, listener);
 
         Log.d(LOG_TAG, "Transferring (id "+ observer.getId() +") local image '"+ filePath +"' to '"+ remoteFilename +"'...");
     }
 
     /**
-     * Attempts to upload the contents of a given file to the S3 bucket
+     * Attempts to delete a remote file from the S3 bucket
      * (permissions required: s3:ListBucket permission on the bucket,
      *                        s3:GetObject + s3:DeleteObject on the file).
      *
      * @param remoteFilename    the remote file name the data to delete is stored under.
      * @param listener          listener for the deletion operation.
      */
-    public void deleteImage(String remoteFilename, ImageDeletionListener listener) {
+    public void deleteRemoteImage(String remoteFilename, ImageDeletionListener listener) {
 
-        new DeleteImageTask(remoteFilename, listener).execute();
+        new ImageDeleter(remoteFilename, s3Client, listener).execute();
+    }
+
+
+    /** Operations about the image file picker **/
+
+    /**
+     * Shows the camera/gallery image picker.
+     * This method makes use of the auxiliary class ImagePicker.
+     *
+     * @param activity  the activity from where the picker is shown.
+     */
+    public static void showImagePicker(Activity activity) {
+
+        ImagePicker.showImagePicker(activity);
     }
 
     /**
-     * Forms the complete url for a given image stored in the S3 bucket (static method).
+     * Handles the image picker response from activity.onActivityResult().
+     * This method makes use of the auxiliary class ImagePicker.
      *
-     * @param imageName     the name name of the image we are asking for.
-     * @return
+     * @param activity  the activity from where the picker is shown.
      */
-    public static String getImageUrl(String imageName) {
+    public static void handleImagePickerResult(Activity activity,
+                                               int requestCode,
+                                               int resultCode,
+                                               Intent data,
+                                               ImagePickingListener listener) {
 
-        return "https://"+ S3_BUCKET +".s3.amazonaws.com/"+ imageName;
+        ImagePicker.handleImagePickerResult(activity, requestCode, resultCode, data, listener);
     }
 
 
-    /* Private methods and classes */
+    /** Other operations with local image files **/
 
-    // Auxiliary method: assigns our TransferListener listener to a given S3 TransferObserver object
-    private void setTransferListener(TransferObserver observer, final ImageUploadListener listener) {
+    /**
+     * Attempts to resize a local image file to specific limit dimensions
+     * (only if the original image is equal or smaller than the limit dimensions).
+     *
+     * @param sourceFile    the remote file name the data to delete is stored under.
+     * @param listener          listener for the deletion operation.
+     */
+    public void resizeImage(File sourceFile, ImageResizeListener listener) {
+
+        new ImageResizer(sourceFile, listener).execute();
+    }
+
+    /**
+     * Attempts to save a bitmap to a temp file.
+     *
+     * @param sourceBitmap      the bitmap to save.
+     * @param destinationPath   the file path where the image will be saved to.
+     * @param listener          listener for the saving operation.
+     */
+    public void saveImage(Bitmap sourceBitmap, String destinationPath, ImageSavingListener listener) {
+
+        new ImageSaver(sourceBitmap, destinationPath, listener).execute();
+    }
+
+
+    /*** Private methods ***/
+
+    // Auxiliary method: assigns a ImageUploadListener listener to a given TransferObserver for uploads
+    private void setUploadListener(TransferObserver observer, final ImageUploadListener listener) {
 
         if (observer == null || listener == null )
             return;
@@ -441,58 +576,6 @@ public class ImageManager {
                 }
             }
         });
-    }
-
-    // Auxiliary class: AsyncTask to delete a remote file in background
-    private class DeleteImageTask extends AsyncTask<Void, Void, Void> {
-
-        private String remoteFilename;
-        private ImageDeletionListener listener;
-        private Exception error;
-
-        public DeleteImageTask(String remoteFilename, ImageDeletionListener listener) {
-            this.remoteFilename = remoteFilename;
-            this.listener = listener;
-            error = null;
-        }
-
-        @Override
-        protected void onPreExecute() {
-        }
-
-        @Override
-        protected Void doInBackground(Void... inputs) {
-
-            Log.d(LOG_TAG, "Deleting remote image '"+ remoteFilename +"'...");
-
-            try {
-                boolean objectExists = s3Client.doesObjectExist(S3_BUCKET, remoteFilename);
-
-                if (objectExists)
-                    s3Client.deleteObject(S3_BUCKET, remoteFilename);
-                else
-                    error = new Exception("The remote file does not exist.");
-            }
-            catch (Exception e) {
-                error = e;
-            }
-
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-
-            if ( error != null) {
-                Log.d(LOG_TAG, "Error deleting remote image '"+ remoteFilename +"': "+ error.toString());
-                listener.onDeletionError(error);
-            }
-
-            else {
-                Log.d(LOG_TAG, "The remote image '"+ remoteFilename +"' has been deleted");
-                listener.onDeletionSuccess();
-            }
-        }
     }
 
 }
