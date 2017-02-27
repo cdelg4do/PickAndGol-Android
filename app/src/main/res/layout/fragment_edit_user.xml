@@ -1,0 +1,71 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              android:orientation="vertical"
+              android:layout_margin="20dp"
+              tools:context="io.keepcoding.pickandgol.fragment.EditUserFragment">
+
+    <de.hdodenhof.circleimageview.CircleImageView
+        android:id="@+id/edit_user_circle_image"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@drawable/default_avatar"
+        android:layout_marginBottom="16dp"
+        android:scaleType="centerCrop"
+        app:civ_border_color="@android:color/white"
+        app:civ_border_width="1dp"
+        android:layout_gravity="center"/>
+
+    <TextView
+        android:layout_marginTop="30dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/edit_user_name"
+        android:textSize="@dimen/edit_user_text_size"/>
+    <EditText
+        android:id="@+id/edit_user_name_edit_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/edit_user_text_size"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_marginTop="25dp"
+        android:layout_height="wrap_content"
+        android:text="@string/edit_user_email"
+        android:textSize="@dimen/edit_user_text_size"/>
+    <EditText
+        android:id="@+id/edit_user_email_edit_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/edit_user_text_size"/>
+
+    <Button
+        android:id="@+id/edit_user_change_password_button"
+        android:text="@string/user_edit_change_password"
+        android:textSize="18sp"
+        android:layout_marginTop="25dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:orientation="vertical"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="bottom|end">
+
+        <Button
+            android:id="@+id/edit_user_save_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:drawableLeft="@drawable/ic_accept"
+            android:text="@string/edit_user_save_button_text"
+            android:layout_gravity="end"/>
+    </LinearLayout>
+
+</LinearLayout>

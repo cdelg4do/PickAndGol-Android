@@ -20,7 +20,9 @@ import com.squareup.picasso.Picasso;
 
 import io.keepcoding.pickandgol.R;
 import io.keepcoding.pickandgol.dialog.LoginDialog;
+import io.keepcoding.pickandgol.fragment.EditUserFragment;
 import io.keepcoding.pickandgol.fragment.MainContentFragment;
+import io.keepcoding.pickandgol.interactor.EditUserInteractor;
 import io.keepcoding.pickandgol.interactor.LoginInteractor;
 import io.keepcoding.pickandgol.interactor.LoginInteractor.LoginInteractorListener;
 import io.keepcoding.pickandgol.interactor.UserDetailInteractor;
@@ -41,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
     private DrawerLayout mainDrawer;
     private View drawerHeader;
     private String actionBarTitle;
-
+    private Login login;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -173,7 +175,12 @@ public class MainActivity extends AppCompatActivity {
         switch (selectedItem) {
 
             case "User detail":
-                doGetUserDetailOperation("58a1f35ec26dc719c5ffd466");
+                if (login == null) {
+                    Utils.simpleDialog(MainActivity.this, "User detail error", "You have to login before");
+                    return;
+                }
+
+                doGetUserDetailOperation(login.getId(), login.getToken());
                 mainDrawer.closeDrawers();
                 break;
 
@@ -226,29 +233,20 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onLoginSuccess(Login login) {
                 pDialog.dismiss();
-
-                Utils.simpleDialog(MainActivity.this, "Login successful",
-                        "Id: "+ login.getId()
-                        +"\nName: "+ login.getName()
-                        +"\n\nToken: \n"+ login.getToken());
-
-                ImageView circleImageView = (ImageView) drawerHeader.findViewById(R.id.circle_image);
-
-                Picasso.with(MainActivity.this)
-                        .load(login.getPhotoUrl())
-                        .into(circleImageView);
+                MainActivity.this.login = login;
+                updateLoginPicture();
             }
         });
     }
 
 
     // Use a UserDetailInteractor to perform the user detail operation
-    private void doGetUserDetailOperation(final @NonNull String id) {
+    private void doGetUserDetailOperation(final @NonNull String id, final @NonNull String token) {
 
         final ProgressDialog pDialog = Utils.newProgressDialog(this, "Fetching user '"+ id +"' info...");
         pDialog.show();
 
-        new UserDetailInteractor().execute(this, id, new UserDetailInteractorListener() {
+        new UserDetailInteractor().execute(this, id, token, new UserDetailInteractorListener() {
 
             @Override
             public void onUserDetailFail(Exception e) {
@@ -261,20 +259,63 @@ public class MainActivity extends AppCompatActivity {
             public void onUserDetailSuccess(User user) {
                 pDialog.dismiss();
 
-                String photoUrl = (user.getPhotoUrl() != null) ? user.getPhotoUrl() : "<none>";
+                EditUserFragment editUserFragment = EditUserFragment.newInstance(user);
+                editUserFragment.setListener(new EditUserFragment.Listener() {
+                    @Override
+                    public void onSaveButtonPushed(final User userModified) {
+                        new EditUserInteractor().execute(MainActivity.this, token, userModified, new EditUserInteractor.Listener() {
+                            @Override
+                            public void onEditUserSuccess() {
+                                updateLogin(userModified.getEmail(), userModified.getName(), userModified.getPhotoUrl());
+                                updateLoginPicture();
+                                Utils.simpleDialog(MainActivity.this, "User", "User modified");
+                            }
 
-                String favorites = "";
-                for (Integer i : user.getFavorites())
-                    favorites += i.toString() +" ";
+                            @Override
+                            public void onEditUserFail(final String message) {
+                                Utils.simpleDialog(MainActivity.this, "User modify error", message);
+                            }
+                        });
+                    }
+                });
 
-                Utils.simpleDialog(MainActivity.this, "User detail",
-                        "Id: "+ user.getId()
-                        +"\nName: "+ user.getName()
-                        +"\nEmail: "+ user.getEmail()
-                        +"\nFavorites: "+ favorites
-                        +"\n\nPhoto: \n"+ photoUrl);
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.mainContentFragment_placeholder, editUserFragment)
+                        .commit();
             }
         });
     }
 
+    private void updateLogin(final String email, final String name, final String photoUrl) {
+        String newEmail = login.getEmail();
+        if (email != null) {
+            newEmail = email;
+        }
+
+        String newName = login.getName();
+        if (name != null) {
+            newName = name;
+        }
+
+        String newPhotoUrl = login.getPhotoUrl();
+        if (photoUrl != null) {
+            newPhotoUrl = photoUrl;
+        }
+
+        login = new Login(login.getId(), newEmail, newName, login.getToken(), newPhotoUrl);
+    }
+
+    private void updateLoginPicture() {
+        ImageView circleImageView = (ImageView) drawerHeader.findViewById(R.id.circle_image);
+
+        if (login.getPhotoUrl() == null) {
+            circleImageView.setImageResource(R.drawable.default_avatar);
+            return;
+        }
+
+        Picasso.with(MainActivity.this)
+                .load(login.getPhotoUrl())
+                .into(circleImageView);
+    }
 }

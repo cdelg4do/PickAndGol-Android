@@ -19,9 +19,11 @@ public class User implements Serializable {
     private @NonNull List<Integer> favorites;
     private @Nullable String photoUrl;
 
-
-    // The default constructor will not be public
     private User() {
+    }
+
+    public User(final String id) {
+        this.id = id;
     }
 
     public User(final @NonNull String id,
@@ -45,14 +47,24 @@ public class User implements Serializable {
         return id;
     }
 
-    @NonNull
     public String getEmail() {
         return email;
     }
 
     @NonNull
+    public User setEmail(final String email) {
+        this.email = email;
+        return this;
+    }
+
     public String getName() {
         return name;
+    }
+
+    @NonNull
+    public User setName(final String name) {
+        this.name = name;
+        return this;
     }
 
     @NonNull
@@ -63,5 +75,11 @@ public class User implements Serializable {
     @Nullable
     public String getPhotoUrl() {
         return photoUrl;
+    }
+
+    @NonNull
+    public User setPhotoUrl(final String photoUrl) {
+        this.photoUrl = photoUrl;
+        return this;
     }
 }

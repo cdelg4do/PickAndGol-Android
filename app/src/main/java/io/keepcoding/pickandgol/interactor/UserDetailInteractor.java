@@ -44,6 +44,7 @@ public class UserDetailInteractor {
      */
     public void execute(final @NonNull Context context,
                         final @NonNull String id,
+                        final @NonNull String token,
                         final @NonNull UserDetailInteractorListener listener) {
 
         if (listener == null)
@@ -52,7 +53,7 @@ public class UserDetailInteractor {
         NetworkManager networkMgr = new NetworkManager(context);
         RequestParams userDetailParams = new RequestParams();   // no params needed
 
-        String remoteUrl = getUrl(id);
+        String remoteUrl = getUrl(id, token);
 
         networkMgr.launchGETStringRequest(remoteUrl, userDetailParams, USER, new NetworkManager.NetworkRequestListener() {
 
@@ -71,8 +72,8 @@ public class UserDetailInteractor {
 
 
     // Gets the remote url for the operation
-    private String getUrl(String id) {
-        return URL_USER_DETAIL +"/"+ id;
+    private String getUrl(String id, String token) {
+        return URL_USER_DETAIL + "/" + id + "?token=" + token;
     }
 
 }
