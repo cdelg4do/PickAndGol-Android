@@ -26,7 +26,9 @@ import butterknife.ButterKnife;
 import io.keepcoding.pickandgol.R;
 import io.keepcoding.pickandgol.dialog.ChooseRemoteUrlDialog;
 import io.keepcoding.pickandgol.dialog.LoginDialog;
+import io.keepcoding.pickandgol.fragment.EditUserFragment;
 import io.keepcoding.pickandgol.fragment.MainContentFragment;
+import io.keepcoding.pickandgol.interactor.EditUserInteractor;
 import io.keepcoding.pickandgol.interactor.LoginInteractor;
 import io.keepcoding.pickandgol.interactor.UserDetailInteractor;
 import io.keepcoding.pickandgol.manager.image.ImageManager;
@@ -72,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
     private DrawerLayout mainDrawer;
     private View drawerHeader;
     private String actionBarTitle;
+
 
     // Declare as many Permission Checkers as permission requests we need on this activity
     private PermissionChecker storageChecker;
@@ -281,7 +284,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
-                mainDrawer.closeDrawers();
                 break;
 
             case R.id.drawer_menu_show_remote_image:
@@ -425,6 +427,7 @@ public class MainActivity extends AppCompatActivity {
                 Utils.simpleDialog(MainActivity.this,
                         "Login successful",
                         "Now you are logged as '"+ sm.getUserName() +"'.");
+                updateHeaderFromSessionInfo();
             }
         });
     }
@@ -456,7 +459,8 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
 
-        String token = sm.getSessionToken();
+        final String token = sm.getSessionToken();
+
 
         final ProgressDialog pDialog = Utils.newProgressDialog(this, "Fetching user '"+ id +"' info...");
         pDialog.show();
@@ -474,21 +478,43 @@ public class MainActivity extends AppCompatActivity {
             public void onUserDetailSuccess(User user) {
                 pDialog.dismiss();
 
-                String photoUrl = (user.getPhotoUrl() != null) ? user.getPhotoUrl() : "<none>";
+                EditUserFragment editUserFragment = EditUserFragment.newInstance(user);
+                editUserFragment.setListener(new EditUserFragment.Listener() {
+                    @Override
+                    public void onSaveButtonPushed(final User userModified) {
+                        new EditUserInteractor().execute(MainActivity.this, token, userModified, new EditUserInteractor.Listener() {
+                            @Override
+                            public void onEditUserSuccess() {
+                                updateSessionManagerWithUserModified(userModified);
 
-                String favorites = "[ ";
-                for (Integer i : user.getFavorites())
-                    favorites += i.toString() +" ";
-                favorites += "]";
+                                updateHeaderFromSessionInfo();
+                                Utils.simpleDialog(MainActivity.this, "User", "User modified");
+                            }
 
-                Utils.simpleDialog(MainActivity.this, "User detail",
-                        "Id: "+ user.getId()
-                                +"\nName: "+ user.getName()
-                                +"\nEmail: "+ user.getEmail()
-                                +"\nFavorites: "+ favorites
-                                +"\nPhoto: "+ photoUrl);
+                            @Override
+                            public void onEditUserFail(final String message) {
+                                Utils.simpleDialog(MainActivity.this, "User modify error", message);
+                            }
+                        });
+                    }
+                });
+
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.mainContentFragment_placeholder, editUserFragment)
+                        .commit();
             }
         });
+    }
+
+    private void updateSessionManagerWithUserModified(final User userModified) {
+        if (!sm.getUserEmail().equals(userModified.getEmail())) {
+            sm.updateUserEmail(userModified.getEmail());
+        }
+
+        if (!sm.getUserName().equals(userModified.getName())) {
+            sm.updateUserName(userModified.getName());
+        }
     }
 
     // Shows the info from the local stored session
@@ -563,5 +589,4 @@ public class MainActivity extends AppCompatActivity {
                 .replace(R.id.mainContentFragment_placeholder, mainFragment)
                 .commit();
     }
-
 }

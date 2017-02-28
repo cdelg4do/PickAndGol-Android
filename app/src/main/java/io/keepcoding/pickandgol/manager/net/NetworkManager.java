@@ -163,6 +163,47 @@ public class NetworkManager {
         queue.add(postRequest);
     }
 
+    /**
+     * Queues a new PUT request through the network.
+     *
+     * If the request was successful, will call listener.onNetworkRequestSuccess() passing
+     * a ParsedData object to the listener (the listener should cast it to the appropriate class).
+     *
+     * Otherwise, it will call listener.onNetworkRequestFail() passing the error to the listener.
+     *
+     * @param url the url to address the request
+     * @param bodyParams a Map with the parameters to add to the request body
+     * @param expectedResponseType the response type expected for the request
+     * @param listener the listener that will be waiting for the response
+     */
+    public void launchPUTStringRequest(
+            final @NonNull String url,
+            final @NonNull RequestParams bodyParams,
+            final JsonResponseType expectedResponseType,
+            final @NonNull NetworkRequestListener listener) {
+
+        if (url == null || bodyParams == null || listener == null) {
+            return;
+        }
+
+        StringRequest putRequest = new StringRequest(
+                Request.Method.PUT,
+                url,
+                getNewInternalListener(expectedResponseType, listener),
+                getNewInternalErrorListener(listener))
+        {
+            // This override is necessary in order to pass params to the POST request
+            @Override
+            protected Map<String,String> getParams() {
+                return bodyParams.getParams();
+            }
+        };
+
+        Log.d("NetworkManager", "Launching PUT request... \n" + url);
+        RequestQueue queue = Volley.newRequestQueue(context.get());
+        queue.add(putRequest);
+    }
+
 
     // Auxiliary methods:
 
