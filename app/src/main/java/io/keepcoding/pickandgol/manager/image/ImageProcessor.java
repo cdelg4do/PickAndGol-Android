@@ -11,31 +11,37 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import static io.keepcoding.pickandgol.manager.image.ImageManagerSettings.RESIZE_COMPRESS;
+import static io.keepcoding.pickandgol.manager.image.ImageManagerSettings.COMPRESS_FORMAT;
+import static io.keepcoding.pickandgol.manager.image.ImageManagerSettings.COMPRESS_QUALITY;
 import static io.keepcoding.pickandgol.manager.image.ImageManagerSettings.RESIZE_MAX_HEIGHT;
 import static io.keepcoding.pickandgol.manager.image.ImageManagerSettings.RESIZE_MAX_WIDTH;
-import static io.keepcoding.pickandgol.manager.image.ImageManagerSettings.RESIZE_TEMP_OUTPUT;
+import static io.keepcoding.pickandgol.manager.image.ImageManagerSettings.PROCESSOR_TEMP_DIR;
+import static io.keepcoding.pickandgol.manager.image.ImageManagerSettings.PROCESSOR_TEMP_FILENAME;
 
 
 /**
  * This class manages all the resize/rotate operations for local image files in background.
  * It is an auxiliary class of ImageManager, and has package-private visibility.
  */
-class ImageResizer extends AsyncTask<Void, Void, Void> {
+class ImageProcessor extends AsyncTask<Void, Void, Void> {
 
-    private final static String LOG_TAG = "ImageResizer";
+    private final static String LOG_TAG = "ImageProcessor";
 
     private File sourceFile;
     private ImageManager.ImageResizeListener listener;
     private Exception error;
-    private boolean useSourceFile;
+    private String tempFilePath;
 
-    ImageResizer(File sourceFile, ImageManager.ImageResizeListener listener) {
+    ImageProcessor(File sourceFile, ImageManager.ImageResizeListener listener) {
         this.sourceFile = sourceFile;
         this.listener = listener;
         error = null;
 
-        useSourceFile = false;
+        try                 {   tempFilePath = new File(PROCESSOR_TEMP_DIR.getPath(),
+                PROCESSOR_TEMP_FILENAME
+                                                   ).getCanonicalPath();    }
+
+        catch (Exception e) {   tempFilePath = null;    }
     }
 
     @Override
@@ -45,45 +51,23 @@ class ImageResizer extends AsyncTask<Void, Void, Void> {
     @Override
     protected Void doInBackground(Void... inputs) {
 
+        Log.d(LOG_TAG, "Processing image file '"+ sourceFile.getAbsolutePath() +"'...");
+
         if( !sourceFile.isFile() ) {
             error = new Exception("File does not exist or is inaccessible");
             return null;
         }
 
         Bitmap sourceImage = BitmapFactory.decodeFile(sourceFile.getAbsolutePath());
-        int sourceHeight = sourceImage.getHeight();
-        int sourceWidth = sourceImage.getWidth();
+        Bitmap resized = resizeIfNeeded(sourceImage);
 
-        if (sourceHeight <= RESIZE_MAX_HEIGHT && sourceWidth <= RESIZE_MAX_WIDTH) {
-            useSourceFile = true;
-            return null;
-        }
-
-        float widthRatio  = (float) RESIZE_MAX_WIDTH  / sourceWidth;
-        float heightRatio = (float) RESIZE_MAX_HEIGHT / sourceHeight;
-
-        int newHeight, newWidth;
-        if(widthRatio > heightRatio) {
-            newHeight = (int) (sourceHeight * heightRatio);
-            newWidth = (int) (sourceWidth * heightRatio);
-        }
-        else {
-            newHeight = (int) (sourceHeight * widthRatio);
-            newWidth = (int) (sourceWidth * widthRatio);
-        }
-
-        Log.d(LOG_TAG, "Resizing image: "+
-                "("+sourceWidth+", "+sourceHeight+") --> ("+newWidth+", "+newHeight+")");
-
-        Bitmap resized = Bitmap.createScaledBitmap(sourceImage, newWidth, newHeight, true);
-
-        // The resized image does not contain Exif rotation info, we get it from the original
+        // The resized image does not contain Exif rotation info, we get it from the original file
         Bitmap rotatedResized = rotateIfNeeded(resized, sourceFile.getAbsolutePath());
 
         FileOutputStream outStream;
         try {
-            outStream = new FileOutputStream(RESIZE_TEMP_OUTPUT);
-            rotatedResized.compress(Bitmap.CompressFormat.JPEG, RESIZE_COMPRESS, outStream);
+            outStream = new FileOutputStream(tempFilePath);
+            rotatedResized.compress(COMPRESS_FORMAT, COMPRESS_QUALITY, outStream);
             outStream.close();
         }
         catch (Exception e) {
@@ -98,23 +82,46 @@ class ImageResizer extends AsyncTask<Void, Void, Void> {
     protected void onPostExecute(Void result) {
 
         if ( error != null) {
-            Log.d(LOG_TAG, "Error resizing local image '"+ sourceFile.getAbsolutePath()
-                    +"': "+ error.toString());
-
+            Log.e(LOG_TAG, "Error processing the image : "+ error.toString());
             listener.onResizeError(error);
         }
-        else if (useSourceFile) {
-            Log.d(LOG_TAG, "The local image '"+ sourceFile.getAbsolutePath()
-                    +"' did not require resizing");
+        else {
+            Log.d(LOG_TAG, "The processed image has been saved to '"+ tempFilePath +"'");
+            listener.onResizeSuccess( new File(tempFilePath) );
+        }
+    }
 
-            listener.onResizeSuccess(sourceFile);
+    // Returns a bitmap that fits into the max dimensions, scaling the given one if necessary
+    private Bitmap resizeIfNeeded(Bitmap image) {
+
+        int imageHeight = image.getHeight();
+        int imageWidth = image.getWidth();
+
+        // If the source image already fits into the max dimensions, do not resize
+        if (imageHeight <= RESIZE_MAX_HEIGHT && imageWidth <= RESIZE_MAX_WIDTH)
+            return image;
+
+
+        float widthRatio  = (float) RESIZE_MAX_WIDTH  / imageWidth;
+        float heightRatio = (float) RESIZE_MAX_HEIGHT / imageHeight;
+
+        int newHeight, newWidth;
+        if(widthRatio > heightRatio) {
+            newHeight = (int) (imageHeight * heightRatio);
+            newWidth = (int) (imageWidth * heightRatio);
         }
         else {
-            Log.d(LOG_TAG, "The local image '"+ sourceFile.getAbsolutePath()
-                    +"' was resized and stored at '"+ RESIZE_TEMP_OUTPUT +"'");
-
-            listener.onResizeSuccess( new File(RESIZE_TEMP_OUTPUT) );
+            newHeight = (int) (imageHeight * widthRatio);
+            newWidth = (int) (imageWidth * widthRatio);
         }
+
+        Log.d(LOG_TAG, "Resizing image "+
+                "("+imageWidth +"x"+ imageHeight+") --> ("+newWidth +"x"+ newHeight+")");
+
+        Bitmap resized = Bitmap.createScaledBitmap(image, newWidth, newHeight, true);
+
+        image.recycle();
+        return resized;
     }
 
     // Returns a rotated bitmap from the given one,
@@ -141,11 +148,12 @@ class ImageResizer extends AsyncTask<Void, Void, Void> {
         if (degrees == 0)
             return image;
 
+
         // Create the rotation matrix and apply it to the bitmap
         Matrix rotationMatrix = new Matrix();
         rotationMatrix.postRotate(degrees);
 
-        Log.d(LOG_TAG, "Rotating image  ("+degrees+" degrees)...");
+        Log.d(LOG_TAG, "Rotating image "+ degrees +" degrees");
 
         Bitmap rotatedImg = Bitmap.createBitmap(image, 0, 0,
                 image.getWidth(),
