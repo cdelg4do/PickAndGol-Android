@@ -7,8 +7,6 @@ import android.util.Log;
 import java.io.File;
 import java.io.FileOutputStream;
 
-import static io.keepcoding.pickandgol.manager.image.ImageManagerSettings.RESIZE_TEMP_OUTPUT;
-
 
 /**
  * This class is in charge of all image saving operations in background.
@@ -20,14 +18,16 @@ class ImageSaver extends AsyncTask<Void, Void, Void> {
 
     private Bitmap sourceBitmap;
     private String destinationPath;
+    private boolean useCompression;
     private ImageManager.ImageSavingListener listener;
     private Exception error;
 
     private File savedFile;
 
-    ImageSaver(Bitmap sourceBitmap, String destinationPath, ImageManager.ImageSavingListener listener) {
+    ImageSaver(Bitmap sourceBitmap, String destinationPath, boolean useCompression, ImageManager.ImageSavingListener listener) {
         this.sourceBitmap = sourceBitmap;
         this.destinationPath = destinationPath;
+        this.useCompression = useCompression;
         this.listener = listener;
         error = null;
         savedFile = null;
@@ -45,7 +45,12 @@ class ImageSaver extends AsyncTask<Void, Void, Void> {
         try {
             savedFile = new File(destinationPath);
             FileOutputStream outStream = new FileOutputStream(savedFile);
-            sourceBitmap.compress(Bitmap.CompressFormat.PNG, 100, outStream);
+
+            if (useCompression)
+                sourceBitmap.compress(Bitmap.CompressFormat.JPEG, 90, outStream);
+            else
+                sourceBitmap.compress(Bitmap.CompressFormat.PNG, 100, outStream);
+
             outStream.flush();
             outStream.close();
         }

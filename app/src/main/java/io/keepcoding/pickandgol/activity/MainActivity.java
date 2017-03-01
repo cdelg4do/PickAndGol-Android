@@ -290,7 +290,7 @@ public class MainActivity extends AppCompatActivity {
 
                 new ChooseRemoteUrlDialog(MainActivity.this,
                                           "Enter a remote image url to load",
-                                          "https://pickandgol.s3.amazonaws.com/test.jpg",
+                                          "https://pickandgol.s3.amazonaws.com/test01.jpg",
                                           new ChooseRemoteUrlListener() {
                     @Override
                     public void onChooseRemoteUrl(String url) {
@@ -343,7 +343,7 @@ public class MainActivity extends AppCompatActivity {
         if (imageFile == null || ! imageFile.isFile() )
             return;
 
-        im.resizeImage(imageFile, new ImageResizeListener() {
+        im.processImage(imageFile, new ImageResizeListener() {
             @Override
             public void onResizeError(Exception error) {
                 Utils.simpleDialog(MainActivity.this, "Unable to resize image", error.toString());

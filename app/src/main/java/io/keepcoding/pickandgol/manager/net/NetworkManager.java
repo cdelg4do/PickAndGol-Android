@@ -192,7 +192,7 @@ public class NetworkManager {
                 getNewInternalListener(expectedResponseType, listener),
                 getNewInternalErrorListener(listener))
         {
-            // This override is necessary in order to pass params to the POST request
+            // This override is necessary in order to pass params to the PUT request
             @Override
             protected Map<String,String> getParams() {
                 return bodyParams.getParams();

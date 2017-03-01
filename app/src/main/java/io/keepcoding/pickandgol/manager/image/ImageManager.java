@@ -507,27 +507,29 @@ public class ImageManager {
     /** Other operations with local image files **/
 
     /**
-     * Attempts to resize a local image file to specific limit dimensions
-     * (only if the original image is equal or smaller than the limit dimensions).
+     * Attempts to process a local image file, making it to fit into specific dimensions,
+     * rotating it (if necessary) and compressing it according to the appropriate settings.
+     * If the process succeeds, a new image file is created and passed to the listener.
      *
-     * @param sourceFile    the remote file name the data to delete is stored under.
-     * @param listener          listener for the deletion operation.
+     * @param sourceFile    the image file to be processed.
+     * @param listener      listener for the processing operation.
      */
-    public void resizeImage(File sourceFile, ImageResizeListener listener) {
+    public void processImage(File sourceFile, ImageResizeListener listener) {
 
-        new ImageResizer(sourceFile, listener).execute();
+        new ImageProcessor(sourceFile, listener).execute();
     }
 
     /**
-     * Attempts to save a bitmap to a temp file.
+     * Attempts to save a bitmap to a local image file.
      *
      * @param sourceBitmap      the bitmap to save.
      * @param destinationPath   the file path where the image will be saved to.
+     * @param useCompression    indicates if use lossy compression format (JPEG) or not (PNG)
      * @param listener          listener for the saving operation.
      */
-    public void saveImage(Bitmap sourceBitmap, String destinationPath, ImageSavingListener listener) {
+    public void saveImage(Bitmap sourceBitmap, String destinationPath, boolean useCompression, ImageSavingListener listener) {
 
-        new ImageSaver(sourceBitmap, destinationPath, listener).execute();
+        new ImageSaver(sourceBitmap, destinationPath, useCompression, listener).execute();
     }
 
 

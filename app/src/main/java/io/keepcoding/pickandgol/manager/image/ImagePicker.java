@@ -17,11 +17,11 @@ import java.util.List;
 
 import io.keepcoding.pickandgol.manager.image.ImageManager.ImagePickingListener;
 
+import static android.content.Intent.ACTION_GET_CONTENT;
 import static android.provider.MediaStore.ACTION_IMAGE_CAPTURE;
 import static io.keepcoding.pickandgol.manager.image.ImageManagerSettings.CUSTOM_CAMERA_DIR;
 import static io.keepcoding.pickandgol.manager.image.ImageManagerSettings.CUSTOM_CAMERA_FILENAME;
 import static io.keepcoding.pickandgol.manager.image.ImageManagerSettings.IMAGE_PICKER_REQUEST_CODE;
-import static io.keepcoding.pickandgol.manager.image.ImageManagerSettings.USE_CUSTOM_CAMERA_OUTPUT;
 
 
 /**
@@ -58,49 +58,40 @@ abstract class ImagePicker {
                                         ImagePickingListener listener) {
 
         if (requestCode == IMAGE_PICKER_REQUEST_CODE) {
-            if (resultCode == Activity.RESULT_OK) {
 
-                if (getPickerResultUri(data) != null) {
-
-                    try {
-                        Uri imageUri = getPickerResultUri(data);
-
-                        String imagePath = getRealPathFromUri(activity, imageUri);
-                        listener.onImagePicked(imagePath);
-                    }
-                    catch (Exception e) {
-                        Log.e(LOG_TAG, "Error getting image: "+ e.toString());
-                        listener.onImagePicked(null);
-                    }
-                }
-                else {
-                    Log.e(LOG_TAG, "Image picker: result does not contain  was not OK");
-                    listener.onImagePicked(null);
-                }
-            }
-            else {
-                Log.e(LOG_TAG, "Image picker: result code was not OK");
+            if (resultCode != Activity.RESULT_OK) {
+                Log.d(LOG_TAG, "Image picking was canceled");
                 listener.onImagePicked(null);
+                return;
             }
+
+            Uri imageUri;
+            try                 {   imageUri = getPickerResultUri(data);    }
+            catch (Exception e) {   imageUri = null;                        }
+
+            if (imageUri == null) {
+                Log.e(LOG_TAG, "Error getting image path: result does not contain an uri");
+                listener.onImagePicked(null);
+                return;
+            }
+
+            String imagePath = getRealPathFromUri(activity, imageUri);
+            listener.onImagePicked(imagePath);
         }
     }
 
 
     /** Auxiliary methods **/
 
-    // Returns a chooser intent with all registered options for image picking (camera and gallery)
+    // Creates a chooser intent with all registered options for image picking (camera and gallery)
     private static Intent createImagePickerIntent(Activity activity) {
 
         // Custom uri for the images taken with the camera
         // (if it is null, images will be stored in the camera folder like any other camera photo)
         Uri cameraOutputUri = null;
 
-        if (USE_CUSTOM_CAMERA_OUTPUT) {
-
-            if (CUSTOM_CAMERA_DIR != null)
-                cameraOutputUri = Uri.fromFile(new File(CUSTOM_CAMERA_DIR.getPath(), CUSTOM_CAMERA_FILENAME));
-        }
-
+        if (CUSTOM_CAMERA_DIR != null)
+            cameraOutputUri = Uri.fromFile(new File(CUSTOM_CAMERA_DIR.getPath(), CUSTOM_CAMERA_FILENAME));
 
         List<Intent> allIntents = new ArrayList<>();
         PackageManager packageManager = activity.getPackageManager();
@@ -115,8 +106,8 @@ abstract class ImagePicker {
             intent.setComponent(new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
             intent.setPackage(res.activityInfo.packageName);
 
-            // In case we are using a custom uri for the camera pictures, this will make the file
-            // available on the disk, and no data will be included in the onActivityResult() call.
+            // This will make the file available on the disk,
+            // and no data will be included in the onActivityResult() call.
             if (cameraOutputUri != null)
                 intent.putExtra(MediaStore.EXTRA_OUTPUT, cameraOutputUri);
 
@@ -124,7 +115,7 @@ abstract class ImagePicker {
         }
 
         // Collect all gallery intents
-        Intent galleryIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        Intent galleryIntent = new Intent(ACTION_GET_CONTENT);
         galleryIntent.setType("image/*");
 
         List<ResolveInfo> listGallery = packageManager.queryIntentActivities(galleryIntent, 0);
@@ -157,35 +148,20 @@ abstract class ImagePicker {
         return chooserIntent;
     }
 
-    // Returns the correct uri for camera and gallery intents
+    // Returns the correct uri for camera or gallery intents
     private static Uri getPickerResultUri(Intent data) {
 
-        Uri uri = null;
+        Uri uri;
+        boolean useContentUri = data != null &&
+                                data.getData() != null &&
+                                data.getData().getScheme().equals("content");
 
-        if ( ! USE_CUSTOM_CAMERA_OUTPUT ) {
-
-            if (data != null)
-                uri = data.getData();
-
-            return uri;
-        }
-
-        // If using custom camera output files, we need to determine what kind of uri need
-        // (for camera images or for gallery images)
-        boolean isCameraCustomUri = true;
-
-        if (data != null)
-            if ( data.getAction() == null || ! data.getAction().equals(ACTION_IMAGE_CAPTURE) )
-                isCameraCustomUri = false;
-
-        if (isCameraCustomUri) {
-            if (CUSTOM_CAMERA_DIR != null)
-                uri = Uri.fromFile( new File(CUSTOM_CAMERA_DIR.getPath(), CUSTOM_CAMERA_FILENAME) );
-
-            return uri;
-        }
+        if (useContentUri)
+            uri = data.getData();
         else
-            return data.getData();
+            uri = Uri.fromFile(new File(CUSTOM_CAMERA_DIR.getPath(), CUSTOM_CAMERA_FILENAME));
+
+        return uri;
     }
 
     // Gets the physical path of an image file from its uri
