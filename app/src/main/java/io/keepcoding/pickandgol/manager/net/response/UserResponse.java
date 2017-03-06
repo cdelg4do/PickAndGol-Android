@@ -44,7 +44,7 @@ public class UserResponse implements ParsedResponse {
         @SerializedName("id")              private String id;
         @SerializedName("email")            private String email;
         @SerializedName("name")             private String name;
-        @SerializedName("favorite_pubs")    private List<Integer> favoritePubs;
+        @SerializedName("favorite_pubs")    private List<String> favoritePubs;
         @SerializedName("photo_url")        private String photoUrl;    // Optional field
 
 
@@ -68,7 +68,7 @@ public class UserResponse implements ParsedResponse {
             return name;
         }
 
-        public List<Integer> getFavoritePubs() {
+        public List<String> getFavoritePubs() {
             return favoritePubs;
         }
 
@@ -99,8 +99,8 @@ public class UserResponse implements ParsedResponse {
         else {
             str.append("pubs: [ ");
 
-            for (Integer pub : data.favoritePubs)
-                str.append(pub.toString() +", ");
+            for (String pub : data.favoritePubs)
+                str.append(pub + ", ");
 
             str.setLength(str.length() - 2);    // to remove the last ', '
             str.append(" ] \n");

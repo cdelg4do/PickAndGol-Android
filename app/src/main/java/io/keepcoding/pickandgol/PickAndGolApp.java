@@ -5,6 +5,8 @@ import android.content.Context;
 
 import java.lang.ref.WeakReference;
 
+import io.realm.Realm;
+
 
 /**
  * This class maintains the global application state.
@@ -22,6 +24,9 @@ public class PickAndGolApp extends Application {
 
         // Keep a copy of the application context
         appContext = new WeakReference<>( getApplicationContext() );
+
+        // Init Realm
+        Realm.init( getApplicationContext() );
     }
 
     // Override to warn about memory warnings

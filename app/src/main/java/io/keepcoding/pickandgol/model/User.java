@@ -11,12 +11,12 @@ import java.util.List;
  * This class represents a User in the system.
  * It implements the Serializable interface so that it can be passed inside an Intent.
  */
-public class User implements Serializable {
+public class User implements Serializable, Collectible {
 
     private @NonNull String id;
     private @NonNull String email;
     private @NonNull String name;
-    private @NonNull List<Integer> favorites;
+    private @NonNull List<String> favorites;
     private @Nullable String photoUrl;
     private @Nullable String oldPassword;
     private @Nullable String newPassword;
@@ -31,7 +31,7 @@ public class User implements Serializable {
     public User(final @NonNull String id,
                 final @NonNull String email,
                 final @NonNull String name,
-                final @NonNull List<Integer> favorites,
+                final @NonNull List<String> favorites,
                 final @Nullable String photoUrl) {
 
         this.id = id;
@@ -44,6 +44,7 @@ public class User implements Serializable {
 
     // Getters:
 
+    @Override
     @NonNull
     public String getId() {
         return id;
@@ -70,8 +71,13 @@ public class User implements Serializable {
     }
 
     @NonNull
-    public List<Integer> getFavorites() {
+    public List<String> getFavorites() {
         return favorites;
+    }
+
+    public User setFavorites(final List<String> favorites) {
+        this.favorites = favorites;
+        return this;
     }
 
     @Nullable
@@ -101,5 +107,24 @@ public class User implements Serializable {
 
     public void setNewPassword(@Nullable String newPassword) {
         this.newPassword = newPassword;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof User)) {
+            return false;
+        }
+
+        User user = (User) obj;
+
+        return (((id == null && user.id == null) || (id != null && user.id != null && id.equals(user.getId())))
+                && ((name == null && user.getName() == null) || (name != null && user.getName() != null && name.equals(user.getName())))
+                && ((email == null && user.getEmail() == null) || (email != null && user.getEmail() != null &&  email.equals(user.getEmail())))
+                && ((photoUrl == null && user.getPhotoUrl() == null) || (photoUrl != null && user.getPhotoUrl() != null && photoUrl.equals(user.getPhotoUrl())))
+                && ((favorites == null && user.getFavorites() == null) || (favorites != null && user.getFavorites() != null && favorites.equals(user.getFavorites()))));
     }
 }

@@ -11,7 +11,7 @@ import java.io.Serializable;
  * This class contains the login info of the device session.
  * It implements the Serializable interface so that it can be passed inside an Intent.
  */
-public class Login implements Serializable {
+public class SessionInfo implements Serializable {
 
     private boolean anonymousSession;
     private @Nullable String id;
@@ -21,14 +21,14 @@ public class Login implements Serializable {
     private @Nullable String photoUrl;
 
     // The default constructor will not be public
-    private Login() {
+    private SessionInfo() {
     }
 
-    public Login(final @Nullable String id,
-                 final @Nullable String email,
-                 final @Nullable String name,
-                 final @Nullable String token,
-                 final @Nullable String photoUrl) {
+    public SessionInfo(final @Nullable String id,
+                       final @Nullable String email,
+                       final @Nullable String name,
+                       final @Nullable String token,
+                       final @Nullable String photoUrl) {
 
         this.id = id;
         this.email = email;
