@@ -6,7 +6,7 @@ import android.support.annotation.Nullable;
 
 import com.securepreferences.SecurePreferences;
 
-import io.keepcoding.pickandgol.model.Login;
+import io.keepcoding.pickandgol.model.SessionInfo;
 
 
 /**
@@ -60,19 +60,19 @@ public class SessionManager {
     /**
      * Persists and encrypts the given session information on the local storage.
      *
-     * @param login an object with the session data to persist
+     * @param sessionInfo an object with the session data to persist
      * @return true if it was able to store an authenticated user session, false in other case
      */
-    public boolean storeSession(@NonNull Login login) {
+    public boolean storeSession(@NonNull SessionInfo sessionInfo) {
 
-        if ( login == null || login.isAnonymousSession() )
+        if ( sessionInfo == null || sessionInfo.isAnonymousSession() )
             return false;
 
-        editor.putString(USER_ID_KEY, login.getId());
-        editor.putString(USER_EMAIL_KEY, login.getEmail());
-        editor.putString(USER_NAME_KEY, login.getName());
-        editor.putString(USER_PHOTO_KEY, login.getPhotoUrl());
-        editor.putString(SESSION_TOKEN_KEY, login.getToken());
+        editor.putString(USER_ID_KEY, sessionInfo.getId());
+        editor.putString(USER_EMAIL_KEY, sessionInfo.getEmail());
+        editor.putString(USER_NAME_KEY, sessionInfo.getName());
+        editor.putString(USER_PHOTO_KEY, sessionInfo.getPhotoUrl());
+        editor.putString(SESSION_TOKEN_KEY, sessionInfo.getToken());
         editor.putBoolean(STORED_SESSION, true);
 
         editor.commit();

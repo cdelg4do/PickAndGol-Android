@@ -1,4 +1,4 @@
-package io.keepcoding.pickandgol.model.db.realmmanager;
+package io.keepcoding.pickandgol.manager.db.realm.model;
 
 import android.support.annotation.NonNull;
 
@@ -6,13 +6,13 @@ import io.realm.RealmObject;
 import io.realm.annotations.Index;
 import io.realm.annotations.PrimaryKey;
 
-public class PubId extends RealmObject {
+public class RealmPubId extends RealmObject {
     @PrimaryKey @Index
     private String id;
 
-    public PubId() {}
+    public RealmPubId() {}
 
-    public PubId(@NonNull final String id) {
+    public RealmPubId(@NonNull final String id) {
         this.id = id;
     }
 
@@ -30,11 +30,11 @@ public class PubId extends RealmObject {
             return true;
         }
 
-        if (!(obj instanceof PubId)) {
+        if (!(obj instanceof RealmPubId)) {
             return false;
         }
 
-        PubId param = (PubId) obj;
+        RealmPubId param = (RealmPubId) obj;
         return id.equals(param.getId());
     }
 }

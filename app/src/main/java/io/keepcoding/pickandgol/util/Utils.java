@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.os.Looper;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.util.Patterns;
@@ -172,6 +173,16 @@ public class Utils {
         }
 
         return extension;
+    }
+
+
+    // Determines if the current thread is the main thread (useful for debugging)
+    public static boolean isCurrentThreadMain() {
+
+        return Thread.currentThread() == Looper.getMainLooper().getThread();
+
+        // On api > 23 only:
+        //return Looper.getMainLooper().isCurrentThread();
     }
 
 }

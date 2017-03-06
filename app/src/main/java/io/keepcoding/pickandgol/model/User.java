@@ -11,7 +11,7 @@ import java.util.List;
  * This class represents a User in the system.
  * It implements the Serializable interface so that it can be passed inside an Intent.
  */
-public class User implements Serializable {
+public class User implements Serializable, Collectible {
 
     private @NonNull String id;
     private @NonNull String email;
@@ -44,6 +44,7 @@ public class User implements Serializable {
 
     // Getters:
 
+    @Override
     @NonNull
     public String getId() {
         return id;

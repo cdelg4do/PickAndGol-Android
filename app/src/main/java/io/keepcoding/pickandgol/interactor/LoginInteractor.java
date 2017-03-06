@@ -8,8 +8,8 @@ import io.keepcoding.pickandgol.manager.net.ParsedData;
 import io.keepcoding.pickandgol.manager.net.RequestParams;
 import io.keepcoding.pickandgol.manager.net.response.LoginResponse.LoginData;
 import io.keepcoding.pickandgol.manager.session.SessionManager;
-import io.keepcoding.pickandgol.model.Login;
-import io.keepcoding.pickandgol.model.mapper.LoginDataToLoginMapper;
+import io.keepcoding.pickandgol.model.SessionInfo;
+import io.keepcoding.pickandgol.model.mapper.LoginDataToSessionInfoMapper;
 
 import static io.keepcoding.pickandgol.manager.net.NetworkManagerSettings.JsonResponseType.LOGIN;
 import static io.keepcoding.pickandgol.manager.net.NetworkManagerSettings.URL_LOGIN;
@@ -69,9 +69,9 @@ public class LoginInteractor {
 
             @Override
             public void onNetworkRequestSuccess(ParsedData parsedData) {
-                Login login = new LoginDataToLoginMapper().map( (LoginData) parsedData );
+                SessionInfo sessionInfo = new LoginDataToSessionInfoMapper().map( (LoginData) parsedData );
 
-                boolean sessionStored = SessionManager.getInstance(context).storeSession(login);
+                boolean sessionStored = SessionManager.getInstance(context).storeSession(sessionInfo);
 
                 if (sessionStored)
                     listener.onLoginSuccess();
