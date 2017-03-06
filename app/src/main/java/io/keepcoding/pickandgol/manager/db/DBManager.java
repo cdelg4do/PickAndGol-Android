@@ -23,6 +23,8 @@ public interface DBManager {
     void savePub(@NonNull final Pub pub, final DBManagerListener listener);
     void saveUser(@NonNull final User user, final DBManagerListener listener);
 
+    void removeUser(@NonNull final String userId, final DBManagerListener listener);
+
     @NonNull EventAggregate getEventsFromPub(@NonNull final String pubId);
     @NonNull PubAggregate getPubsFromEvent(@NonNull final String eventId);
     @NonNull PubAggregate getFavoritesFromUser(@NonNull final String userId);

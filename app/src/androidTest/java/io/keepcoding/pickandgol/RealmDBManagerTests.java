@@ -1,6 +1,7 @@
 package io.keepcoding.pickandgol;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
@@ -18,6 +19,7 @@ import io.keepcoding.pickandgol.util.MainThread;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.fail;
 
 
 /**
@@ -34,17 +36,8 @@ public class RealmDBManagerTests {
         MainThread.run(new Runnable() {
             @Override
             public void run() {
-
-                String[] favorites = {"1111", "2222"};
-                final User user = new User("58b2aef6d9f0163f6eee636e");
-
-                user.setName("Irene")
-                .setEmail("irene@gmail.com")
-                .setPhotoUrl("http://images.com/irene.jpg")
-                .setFavorites(Arrays.asList(favorites));
-
-                Context appContext = InstrumentationRegistry.getTargetContext();
-                final DBManager manager = RealmDBManager.getDefaultInstance(appContext);
+                final User user = createUser();
+                final DBManager manager = getDBManager();
 
                 manager.saveUser(user, new DBManagerListener() {
                     @Override
@@ -58,11 +51,57 @@ public class RealmDBManagerTests {
                         assertEquals("The user read is not the same as the user written", user, userRead);
                     }
                 });
-
             }
         });
+    }
 
+    @Test
+    public void testThatAfterRemoveAnUserCannotGetItAgain() {
+        MainThread.run(new Runnable() {
+            @Override
+            public void run() {
+                final User user = createUser();
+                final DBManager manager = getDBManager();
+                manager.saveUser(user, new DBManagerListener() {
+                    @Override
+                    public void onError(Throwable e) {
+                        // test before
+                    }
 
+                    @Override
+                    public void onSuccess(@Nullable Object result) {
+                        manager.removeUser(user.getId(), new DBManagerListener() {
+                            @Override
+                            public void onError(Throwable e) {
+                                fail("Error while removing a user");
+                            }
 
+                            @Override
+                            public void onSuccess(@Nullable Object result) {
+                                final User userRemoved = manager.getUser(user.getId());
+                                assertEquals("The user removed was recovered!", null, userRemoved);
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    private DBManager getDBManager() {
+        Context appContext = InstrumentationRegistry.getTargetContext();
+        return RealmDBManager.getDefaultInstance();
+    }
+
+    @NonNull
+    private User createUser() {
+        String[] favorites = {"1111", "2222"};
+        final User user = new User("58b2aef6d9f0163f6eee636e");
+
+        user.setName("Irene")
+        .setEmail("irene@gmail.com")
+        .setPhotoUrl("http://images.com/irene.jpg")
+        .setFavorites(Arrays.asList(favorites));
+        return user;
     }
 }

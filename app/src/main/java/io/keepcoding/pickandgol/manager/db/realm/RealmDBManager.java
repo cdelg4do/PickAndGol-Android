@@ -1,10 +1,8 @@
 package io.keepcoding.pickandgol.manager.db.realm;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,17 +29,15 @@ import io.realm.RealmResults;
 public class RealmDBManager implements DBManager {
     private static RealmDBManager instance;
 
-    private WeakReference<Context> context;
     private Realm realm;
 
-    private RealmDBManager(final Context context) {
-        this.context = new WeakReference<>(context);
+    private RealmDBManager() {
         realm = Realm.getDefaultInstance();
     }
 
-    public static RealmDBManager getDefaultInstance(final Context context) {
+    public static RealmDBManager getDefaultInstance() {
         if (instance == null)
-            instance = new RealmDBManager(context);
+            instance = new RealmDBManager();
 
         return instance;
     }
@@ -51,22 +47,31 @@ public class RealmDBManager implements DBManager {
 
     @Override
     public @Nullable Event getEvent(@NonNull final String eventId) {
-
         RealmEvent realmEvent = realm.where(RealmEvent.class).equalTo("id", eventId).findFirst();
+        if (realmEvent == null) {
+            return null;
+        }
+
         return realmEvent.mapToModel();
     }
 
     @Override
     public @Nullable Pub getPub(@NonNull final String pubId) {
-
         RealmPub realmPub = realm.where(RealmPub.class).equalTo("id", pubId).findFirst();
+        if (realmPub == null) {
+            return null;
+        }
+
         return realmPub.mapToModel();
     }
 
     @Override
     public @Nullable User getUser(@NonNull final String userId) {
-
         RealmUser realmUser = realm.where(RealmUser.class).equalTo("id", userId).findFirst();
+        if (realmUser == null) {
+            return null;
+        }
+
         return realmUser.mapToModel();
     }
 
@@ -161,6 +166,36 @@ public class RealmDBManager implements DBManager {
                     }
                 }
         );
+    }
+
+    @Override
+    public void removeUser(@NonNull final String userId, final DBManagerListener listener) {
+        realm.executeTransactionAsync(
+                new Realm.Transaction() {
+                    @Override
+                    public void execute(Realm realm) {
+                        RealmResults<RealmUser> results = realm.where(RealmUser.class).equalTo("id", userId).findAll();
+                        results.deleteAllFromRealm();
+                    }
+                },
+                new Realm.Transaction.OnSuccess() {
+                    @Override
+                    public void onSuccess() {
+                        if (listener != null) {
+                            listener.onSuccess(null);
+                        }
+                    }
+                },
+                new Realm.Transaction.OnError() {
+                    @Override
+                    public void onError(Throwable error) {
+                        if (listener != null) {
+                            listener.onError(error);
+                        }
+                    }
+                }
+        );
+
     }
 
     @Override
