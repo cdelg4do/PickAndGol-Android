@@ -147,7 +147,7 @@ public class RealmPub extends RealmObject {
         for (String eventId: pub.getEvents() )
             events.add( new RealmEventId(eventId) );
 
-        RealmUserId owner = new RealmUserId( pub.getId() );
+        RealmUserId owner = new RealmUserId( pub.getOwner() );
 
         RealmPub realmPub = new RealmPub()
                 .setId( pub.getId() )
