@@ -24,6 +24,8 @@ public interface DBManager {
     void saveUser(@NonNull final User user, final DBManagerListener listener);
 
     void removeUser(@NonNull final String userId, final DBManagerListener listener);
+    void removePub(@NonNull final String pubId, final DBManagerListener listener);
+    void removeEvent(@NonNull final String eventId, final DBManagerListener listener);
 
     @NonNull EventAggregate getEventsFromPub(@NonNull final String pubId);
     @NonNull PubAggregate getPubsFromEvent(@NonNull final String eventId);

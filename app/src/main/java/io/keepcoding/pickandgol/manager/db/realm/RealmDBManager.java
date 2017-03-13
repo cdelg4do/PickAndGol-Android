@@ -199,6 +199,64 @@ public class RealmDBManager implements DBManager {
     }
 
     @Override
+    public void removePub(@NonNull final String pubId, final DBManagerListener listener) {
+        realm.executeTransactionAsync(
+                new Realm.Transaction() {
+                    @Override
+                    public void execute(Realm realm) {
+                        RealmResults<RealmPub> results = realm.where(RealmPub.class).equalTo("id", pubId).findAll();
+                        results.deleteAllFromRealm();
+                    }
+                },
+                new Realm.Transaction.OnSuccess() {
+                    @Override
+                    public void onSuccess() {
+                        if (listener != null) {
+                            listener.onSuccess(null);
+                        }
+                    }
+                },
+                new Realm.Transaction.OnError() {
+                    @Override
+                    public void onError(Throwable error) {
+                        if (listener != null) {
+                            listener.onError(error);
+                        }
+                    }
+                }
+        );
+    }
+
+    @Override
+    public void removeEvent(@NonNull final String eventId, final DBManagerListener listener) {
+        realm.executeTransactionAsync(
+                new Realm.Transaction() {
+                    @Override
+                    public void execute(Realm realm) {
+                        RealmResults<RealmEvent> results = realm.where(RealmEvent.class).equalTo("id", eventId).findAll();
+                        results.deleteAllFromRealm();
+                    }
+                },
+                new Realm.Transaction.OnSuccess() {
+                    @Override
+                    public void onSuccess() {
+                        if (listener != null) {
+                            listener.onSuccess(null);
+                        }
+                    }
+                },
+                new Realm.Transaction.OnError() {
+                    @Override
+                    public void onError(Throwable error) {
+                        if (listener != null) {
+                            listener.onError(error);
+                        }
+                    }
+                }
+        );
+    }
+
+    @Override
     public @NonNull EventAggregate getEventsFromPub(@NonNull String pubId) {
 
         EventAggregate events = EventAggregate.buildEmpty();

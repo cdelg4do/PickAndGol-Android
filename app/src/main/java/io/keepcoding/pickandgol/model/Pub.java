@@ -123,4 +123,21 @@ public class Pub implements Collectible {
         this.events = events;
         return this;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof Pub)) {
+            return false;
+        }
+
+        Pub pub = (Pub) obj;
+
+        return id.equals(pub.id) && name.equals(pub.name) && hasLocation == pub.hasLocation
+                && latitude == pub.latitude && longitude == pub.longitude && url.equals(pub.url)
+                && owner.equals(pub.owner) && events.equals(pub.events);
+    }
 }
