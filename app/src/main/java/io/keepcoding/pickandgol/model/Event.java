@@ -1,5 +1,6 @@
 package io.keepcoding.pickandgol.model;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
 
@@ -7,7 +8,7 @@ import java.util.List;
 /**
  * This class contains the info about an Event managed by the client app
  */
-public class Event implements Collectible {
+public class Event implements Collectible, Serializable {
 
     private String id;
     private String name;
@@ -28,6 +29,14 @@ public class Event implements Collectible {
         this.photoUrl = photoUrl;
         this.category = category;
         this.pubs = pubs;
+
+        /*
+        if (description.equals(""))
+            this.description = null;
+
+        if (photoUrl == null)
+            this.photoUrl = null;
+        */
     }
 
 

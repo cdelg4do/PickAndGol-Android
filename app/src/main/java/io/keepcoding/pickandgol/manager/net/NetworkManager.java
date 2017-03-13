@@ -21,6 +21,7 @@ import java.io.StringReader;
 import java.lang.ref.WeakReference;
 import java.util.Map;
 
+import io.keepcoding.pickandgol.manager.net.response.EventListResponse;
 import io.keepcoding.pickandgol.manager.net.response.LoginResponse;
 import io.keepcoding.pickandgol.manager.net.response.UserResponse;
 
@@ -118,6 +119,7 @@ public class NetworkManager {
                 getNewInternalErrorListener(listener));
 
         Log.d("NetworkManager", "Launching GET request...\n"+ urlWithParams);
+        //Utils.simpleDialog(context.get(), "GET Request", urlWithParams);
         RequestQueue queue = Volley.newRequestQueue( context.get() );
         queue.add(getRequest);
     }
@@ -275,6 +277,10 @@ public class NetworkManager {
                 parsedResponse = parseUserResponse(response);
                 break;
 
+            case EVENT_LIST:
+                parsedResponse = parseEventListResponse(response);
+                break;
+
             default:
                 parsedResponse = null;
                 break;
@@ -323,6 +329,24 @@ public class NetworkManager {
         }
 
         return userEntity;
+    }
+
+    // JsonResponseType: EVENT_LIST
+    @Nullable
+    private EventListResponse parseEventListResponse(String responseString) {
+
+        EventListResponse eventListResponse = null;
+
+        try {
+            Reader reader = new StringReader(responseString);
+            Gson gson = new GsonBuilder().create();
+            eventListResponse = gson.fromJson(reader, EventListResponse.class);
+        }
+        catch (RuntimeException e) {
+            e.printStackTrace();
+        }
+
+        return eventListResponse;
     }
 
 }

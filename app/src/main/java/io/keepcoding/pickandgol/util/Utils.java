@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Looper;
+import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.util.Patterns;
@@ -12,6 +13,9 @@ import android.view.View;
 import android.webkit.URLUtil;
 import android.widget.Toast;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.regex.Pattern;
 
 
@@ -175,6 +179,25 @@ public class Utils {
         return extension;
     }
 
+    // Gets a date from a mongodb date string
+    public static @Nullable  Date getDateFromMongo(String dateString) {
+
+        Date date = null;
+
+        try {
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+            date = df.parse(dateString);
+        }
+        catch (Exception e) {
+        }
+
+        return date;
+    }
+
+
+    /*
+        Other auxiliary methods
+     */
 
     // Determines if the current thread is the main thread (useful for debugging)
     public static boolean isCurrentThreadMain() {

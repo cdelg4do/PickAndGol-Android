@@ -8,15 +8,29 @@ import java.util.List;
 
 
 /**
- * This class is an aggregate of Pub objects
+ * This class is an aggregate of Pub objects, obtained from a pub search.
  */
 public class PubAggregate implements Iterable<Pub>, Updatable<Pub>, Searchable<Pub> {
 
+    // The list of pubs contained in this aggregate
     private List<Pub> pubList;
+
+    // The total number of search matches (there can be more pubs than those contained here)
+    private int totalResults;
+
 
     // Constructor is private, use the static build...() methods instead
     private PubAggregate() {
         pubList = new ArrayList<>();
+        totalResults = 0;
+    }
+
+    public int getTotalResults() {
+        return totalResults;
+    }
+
+    public void setTotalResults(int total) {
+        this.totalResults = total;
     }
 
     @Override
@@ -60,6 +74,13 @@ public class PubAggregate implements Iterable<Pub>, Updatable<Pub>, Searchable<P
     }
 
     @Override
+    public void addElements(Iterable<Pub> moreElements) {
+
+        for (int i=0; i<moreElements.size(); i++)
+            pubList.add( moreElements.get(i) );
+    }
+
+    @Override
     public @Nullable Pub search(String id) {
 
         Pub foundPub = null;
@@ -86,10 +107,11 @@ public class PubAggregate implements Iterable<Pub>, Updatable<Pub>, Searchable<P
         return new PubAggregate();
     }
 
-    public static PubAggregate buildFromList(List<Pub> list) {
+    public static PubAggregate buildFromList(List<Pub> list, int total) {
 
         PubAggregate pubAggregate = new PubAggregate();
         pubAggregate.setAll(list);
+        pubAggregate.setTotalResults(total);
 
         return pubAggregate;
     }

@@ -60,6 +60,13 @@ public class UserAggregate implements Iterable<User>, Updatable<User>, Searchabl
     }
 
     @Override
+    public void addElements(Iterable<User> moreElements) {
+
+        for (int i=0; i<moreElements.size(); i++)
+            userList.add( moreElements.get(i) );
+    }
+
+    @Override
     public @Nullable User search(String id) {
 
         User foundUser = null;

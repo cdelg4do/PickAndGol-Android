@@ -96,7 +96,7 @@ public class PermissionChecker {
 
             case LOCATION_SET:
                 explanationTitle = "Access to device's location";
-                explanationMsg = "In order to show your current position on the map, " +
+                explanationMsg = "In order to perform searches based on your location, " +
                         "Pick And Gol will ask you to grant access to this device's location.";
                 break;
 

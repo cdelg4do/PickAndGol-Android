@@ -4,10 +4,12 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -27,14 +29,22 @@ import io.keepcoding.pickandgol.R;
 import io.keepcoding.pickandgol.dialog.ChooseRemoteUrlDialog;
 import io.keepcoding.pickandgol.dialog.LoginDialog;
 import io.keepcoding.pickandgol.fragment.EditUserFragment;
+import io.keepcoding.pickandgol.fragment.EventListFragment;
 import io.keepcoding.pickandgol.fragment.MainContentFragment;
 import io.keepcoding.pickandgol.interactor.EditUserInteractor;
 import io.keepcoding.pickandgol.interactor.LoginInteractor;
+import io.keepcoding.pickandgol.interactor.SearchEventsInteractor;
+import io.keepcoding.pickandgol.interactor.SearchEventsInteractor.SearchEventsInteractorListener;
 import io.keepcoding.pickandgol.interactor.UserDetailInteractor;
+import io.keepcoding.pickandgol.manager.geo.GeoManager;
 import io.keepcoding.pickandgol.manager.image.ImageManager;
 import io.keepcoding.pickandgol.manager.image.ImageManager.ImageResizeListener;
 import io.keepcoding.pickandgol.manager.session.SessionManager;
+import io.keepcoding.pickandgol.model.Event;
+import io.keepcoding.pickandgol.model.EventAggregate;
 import io.keepcoding.pickandgol.model.User;
+import io.keepcoding.pickandgol.navigator.Navigator;
+import io.keepcoding.pickandgol.search.EventSearchParams;
 import io.keepcoding.pickandgol.util.PermissionChecker;
 import io.keepcoding.pickandgol.util.Utils;
 
@@ -45,15 +55,28 @@ import static io.keepcoding.pickandgol.interactor.UserDetailInteractor.UserDetai
 import static io.keepcoding.pickandgol.manager.image.ImageManagerSettings.IMAGE_PICKER_REQUEST_CODE;
 import static io.keepcoding.pickandgol.util.PermissionChecker.CheckPermissionListener;
 import static io.keepcoding.pickandgol.util.PermissionChecker.PermissionTag.CAMERA_SET;
+import static io.keepcoding.pickandgol.util.PermissionChecker.PermissionTag.LOCATION_SET;
 import static io.keepcoding.pickandgol.util.PermissionChecker.PermissionTag.RW_STORAGE_SET;
 import static io.keepcoding.pickandgol.util.PermissionChecker.REQUEST_FOR_CAMERA_PERMISSION;
+import static io.keepcoding.pickandgol.util.PermissionChecker.REQUEST_FOR_LOCATION_PERMISSION;
 import static io.keepcoding.pickandgol.util.PermissionChecker.REQUEST_FOR_STORAGE_PERMISSION;
 
 
 /**
  * This class is the application main activity
  */
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements EventListFragment.EventListListener {
+
+    public static String CURRENT_EVENT_SEARCH_PARAMS_KEY = "CURRENT_EVENT_SEARCH_PARAMS_KEY";
+    public static String SHOW_DISTANCE_SELECTOR_KEY = "SHOW_DISTANCE_SELECTOR_KEY";
+    public static String NEW_EVENT_SEARCH_PARAMS_KEY = "NEW_EVENT_SEARCH_PARAMS_KEY";
+
+    // This helps to know what was the fragment showing before the activity was destroyed
+    // (if it is OTHER, it means that does not mind)
+    private enum ShowingFragment {
+        EVENT_LIST,
+        OTHER
+    }
 
     // When choosing an image from the picker, this helps to know what to do with it
     // (like upload the selected image to the cloud, load it into an ImageView, etc.)
@@ -62,23 +85,35 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private final String ACTIONBAR_TITLE_SAVED_STATE = "ACTIONBAR_TITLE_SAVED_STATE";
-    private final int DEFAULT_DRAWER_ITEM = R.id.drawer_menu_item_1;
+    private final String LAST_EVENT_SEARCH_SAVED_STATE = "LAST_EVENT_SEARCH_SAVED_STATE";
+    private final String LAST_TOTAL_RESULTS_SAVED_STATE = "LAST_TOTAL_RESULTS_SAVED_STATE";
+    private final String SHOWING_FRAGMENT_SAVED_STATE = "SHOWING_FRAGMENT_SAVED_STATE";
+
+    private final int DEFAULT_DRAWER_ITEM = R.id.drawer_menu_item_2;
 
     private SessionManager sm;
     private ImageManager im;
+    private GeoManager gm;
 
     private ImagePurpose lastPickedImagePurpose;  // stores the purpose of the last picked image
 
     private Fragment mainFragment;
+    private EventListFragment eventListFragment;
+
+    private EventSearchParams lastEventSearchParams;
+    private int lastEventSearchTotalResults;
 
     private DrawerLayout mainDrawer;
     private View drawerHeader;
     private String actionBarTitle;
 
+    private ShowingFragment showingFragment;
+
 
     // Declare as many Permission Checkers as permission requests we need on this activity
     private PermissionChecker storageChecker;
     private PermissionChecker cameraChecker;
+    private PermissionChecker locationChecker;
 
     // Reference to UI elements to be bind with Butterknife (not before the header is inflated)
     @BindView(R.id.drawer_profile_username) TextView profileNameText;
@@ -96,18 +131,28 @@ public class MainActivity extends AppCompatActivity {
         // Init all the permission checkers that will be used in this activity
         storageChecker = new PermissionChecker(RW_STORAGE_SET, this);
         cameraChecker = new PermissionChecker(CAMERA_SET, this);
+        locationChecker = new PermissionChecker(LOCATION_SET, this);
 
         // Init all the managers used in this activity
         sm = SessionManager.getInstance(this);
         im = ImageManager.getInstance(this);
+        gm = new GeoManager(this);
 
         setupActionBar();
         setupDrawer(savedInstanceState);
 
-        if (savedInstanceState != null)
-            restoreActivityState(savedInstanceState);
-
         updateHeaderFromSessionInfo();
+
+        if (savedInstanceState == null) {
+
+            showingFragment = ShowingFragment.OTHER;
+
+            // Set initial event search params: empty
+            lastEventSearchParams = EventSearchParams.buildEmptyParams();
+            lastEventSearchTotalResults = 0;
+        }
+        else
+            restoreActivityState(savedInstanceState);
     }
 
     @Override
@@ -126,8 +171,11 @@ public class MainActivity extends AppCompatActivity {
                 mainDrawer.openDrawer(GravityCompat.START);
                 return true;
 
-            case R.id.main_menu_clear_image_cache:
-                doClearImageCacheOperation();
+            case R.id.main_menu_search:
+                Navigator.fromMainActivityToEventSearchActivity(
+                        this,
+                        lastEventSearchParams,
+                        GeoManager.isLocationAccessGranted(this));
                 return true;
 
             default:
@@ -140,6 +188,10 @@ public class MainActivity extends AppCompatActivity {
         Log.d("MainActivity","Saving activity state...");
 
         outState.putString(ACTIONBAR_TITLE_SAVED_STATE, actionBarTitle);
+        outState.putSerializable(LAST_EVENT_SEARCH_SAVED_STATE, lastEventSearchParams);
+        outState.putInt(LAST_TOTAL_RESULTS_SAVED_STATE, lastEventSearchTotalResults);
+        outState.putSerializable(SHOWING_FRAGMENT_SAVED_STATE, showingFragment);
+
         super.onSaveInstanceState(outState);
     }
 
@@ -149,6 +201,13 @@ public class MainActivity extends AppCompatActivity {
 
         actionBarTitle = savedInstanceState.getString(ACTIONBAR_TITLE_SAVED_STATE, "");
         setTitle(actionBarTitle);
+
+        lastEventSearchParams = (EventSearchParams) savedInstanceState.getSerializable(LAST_EVENT_SEARCH_SAVED_STATE);
+        lastEventSearchTotalResults = savedInstanceState.getInt(LAST_TOTAL_RESULTS_SAVED_STATE);
+
+        showingFragment = (ShowingFragment) savedInstanceState.getSerializable(SHOWING_FRAGMENT_SAVED_STATE);
+        if (showingFragment == ShowingFragment.EVENT_LIST)
+            eventListFragment = (EventListFragment) getSupportFragmentManager().findFragmentById(R.id.mainContentFragment_placeholder);
     }
 
     // Set the layout toolbar as the activity action bar
@@ -218,14 +277,42 @@ public class MainActivity extends AppCompatActivity {
 
         else if (requestCode == REQUEST_FOR_CAMERA_PERMISSION)
             cameraChecker.checkAfterAsking();
+
+        else if (requestCode == REQUEST_FOR_LOCATION_PERMISSION)
+            locationChecker.checkAfterAsking();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+        // If we are coming from the Event Search Settings Activity
+        if (requestCode == Navigator.EVENT_SEARCH_ACTIVITY_REQUEST_CODE &&
+            resultCode == RESULT_OK) {
+
+            final EventSearchParams newSearchParams = (EventSearchParams) data.getSerializableExtra(NEW_EVENT_SEARCH_PARAMS_KEY);
+
+            // Check if we have permission to access the device location, before performing a search
+            locationChecker.checkBeforeAsking(new CheckPermissionListener() {
+                @Override
+                public void onPermissionDenied() {
+                    String msg = "Pick And Gol will not be able to search based on your location.";
+                    Utils.shortSnack(MainActivity.this, msg);
+
+                    searchEventsFirstPage(newSearchParams, null);
+                    mainDrawer.closeDrawers();
+                }
+
+                @Override
+                public void onPermissionGranted() {
+                    searchEventsFirstPage(newSearchParams, null);
+                    mainDrawer.closeDrawers();
+                }
+            });
+        }
+
         // If we are coming from the image picker
-        if (requestCode == IMAGE_PICKER_REQUEST_CODE) {
+        else if (requestCode == IMAGE_PICKER_REQUEST_CODE) {
 
             im.handleImagePickerResult(MainActivity.this, requestCode, resultCode, data, new ImageManager.ImagePickingListener() {
                 @Override
@@ -266,6 +353,33 @@ public class MainActivity extends AppCompatActivity {
 
         switch (menuItem.getItemId()) {
 
+            case R.id.event_search:
+
+                showingFragment = ShowingFragment.EVENT_LIST;
+
+                actionBarTitle = menuItem.getTitle().toString();
+                setTitle(actionBarTitle);
+
+                // Check if we have permission to access the device location, before performing a search
+                locationChecker.checkBeforeAsking(new CheckPermissionListener() {
+                    @Override
+                    public void onPermissionDenied() {
+                        String msg = "Pick And Gol will not be able to search based on your location.";
+                        Utils.shortSnack(MainActivity.this, msg);
+
+                        searchEventsFirstPage(lastEventSearchParams, null);
+                        mainDrawer.closeDrawers();
+                    }
+
+                    @Override
+                    public void onPermissionGranted() {
+                        searchEventsFirstPage(lastEventSearchParams, null);
+                        mainDrawer.closeDrawers();
+                    }
+                });
+
+                break;
+
             case R.id.drawer_menu_upload_image:
 
                 // Check if we have permission to access the camera, before opening the image picker
@@ -300,6 +414,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
 
             case R.id.drawer_menu_user_detail:
+
                 doGetUserDetailOperation( sm.getUserId() );     // ask for our own user
                 mainDrawer.closeDrawers();
                 break;
@@ -317,6 +432,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
 
             case R.id.drawer_menu_log_out:
+
                 doLogOutOperation();
                 mainDrawer.closeDrawers();
                 break;
@@ -336,6 +452,106 @@ public class MainActivity extends AppCompatActivity {
 
 
     /*** Operations triggered by the menu action selectors ***/
+
+    private void searchEventsFirstPage(final @NonNull EventSearchParams searchParams, final @Nullable SwipeRefreshLayout swipeCaller) {
+
+        searchParams.setOffset(0);
+
+        // If we didn't come from a swipe gesture, show a progress dialog
+        final ProgressDialog pDialog = Utils.newProgressDialog(this, "Searching events...");
+        if ( swipeCaller == null )
+            pDialog.show();
+
+        // Define what to do with the search results
+        final SearchEventsInteractorListener interactorListener = new SearchEventsInteractorListener() {
+
+            @Override
+            public void onSearchEventsFail(Exception e) {
+
+                if (swipeCaller != null)    swipeCaller.setRefreshing(false);
+                else                        pDialog.dismiss();
+
+                Log.e("MainActivity","Failed to search events: "+ e.toString() );
+                Utils.simpleDialog(MainActivity.this, "Event search error", e.getMessage());
+            }
+
+            @Override
+            public void onSearchEventsSuccess(EventAggregate events) {
+
+                if (swipeCaller == null)    pDialog.dismiss();
+                else                        swipeCaller.setRefreshing(false);
+
+                lastEventSearchTotalResults = events.getTotalResults();
+
+                eventListFragment = EventListFragment.newInstance(events);
+
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.mainContentFragment_placeholder, eventListFragment)
+                        .commit();
+
+                Utils.shortSnack(MainActivity.this, events.getTotalResults() +" event(s) found");
+            }
+        };
+
+
+        // The current location will be sent only if it is available
+        searchParams.setCoordinates(null, null);
+
+        if ( !GeoManager.isLocationAccessGranted(this) ) {
+            lastEventSearchParams = searchParams;
+            new SearchEventsInteractor().execute(MainActivity.this, searchParams, interactorListener);
+        }
+        else {
+            gm.requestLastLocation(new GeoManager.GeoManagerListener() {
+                @Override
+                public void onLocationError(Throwable error) {
+                    lastEventSearchParams = searchParams;
+                    new SearchEventsInteractor().execute(MainActivity.this, searchParams, interactorListener);
+                }
+
+                @Override
+                public void onLocationSuccess(double latitude, double longitude) {
+                    searchParams.setCoordinates(latitude, longitude);
+                    lastEventSearchParams = searchParams;
+                    new SearchEventsInteractor().execute(MainActivity.this, searchParams, interactorListener);
+                }
+            });
+        }
+    }
+
+
+    private void searchEventsNextPage(final @NonNull EventSearchParams searchParams) {
+
+        int newOffset = searchParams.getOffset() + searchParams.getLimit();
+
+        // If we are already at the last page of results, do nothing and return
+        if (newOffset >= lastEventSearchTotalResults)
+            return;
+
+        searchParams.setOffset(newOffset);
+
+        lastEventSearchParams = searchParams;
+
+        // No need to set the location for "next page" requests,
+        // so we can launch the request without checking permissions for the location services.
+        new SearchEventsInteractor().execute(MainActivity.this, searchParams, new SearchEventsInteractorListener() {
+
+            @Override
+            public void onSearchEventsFail(Exception e) {
+
+                Log.e("MainActivity","Failed to search more events: "+ e.toString() );
+                Utils.shortSnack(MainActivity.this, "Error: "+ e.getMessage());
+            }
+
+            @Override
+            public void onSearchEventsSuccess(EventAggregate events) {
+
+                eventListFragment.addMoreEvents(events);
+            }
+        });
+    }
+
 
     // Resize and upload the given image file
     private void doImageResizeThenUploadOperation(File imageFile) {
@@ -588,5 +804,39 @@ public class MainActivity extends AppCompatActivity {
                 .beginTransaction()
                 .replace(R.id.mainContentFragment_placeholder, mainFragment)
                 .commit();
+    }
+
+
+
+    /*** Implementation of EventListFragment.EventListListener interface ***/
+
+    @Override
+    public void onItemClicked(Event event, int position) {
+        Utils.shortSnack(MainActivity.this, event.getName() +" clicked.");
+    }
+
+    @Override
+    public void onSwipeRefresh(@Nullable final SwipeRefreshLayout swipeCaller) {
+
+        // Check if we have permission to access the device location, before performing a search
+        locationChecker.checkBeforeAsking(new CheckPermissionListener() {
+            @Override
+            public void onPermissionDenied() {
+                String msg = "Pick And Gol will not be able to search based on your location.";
+                Utils.shortSnack(MainActivity.this, msg);
+
+                searchEventsFirstPage(lastEventSearchParams, swipeCaller);
+            }
+
+            @Override
+            public void onPermissionGranted() {
+                searchEventsFirstPage(lastEventSearchParams, swipeCaller);
+            }
+        });
+    }
+
+    @Override
+    public void onLoadNextPage() {
+        searchEventsNextPage(lastEventSearchParams);
     }
 }
