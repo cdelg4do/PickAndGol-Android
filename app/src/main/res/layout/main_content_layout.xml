@@ -8,7 +8,7 @@
     <include layout="@layout/toolbar_main"/>
 
     <!-- This layout will be replaced by a fragment during runtime -->
-    <RelativeLayout
+    <LinearLayout
         android:id="@+id/mainContentFragment_placeholder"
         android:layout_width="match_parent"
         android:layout_height="match_parent"/>
