@@ -12,4 +12,5 @@ public interface Updatable<T extends Collectible> {
     void delete(T element);
     void update(T element, int index);
     void setAll(List<T> list);
+    void addElements(Iterable<T> moreElements);
 }

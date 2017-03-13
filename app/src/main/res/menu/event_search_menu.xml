@@ -5,10 +5,8 @@
       tools:context=".MainActivity">
 
     <item
-        android:id="@+id/main_menu_search"
-        android:title="Search"
-        android:icon="@android:drawable/ic_menu_search"
-        android:orderInCategory="100"
-        app:showAsAction="always"/>
+        android:id="@+id/event_search_menu_reset"
+        android:title="Reset filters"
+        app:showAsAction="never"/>
 
 </menu>

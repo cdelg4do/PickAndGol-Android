@@ -307,8 +307,8 @@ public class ImageManager {
      * @param imageUrl      the url of the image to load.
      * @param target        the ImageView to load the image on.
      */
-    public void loadImage(final @NonNull ImageView target,
-                          final @NonNull String imageUrl) {
+    public void loadImage(final @NonNull String imageUrl,
+                          final @NonNull ImageView target) {
 
         loadImage(imageUrl, target, null, null, null);
     }

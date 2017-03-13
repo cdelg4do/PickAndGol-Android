@@ -4,10 +4,10 @@
     <group android:checkableBehavior="single">
 
         <item
-            android:id="@+id/drawer_menu_item_1"
+            android:id="@+id/event_search"
             android:icon="@android:drawable/ic_menu_gallery"
             android:checked = "true"
-            android:title="Drawer Item #1"/>
+            android:title="Event Search"/>
 
         <item
             android:id="@+id/drawer_menu_item_2"
