@@ -10,10 +10,10 @@
             android:title="Event Search"/>
 
         <item
-            android:id="@+id/drawer_menu_item_2"
+            android:id="@+id/create_event"
             android:icon="@android:drawable/ic_menu_today"
             android:checkable = "true"
-            android:title="Drawer Item #2"/>
+            android:title="Create Event"/>
 
         <item
             android:id="@+id/drawer_menu_upload_image"

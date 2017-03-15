@@ -78,4 +78,21 @@ public class RequestParams {
         strBuilder.setLength(strBuilder.length() - 1);    // to remove the last '&'
         return strBuilder.toString();
     }
+
+    public String debugString() {
+
+        if (params.size() == 0)
+            return "< NO PARAMS >\n";
+
+        StringBuilder strBuilder = new StringBuilder("\n");
+
+        for (Map.Entry<String, String> entry : params.entrySet()) {
+
+            String key = entry.getKey();
+            String value = entry.getValue();
+            strBuilder.append(key +": "+ value +"\n");
+        }
+
+        return strBuilder.toString();
+    }
 }

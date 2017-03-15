@@ -1,12 +1,14 @@
 package io.keepcoding.pickandgol.model;
 
+import java.io.Serializable;
 import java.util.List;
 
 
 /**
- * This class contains the info about a Pub managed by the client app
+ * This class contains the info about a Pub managed by the client app.
+ * (implements the Serializable interface so that it can be passed inside an Intent)
  */
-public class Pub implements Collectible {
+public class Pub implements Collectible, Serializable {
 
     private String id;
     private String name;

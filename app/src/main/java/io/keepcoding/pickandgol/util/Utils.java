@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.DialogInterface.OnClickListener;
 import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -15,7 +16,9 @@ import android.widget.Toast;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.regex.Pattern;
 
 
@@ -90,13 +93,13 @@ public class Utils {
 
 
     // Shows the user a dialog with Accept button only and its corresponding listener
-    public static void simpleDialog(Context ctx, String title, String msg, DialogInterface.OnClickListener acceptListener) {
+    public static void simpleDialog(Context ctx, String title, String msg, OnClickListener listener) {
 
         final AlertDialog dialog;
 
         // If no listener was provided, use a default one
-        if (acceptListener == null)
-            acceptListener = new DialogInterface.OnClickListener() {
+        if (listener == null)
+            listener = new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                 }
@@ -105,7 +108,7 @@ public class Utils {
         AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
         builder.setTitle(title);
         builder.setMessage(msg);
-        builder.setPositiveButton(ctx.getResources().getString(android.R.string.ok), acceptListener);
+        builder.setPositiveButton(ctx.getResources().getString(android.R.string.ok), listener);
 
         dialog = builder.create();
         dialog.show();
@@ -180,7 +183,7 @@ public class Utils {
     }
 
     // Gets a date from a mongodb date string
-    public static @Nullable  Date getDateFromMongo(String dateString) {
+    public static @Nullable Date getDateFromMongo(String dateString) {
 
         Date date = null;
 
@@ -192,6 +195,34 @@ public class Utils {
         }
 
         return date;
+    }
+
+    public static Date getDateFromIntegers(Integer yyyy, Integer mm, Integer dd,
+                                           Integer hh, Integer mins) {
+
+        Calendar cal = Calendar.getInstance();
+
+        cal.set(Calendar.YEAR, yyyy);
+        cal.set(Calendar.MONTH, mm);
+        cal.set(Calendar.DATE, dd);
+        cal.set(Calendar.HOUR_OF_DAY, hh);
+        cal.set(Calendar.MINUTE, mins);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+
+        return cal.getTime();
+    }
+
+    public static String getISODateString(Date date) {
+
+        String ISO_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
+
+        TimeZone utc = TimeZone.getTimeZone("UTC");
+        SimpleDateFormat isoFormatter = new SimpleDateFormat(ISO_FORMAT);
+        isoFormatter.setTimeZone(utc);
+        String isoString = isoFormatter.format(date);
+
+        return isoString;
     }
 
 

@@ -9,4 +9,11 @@
     <string name="user_edit_change_password">Change password</string>
     <string name="edit_user_old_password">Old password</string>
     <string name="edit_user_new_password">New password</string>
+
+    <string name="new_event_name">Name:</string>
+    <string name="new_event_category">Category:</string>
+    <string name="new_event_date">Date:</string>
+    <string name="new_event_time">Time:</string>
+    <string name="new_event_description">Description (optional):</string>
+    <string name="new_event_image">Image (optional):</string>
 </resources>

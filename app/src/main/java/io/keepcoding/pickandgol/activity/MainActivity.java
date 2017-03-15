@@ -21,6 +21,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.UUID;
 
 import butterknife.BindView;
@@ -38,10 +39,11 @@ import io.keepcoding.pickandgol.interactor.SearchEventsInteractor.SearchEventsIn
 import io.keepcoding.pickandgol.interactor.UserDetailInteractor;
 import io.keepcoding.pickandgol.manager.geo.GeoManager;
 import io.keepcoding.pickandgol.manager.image.ImageManager;
-import io.keepcoding.pickandgol.manager.image.ImageManager.ImageResizeListener;
+import io.keepcoding.pickandgol.manager.image.ImageManager.ImageProcessingListener;
 import io.keepcoding.pickandgol.manager.session.SessionManager;
 import io.keepcoding.pickandgol.model.Event;
 import io.keepcoding.pickandgol.model.EventAggregate;
+import io.keepcoding.pickandgol.model.Pub;
 import io.keepcoding.pickandgol.model.User;
 import io.keepcoding.pickandgol.navigator.Navigator;
 import io.keepcoding.pickandgol.search.EventSearchParams;
@@ -67,6 +69,8 @@ import static io.keepcoding.pickandgol.util.PermissionChecker.REQUEST_FOR_STORAG
  */
 public class MainActivity extends AppCompatActivity implements EventListFragment.EventListListener {
 
+    private final static String LOG_TAG = "MainActivity";
+
     public static String CURRENT_EVENT_SEARCH_PARAMS_KEY = "CURRENT_EVENT_SEARCH_PARAMS_KEY";
     public static String SHOW_DISTANCE_SELECTOR_KEY = "SHOW_DISTANCE_SELECTOR_KEY";
     public static String NEW_EVENT_SEARCH_PARAMS_KEY = "NEW_EVENT_SEARCH_PARAMS_KEY";
@@ -89,7 +93,7 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
     private final String LAST_TOTAL_RESULTS_SAVED_STATE = "LAST_TOTAL_RESULTS_SAVED_STATE";
     private final String SHOWING_FRAGMENT_SAVED_STATE = "SHOWING_FRAGMENT_SAVED_STATE";
 
-    private final int DEFAULT_DRAWER_ITEM = R.id.drawer_menu_item_2;
+    private final int DEFAULT_DRAWER_ITEM = R.id.event_search;
 
     private SessionManager sm;
     private ImageManager im;
@@ -150,7 +154,10 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
             // Set initial event search params: empty
             lastEventSearchParams = EventSearchParams.buildEmptyParams();
             lastEventSearchTotalResults = 0;
+
+            doDefaultOperation();
         }
+
         else
             restoreActivityState(savedInstanceState);
     }
@@ -185,7 +192,7 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
-        Log.d("MainActivity","Saving activity state...");
+        Log.d(LOG_TAG, "Saving activity state...");
 
         outState.putString(ACTIONBAR_TITLE_SAVED_STATE, actionBarTitle);
         outState.putSerializable(LAST_EVENT_SEARCH_SAVED_STATE, lastEventSearchParams);
@@ -197,7 +204,7 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
 
     // Restore the state the activity had just before it was destroyed
     private void restoreActivityState(final @NonNull Bundle savedInstanceState) {
-        Log.d("MainActivity","Restoring activity state...");
+        Log.d(LOG_TAG, "Restoring activity state...");
 
         actionBarTitle = savedInstanceState.getString(ACTIONBAR_TITLE_SAVED_STATE, "");
         setTitle(actionBarTitle);
@@ -259,11 +266,17 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
                 onDrawerHeaderSelected();
             }
         });
+    }
 
-        if (savedInstanceState == null) {
-            MenuItem defaultDrawerItem = navigationView.getMenu().findItem(DEFAULT_DRAWER_ITEM);
-            onDrawerItemSelected(defaultDrawerItem);
-        }
+
+    private void doDefaultOperation() {
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        if (navigationView == null)
+            return;
+
+        MenuItem defaultDrawerItem = navigationView.getMenu().findItem(DEFAULT_DRAWER_ITEM);
+        onDrawerItemSelected(defaultDrawerItem);
     }
 
 
@@ -319,7 +332,7 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
                 public void onImagePicked(String imagePath) {
 
                     if (imagePath == null) {
-                        Log.e("MainActivity","Failed to get the path from the image picker");
+                        Log.e(LOG_TAG, "Failed to get the path from the image picker");
                         return;
                     }
 
@@ -378,6 +391,18 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
                     }
                 });
 
+                break;
+
+            case R.id.create_event:
+
+                Pub currentPub = new Pub("58c782770c0ef45dfc5875df", "La Biblioteca",
+                                         43.558096, -5.923779,
+                                         "https://www.facebook.com/Cafe.LaBiblioteca",
+                                         "58b471ddd9f0163f6eee6375", new ArrayList<String>()
+                );
+
+                Navigator.fromPubDetailActivityToNewEventActivity(this, currentPub);
+                mainDrawer.closeDrawers();
                 break;
 
             case R.id.drawer_menu_upload_image:
@@ -471,7 +496,7 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
                 if (swipeCaller != null)    swipeCaller.setRefreshing(false);
                 else                        pDialog.dismiss();
 
-                Log.e("MainActivity","Failed to search events: "+ e.toString() );
+                Log.e(LOG_TAG, "Failed to search events: "+ e.toString() );
                 Utils.simpleDialog(MainActivity.this, "Event search error", e.getMessage());
             }
 
@@ -540,7 +565,7 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
             @Override
             public void onSearchEventsFail(Exception e) {
 
-                Log.e("MainActivity","Failed to search more events: "+ e.toString() );
+                Log.e(LOG_TAG, "Failed to search more events: "+ e.toString() );
                 Utils.shortSnack(MainActivity.this, "Error: "+ e.getMessage());
             }
 
@@ -559,14 +584,14 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
         if (imageFile == null || ! imageFile.isFile() )
             return;
 
-        im.processImage(imageFile, new ImageResizeListener() {
+        im.processImage(imageFile, new ImageProcessingListener() {
             @Override
-            public void onResizeError(Exception error) {
+            public void onProcessError(Exception error) {
                 Utils.simpleDialog(MainActivity.this, "Unable to resize image", error.toString());
             }
 
             @Override
-            public void onResizeSuccess(File resizedFile) {
+            public void onProcessSuccess(File resizedFile) {
                 doUploadImageOperation(resizedFile.getAbsolutePath());
             }
         });
@@ -576,7 +601,7 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
     private void doUploadImageOperation(final String filePath) {
 
         if( ! new File(filePath).isFile() ) {
-            Log.e("File Upload", "An error occurred: '"+ filePath +"' does not exist or is not a file");
+            Log.e(LOG_TAG, "An error occurred: '"+ filePath +"' does not exist or is not a file");
             Utils.simpleDialog(MainActivity.this, "Upload error",
                     "The file '" + filePath + "' could not be uploaded: \n\nFile does not exist or is not a file");
             return;
@@ -591,7 +616,7 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
         final ProgressDialog pDialog = Utils.newProgressBarDialog(this, kbTotal, "Uploading file ("+ fileSize +")...");
         pDialog.show();
 
-        Log.d("File Upload", "Uploading file '"+ filePath +"' ("+ fileSize +")...");
+        Log.d(LOG_TAG, "Uploading file '"+ filePath +"' ("+ fileSize +")...");
 
         im.uploadImage(new File(filePath), remoteFileName, new ImageManager.ImageUploadListener() {
 
@@ -604,7 +629,7 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
             @Override
             public void onImageUploadError(int transferId, Exception e) {
                 pDialog.dismiss();
-                Log.e("File Upload", "[id "+ transferId +"] An error occurred: "+ e.toString());
+                Log.e(LOG_TAG, "[id "+ transferId +"] An error occurred: "+ e.toString());
                 Utils.simpleDialog(MainActivity.this, "Upload error",
                         "The file '" + filePath + "' could not be uploaded: \n\n"+ e.toString());
             }
@@ -612,7 +637,7 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
             @Override
             public void onImageUploadCompletion(int transferId) {
                 pDialog.dismiss();
-                Log.d("File Upload", "[id "+ transferId +"] File '" + filePath + "' has been stored as: "+ remoteFileName);
+                Log.d(LOG_TAG, "[id "+ transferId +"] File '" + filePath + "' has been stored as: "+ remoteFileName);
                 Utils.simpleDialog(MainActivity.this, "Upload successful",
                         "The file has been stored as '" + remoteFileName + "'.");
             }
@@ -630,7 +655,7 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
             @Override
             public void onLoginFail(Exception e) {
                 pDialog.dismiss();
-                Log.e("MainActivity","Failed to login: "+ e.toString() );
+                Log.e(LOG_TAG, "Failed to login: "+ e.toString() );
                 Utils.simpleDialog(MainActivity.this, "Login error", e.getMessage());
             }
 
@@ -686,7 +711,7 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
             @Override
             public void onUserDetailFail(Exception e) {
                 pDialog.dismiss();
-                Log.e("MainActivity","Failed to retrieve detail for user '"+ id +"': "+ e.toString() );
+                Log.e(LOG_TAG, "Failed to retrieve detail for user '"+ id +"': "+ e.toString() );
                 Utils.simpleDialog(MainActivity.this, "User detail error", e.getMessage());
             }
 

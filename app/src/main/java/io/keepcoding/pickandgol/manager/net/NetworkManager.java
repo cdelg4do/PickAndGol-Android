@@ -21,6 +21,7 @@ import java.io.StringReader;
 import java.lang.ref.WeakReference;
 import java.util.Map;
 
+import io.keepcoding.pickandgol.manager.net.response.EventDetailResponse;
 import io.keepcoding.pickandgol.manager.net.response.EventListResponse;
 import io.keepcoding.pickandgol.manager.net.response.LoginResponse;
 import io.keepcoding.pickandgol.manager.net.response.UserResponse;
@@ -39,6 +40,8 @@ import static io.keepcoding.pickandgol.manager.net.NetworkManagerSettings.JsonRe
  * Does not include image requests, see the ImageManager for that.
  */
 public class NetworkManager {
+
+    private final static String LOG_TAG = "NetworkManager";
 
     private WeakReference<Context> context;
 
@@ -118,8 +121,9 @@ public class NetworkManager {
                 getNewInternalListener(expectedResponseType, listener),
                 getNewInternalErrorListener(listener));
 
-        Log.d("NetworkManager", "Launching GET request...\n"+ urlWithParams);
-        //Utils.simpleDialog(context.get(), "GET Request", urlWithParams);
+        Log.d(LOG_TAG, "Launching [GET] request to URL: "+ url);
+        Log.d(LOG_TAG, "[GET] URL params: "+ urlParams.debugString());
+
         RequestQueue queue = Volley.newRequestQueue( context.get() );
         queue.add(getRequest);
     }
@@ -160,7 +164,9 @@ public class NetworkManager {
             }
         };
 
-        Log.d("NetworkManager", "Launching POST request... \n"+ url);
+        Log.d(LOG_TAG, "Launching [POST] request to URL: "+ url);
+        Log.d(LOG_TAG, "[POST] Body params: "+ bodyParams.debugString());
+
         RequestQueue queue = Volley.newRequestQueue( context.get() );
         queue.add(postRequest);
     }
@@ -201,7 +207,9 @@ public class NetworkManager {
             }
         };
 
-        Log.d("NetworkManager", "Launching PUT request... \n" + url);
+        Log.d(LOG_TAG, "Launching [PUT] request to URL: " + url);
+        Log.d(LOG_TAG, "[PUT] Body params: "+ bodyParams.debugString());
+
         RequestQueue queue = Volley.newRequestQueue(context.get());
         queue.add(putRequest);
     }
@@ -219,7 +227,7 @@ public class NetworkManager {
         newResponseListener = new Response.Listener<String>() {
             @Override
             public void onResponse(String response) {
-                Log.d("NetworkManager", "Response retrieved");
+                Log.d(LOG_TAG, "Response retrieved");
 
                 ParsedResponse parsedResponse = parseStringResponse(response, expectedResponseType);
 
@@ -249,7 +257,7 @@ public class NetworkManager {
         newResponseErrorListener = new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Log.e("NetworkManager", "Unable to get response");
+                Log.e(LOG_TAG, "Unable to get response");
                 externalListener.onNetworkRequestFail(error);
             }
         };
@@ -263,7 +271,7 @@ public class NetworkManager {
     private ParsedResponse parseStringResponse(String response, JsonResponseType expectedType) {
 
         if (response != null)
-            Log.d("NetworkManager","Received response: \n" +response);
+            Log.d(LOG_TAG, "Received response: \n" +response);
 
         ParsedResponse parsedResponse;
 
@@ -281,13 +289,17 @@ public class NetworkManager {
                 parsedResponse = parseEventListResponse(response);
                 break;
 
+            case EVENT_DETAIL:
+                parsedResponse = parseEventDetailResponse(response);
+                break;
+
             default:
                 parsedResponse = null;
                 break;
         }
 
         if (parsedResponse != null)
-            Log.d("NetworkManager","Parsed response (expected type '"+ expectedType.toString() +"'): \n" +parsedResponse.debugString());
+            Log.d(LOG_TAG, "Parsed response (expected type '"+ expectedType.toString() +"'): \n" +parsedResponse.debugString());
 
         return parsedResponse;
     }
@@ -347,6 +359,24 @@ public class NetworkManager {
         }
 
         return eventListResponse;
+    }
+
+    // JsonResponseType: EVENT_DETAIL
+    @Nullable
+    private EventDetailResponse parseEventDetailResponse(String responseString) {
+
+        EventDetailResponse eventDetailResponse = null;
+
+        try {
+            Reader reader = new StringReader(responseString);
+            Gson gson = new GsonBuilder().create();
+            eventDetailResponse = gson.fromJson(reader, EventDetailResponse.class);
+        }
+        catch (RuntimeException e) {
+            e.printStackTrace();
+        }
+
+        return eventDetailResponse;
     }
 
 }

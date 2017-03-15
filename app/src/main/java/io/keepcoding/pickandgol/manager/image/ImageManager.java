@@ -73,10 +73,10 @@ public class ImageManager {
         void onDeletionSuccess();
     }
 
-    // Listener interface for image resize operations
-    public interface ImageResizeListener {
-        void onResizeError(Exception error);
-        void onResizeSuccess(File resizedFile);
+    // Listener interface for image processing operations
+    public interface ImageProcessingListener {
+        void onProcessError(Exception error);
+        void onProcessSuccess(File resizedFile);
     }
 
     // Listener interface for image saving operations
@@ -474,6 +474,17 @@ public class ImageManager {
         new ImageDeleter(remoteFilename, s3Client, listener).execute();
     }
 
+    /**
+     * Returns the full remote url in the S3 Bucket for a given filename.
+     *
+     * @param remoteImageFilename   the remote file name to get its full url.
+     * @return                      the full remote url of the file.
+     */
+    public String getRemoteImageUrl(String remoteImageFilename) {
+
+        return "https://"+ S3_BUCKET +".s3.amazonaws.com/"+ remoteImageFilename;
+    }
+
 
     /** Operations about the image file picker **/
 
@@ -483,7 +494,7 @@ public class ImageManager {
      *
      * @param activity  the activity from where the picker is shown.
      */
-    public static void showImagePicker(Activity activity) {
+    public void showImagePicker(Activity activity) {
 
         ImagePicker.showImagePicker(activity);
     }
@@ -494,7 +505,7 @@ public class ImageManager {
      *
      * @param activity  the activity from where the picker is shown.
      */
-    public static void handleImagePickerResult(Activity activity,
+    public void handleImagePickerResult(Activity activity,
                                                int requestCode,
                                                int resultCode,
                                                Intent data,
@@ -514,7 +525,7 @@ public class ImageManager {
      * @param sourceFile    the image file to be processed.
      * @param listener      listener for the processing operation.
      */
-    public void processImage(File sourceFile, ImageResizeListener listener) {
+    public void processImage(File sourceFile, ImageProcessingListener listener) {
 
         new ImageProcessor(sourceFile, listener).execute();
     }

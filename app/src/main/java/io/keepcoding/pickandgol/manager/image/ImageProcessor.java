@@ -28,11 +28,11 @@ class ImageProcessor extends AsyncTask<Void, Void, Void> {
     private final static String LOG_TAG = "ImageProcessor";
 
     private File sourceFile;
-    private ImageManager.ImageResizeListener listener;
+    private ImageManager.ImageProcessingListener listener;
     private Exception error;
     private String tempFilePath;
 
-    ImageProcessor(File sourceFile, ImageManager.ImageResizeListener listener) {
+    ImageProcessor(File sourceFile, ImageManager.ImageProcessingListener listener) {
         this.sourceFile = sourceFile;
         this.listener = listener;
         error = null;
@@ -83,11 +83,11 @@ class ImageProcessor extends AsyncTask<Void, Void, Void> {
 
         if ( error != null) {
             Log.e(LOG_TAG, "Error processing the image : "+ error.toString());
-            listener.onResizeError(error);
+            listener.onProcessError(error);
         }
         else {
             Log.d(LOG_TAG, "The processed image has been saved to '"+ tempFilePath +"'");
-            listener.onResizeSuccess( new File(tempFilePath) );
+            listener.onProcessSuccess( new File(tempFilePath) );
         }
     }
 

@@ -103,27 +103,43 @@ public class EventDetailResponse implements ParsedResponse {
 
         str.append("result: "+ Utils.safeString(result) +"\n");
 
-        str.append("code: "+ Utils.safeString(data.errorCode) +"\n");
-        str.append("description: "+ Utils.safeString(data.description) +"\n");
-/*
-        str.append("id: "+ Utils.safeString(data.id) +"\n");
-        str.append("email: "+ Utils.safeString(data.email) +"\n");
-        str.append("name: "+ Utils.safeString(data.name) +"\n");
-        str.append("photoUrl: "+ Utils.safeString(data.photoUrl) +"\n");
-
-        if (data.favoritePubs == null || data.favoritePubs.size() == 0)
-            str.append("pubs: [ ] \n");
+        if ( !resultIsOK() ) {
+            str.append("code: "+ Utils.safeString(data.errorCode) +"\n");
+            str.append("description: "+ Utils.safeString(data.description) +"\n");
+        }
 
         else {
-            str.append("pubs: [ ");
+            str.append("id: "+ Utils.safeString(data.getId()) +"\n");
+            str.append("name: "+ Utils.safeString(data.getName()) +"\n");
+            str.append("description: "+ Utils.safeString(data.description) +"\n");
+            str.append("dateString: "+ data.getDate().toString() +"\n");
+            str.append("photoUrl: "+ Utils.safeString(data.getPhotoUrl()) +"\n");
 
-            for (String pub : data.favoritePubs)
-                str.append(pub + ", ");
+            if (data.pubs == null || data.pubs.size() == 0)
+                str.append("pubs: [ ] \n");
+            else {
+                str.append("pubs: [ ");
 
-            str.setLength(str.length() - 2);    // to remove the last ', '
-            str.append(" ] \n");
+                for (String pub : data.pubs)
+                    str.append(pub + ", ");
+
+                str.setLength(str.length() - 2);    // to remove the last ', '
+                str.append(" ] \n");
+            }
+
+            if (data.categories == null || data.categories.size() == 0)
+                str.append("categories: [ ] \n");
+            else {
+                str.append("categories: [ ");
+
+                for (String cat : data.categories)
+                    str.append(cat + ", ");
+
+                str.setLength(str.length() - 2);    // to remove the last ', '
+                str.append(" ] \n");
+            }
         }
-*/
+
         return str.toString();
     }
 }

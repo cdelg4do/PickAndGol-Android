@@ -70,7 +70,7 @@ public class EventSearchSettingsActivity extends AppCompatActivity {
     }
 
     // Set the layout toolbar as the activity action bar
-    // and show the icon to open/close the drawer as the home button
+    // and show the home button
     private void setupActionBar() {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -78,10 +78,8 @@ public class EventSearchSettingsActivity extends AppCompatActivity {
 
         final ActionBar actionBar = getSupportActionBar();
 
-        if (actionBar != null) {
-            actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
+        if (actionBar != null)
             actionBar.setDisplayHomeAsUpEnabled(true);
-        }
     }
 
 
