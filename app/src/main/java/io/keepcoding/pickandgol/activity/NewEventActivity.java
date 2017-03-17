@@ -531,9 +531,4 @@ public class NewEventActivity extends AppCompatActivity {
 
         Navigator.backFromNewEventActivity(this, newEvent);
     }
-
-
-
-
-
 }

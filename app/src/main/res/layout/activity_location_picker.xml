@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:orientation="vertical"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              tools:context="io.keepcoding.pickandgol.activity.LocationPickerActivity">
+
+    <!-- Toolbar for the actvity -->
+    <include layout="@layout/toolbar_main"/>
+
+    <RelativeLayout
+        android:id="@+id/activity_location_picker"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <fragment
+            android:id="@+id/activity_location_picker_map_fragment"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_above="@+id/activity_location_picker_buttons_layout">
+
+            <ImageView
+                android:id="@+id/activity_location_picker_marker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:contentDescription="@null"
+                android:src="@drawable/map_marker" />
+
+            <ImageView
+                android:id="@+id/activity_location_picker_toggle_view"
+                android:layout_width="75dp"
+                android:layout_height="75dp"
+                android:layout_marginRight="65dp"
+                android:layout_marginBottom="18dp"
+                android:padding="9dp"
+                android:background="@android:color/white"
+                android:layout_gravity="bottom|right"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_satellite_view"
+                android:alpha="0.70"/>
+
+        </fragment>
+
+        <LinearLayout
+            android:id="@+id/activity_location_picker_buttons_layout"
+            android:orientation="horizontal"
+            android:layout_alignParentBottom="true"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="5dp"
+            android:gravity="center_horizontal"
+            android:background="#FFCACACA">
+
+            <Button
+                android:id="@+id/activity_location_picker_button_cancel"
+                android:text="Cancel"
+                android:layout_width="100dp"
+                android:layout_height="50dp"/>
+
+            <FrameLayout
+                android:layout_height="match_parent"
+                android:layout_width="10dp">
+
+            </FrameLayout>
+
+            <Button
+                android:id="@+id/activity_location_picker_button_select"
+                android:text="Select"
+                android:layout_width="100dp"
+                android:layout_height="50dp"/>
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</LinearLayout>

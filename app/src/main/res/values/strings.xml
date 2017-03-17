@@ -16,4 +16,11 @@
     <string name="new_event_time">Time:</string>
     <string name="new_event_description">Description (optional):</string>
     <string name="new_event_image">Image (optional):</string>
+
+    <string name="new_pub_name">Name:</string>
+    <string name="new_pub_location">Location:</string>
+    <string name="new_pub_date">Date:</string>
+    <string name="new_pub_time">Time:</string>
+    <string name="new_pub_web">Web site (optional):</string>
+    <string name="new_pub_images">Images (optional):</string>
 </resources>

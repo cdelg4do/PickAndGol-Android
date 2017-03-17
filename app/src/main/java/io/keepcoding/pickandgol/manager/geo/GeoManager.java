@@ -1,6 +1,7 @@
 package io.keepcoding.pickandgol.manager.geo;
 
 import android.content.Context;
+import android.location.Address;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -14,30 +15,43 @@ import com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
 import com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 import com.google.android.gms.location.LocationServices;
 
+import java.util.List;
+
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.support.v4.content.PermissionChecker.PERMISSION_GRANTED;
 
 
 /**
- * This class manages some location functionalities, like getting the last know device location.
+ * This class manages some location functionalities, like getting the last know device location
+ * or reverse geo-decoding locations.
  */
 public class GeoManager {
 
     private final static String LOG_TAG = "GeoManager";
 
     // Use this interface to listen to location requests
-    public interface GeoManagerListener {
+    public interface GeoDirectLocationListener {
 
         void onLocationError(Throwable error);
         void onLocationSuccess(double latitude, double longitude);
     }
 
+    // Use this interface to listen to reverse location requests
+    public interface GeoReverseLocationListener {
 
+        void onReverseLocationError(Throwable error);
+        void onReverseLocationSuccess(@NonNull List<Address> addresses);
+    }
+
+
+    private Context context;
     private GoogleApiClient googleClient;
-    private GeoManagerListener listener;
+    private GeoDirectLocationListener listener;
 
 
     public GeoManager(Context context) {
+
+        this.context = context.getApplicationContext();
 
         // Create the necessary callbacks to connect to the Location Services API:
 
@@ -126,10 +140,44 @@ public class GeoManager {
      *
      * @param listener  a listener to manage the results of the async operation.
      */
-    public void requestLastLocation(GeoManagerListener listener) {
+    public void requestLastLocation(GeoDirectLocationListener listener) {
 
         this.listener = listener;
         googleClient.connect();
+    }
+
+
+    /**
+     * Starts an async request to get the associated addresses for a given location.
+     *
+     * @param latitude      latitude of the location.
+     * @param longitude     longitude of the location.
+     * @param maxResults    maximum number of addresses retrieved.
+     * @param listener      a listener to manage the results of the async operation.
+     */
+    public void requestReverseDecodedAddresses(double latitude, double longitude, int maxResults,
+                                               @NonNull GeoReverseLocationListener listener) {
+
+        if (listener == null)
+            return;
+
+        new ReverseGeoCoder(context, latitude, longitude, maxResults, listener)
+            .execute();
+    }
+
+
+    /**
+     * Starts an async request to get the associated address for a given location.
+     * Similar to the previous method, but it will return no more than one results.
+     *
+     * @param latitude      latitude of the location.
+     * @param longitude     longitude of the location.
+     * @param listener      a listener to manage the results of the async operation.
+     */
+    public void requestReverseDecodedAddress(double latitude, double longitude,
+                                               @NonNull GeoReverseLocationListener listener) {
+
+        requestReverseDecodedAddresses(latitude, longitude, 1, listener);
     }
 
 

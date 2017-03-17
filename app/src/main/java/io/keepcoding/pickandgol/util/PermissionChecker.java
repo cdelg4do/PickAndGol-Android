@@ -3,6 +3,7 @@ package io.keepcoding.pickandgol.util;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 
@@ -127,6 +128,53 @@ public class PermissionChecker {
                 explanationTitle != null
                 && explanationMsg != null
                 && shouldShowRequestPermissionRationale(activity,permissionToCheck)
+        );
+
+        if (ContextCompat.checkSelfPermission(activity, permissionToCheck) == PERMISSION_GRANTED)
+            listener.onPermissionGranted();
+
+        else {
+
+            if (showExplanation)
+                Utils.simpleDialog(activity, explanationTitle, explanationMsg, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        requestPermissions(permissionsToRequest, requestCode);
+                    }
+                });
+
+            else
+                requestPermissions(permissionsToRequest, requestCode);
+        }
+    }
+
+    /**
+     * Checks if the given permission set has been granted. If not, asks the user for them.
+     * This method allows to specify a different request code than the standard one, if not null.
+     * This is useful if you need different callbacks in an Activity for the same permission request.
+     * (the calling activity should implement onRequestPermissionsResult() to handle the answer)
+     *
+     * @param listener a listener for the operation.
+     */
+    public void checkBeforeAsking(@Nullable Integer givenCode, @NonNull CheckPermissionListener listener) {
+
+        if (listener == null)
+            return;
+
+        if (givenCode == null)
+            checkBeforeAsking(listener);
+
+        this.listener = listener;
+
+        PermissionSet pSet = permissionMap.get(tag);
+        String permissionToCheck = pSet.getPermissionToCheck();
+        final String[] permissionsToRequest = pSet.getPermissionArray();
+        final int requestCode = givenCode;
+
+        boolean showExplanation = (
+                explanationTitle != null
+                        && explanationMsg != null
+                        && shouldShowRequestPermissionRationale(activity,permissionToCheck)
         );
 
         if (ContextCompat.checkSelfPermission(activity, permissionToCheck) == PERMISSION_GRANTED)
