@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import io.keepcoding.pickandgol.model.CategoryAggregate;
+
 
 /**
  * This class defines an Spinner adapter for pairs < key, value >,
@@ -90,4 +92,16 @@ public class IntegerStringSpinnerAdapter extends BaseAdapter {
         return view;
     }
 
+    public static IntegerStringSpinnerAdapter createAdapterForCategoriesSpinner(final Context context,
+                                                                                final CategoryAggregate categories,
+                                                                                final String defaultText) {
+        Integer[] keys = new Integer[categories.size()];
+        String[] values = new String[categories.size()];
+        for (int i = 0; i < categories.size(); i++) {
+            keys[i] = i;
+            values[i] = categories.get(i).getName();
+        }
+
+        return new IntegerStringSpinnerAdapter(context, keys, values, defaultText);
+    }
 }

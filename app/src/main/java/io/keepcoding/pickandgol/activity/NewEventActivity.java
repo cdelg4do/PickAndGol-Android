@@ -22,7 +22,6 @@ import android.widget.TextView;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -34,10 +33,12 @@ import io.keepcoding.pickandgol.fragment.DatePickerFragment;
 import io.keepcoding.pickandgol.fragment.TimePickerFragment;
 import io.keepcoding.pickandgol.interactor.CreateEventInteractor;
 import io.keepcoding.pickandgol.interactor.CreateEventInteractor.CreateEventInteractorListener;
+import io.keepcoding.pickandgol.interactor.GetCategoriesInteractor;
 import io.keepcoding.pickandgol.manager.image.ImageManager;
 import io.keepcoding.pickandgol.manager.image.ImageManager.ImagePickingListener;
 import io.keepcoding.pickandgol.manager.image.ImageManager.ImageProcessingListener;
 import io.keepcoding.pickandgol.manager.session.SessionManager;
+import io.keepcoding.pickandgol.model.CategoryAggregate;
 import io.keepcoding.pickandgol.model.Event;
 import io.keepcoding.pickandgol.model.Pub;
 import io.keepcoding.pickandgol.navigator.Navigator;
@@ -70,6 +71,7 @@ public class NewEventActivity extends AppCompatActivity {
 
     Integer yyyy, mm, dd, hh, mins;
     private File imageFileToUpload;
+    private CategoryAggregate categories;
 
     @BindView(R.id.activity_new_event_name_text)         EditText txtName;
     @BindView(R.id.activity_new_event_category_spinner) Spinner spnCategory;
@@ -149,7 +151,7 @@ public class NewEventActivity extends AppCompatActivity {
     // and show the home button
     private void setupActionBar() {
 
-        setTitle("Create an Event");
+        setTitle(getString(R.string.new_event_activity_create_event));
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -161,22 +163,21 @@ public class NewEventActivity extends AppCompatActivity {
 
 
     private void setupCategorySpinner() {
+        GetCategoriesInteractor interactor = new GetCategoriesInteractor();
+        interactor.execute(this, new GetCategoriesInteractor.Listener() {
+            @Override
+            public void onFail(String message) {
+                Log.e(LOG_TAG, message);
+            }
 
-        //TODO: load the categories from the database
-
-        Integer[] categoryIds = {1, 2, 3, 4, 5, 6, 7, 8};
-
-        String[] categoryNames = {"Football", "Formula 1", "Rugby", "Basketball",
-                "Tennis", "Handball", "Baseball", "Cycling"};
-
-        HashMap<Integer,String> spinnerMap = new HashMap<Integer, String>();
-        for (int i = 0; i < categoryIds.length; i++)
-            spinnerMap.put(categoryIds[i], categoryNames[i]);
-
-        IntegerStringSpinnerAdapter adapter = new IntegerStringSpinnerAdapter(this, categoryIds, categoryNames, "<Choose One>");
-        spnCategory.setAdapter(adapter);
+            @Override
+            public void onSuccess(CategoryAggregate categories) {
+                NewEventActivity.this.categories = categories;
+                IntegerStringSpinnerAdapter adapter = IntegerStringSpinnerAdapter.createAdapterForCategoriesSpinner(NewEventActivity.this, categories, getString(R.string.new_event_activity_spinner_default_text));
+                spnCategory.setAdapter(adapter);
+            }
+        });
     }
-
 
     private void setupButtons() {
 
@@ -367,7 +368,7 @@ public class NewEventActivity extends AppCompatActivity {
         Event tempEvent = null;     // This object is just a container of some data from the form
 
         String eventName = txtName.getText().toString();
-        Integer selectedCategoryId = (int) spnCategory.getSelectedItemId();
+        Integer selectedCategoryIndex = ((int) spnCategory.getSelectedItemId()) - 1;
         String eventDescription = txtDescription.getText().toString();
 
         if (eventName.equals("")) {
@@ -375,7 +376,7 @@ public class NewEventActivity extends AppCompatActivity {
             txtName.requestFocus();
         }
 
-        else if (selectedCategoryId == 0) {
+        else if (selectedCategoryIndex < 0) {
             Utils.simpleDialog(this, "Invalid data", "You must select a category for the event.");
             spnCategory.requestFocus();
         }
@@ -388,7 +389,10 @@ public class NewEventActivity extends AppCompatActivity {
         // All data are correct, prepare the temp Event
         else {
             Date eventDate = Utils.getDateFromIntegers(yyyy, mm, dd, hh, mins);
-            String eventCategory = selectedCategoryId.toString();
+            String eventCategory = null;
+            if (categories.get(selectedCategoryIndex) != null) {
+                eventCategory = categories.get(selectedCategoryIndex).getId();
+            }
 
             if (eventDescription.equals(""))
                 eventDescription = null;
