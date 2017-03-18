@@ -34,7 +34,6 @@ public class EventSearchSettingsActivity extends AppCompatActivity {
 
     private EventSearchParams currentSearchParams;
     private boolean useLocation;
-    private CategoryAggregate categories;
 
     @BindView(R.id.activity_event_search_keywords_text)     EditText txtKeywords;
     @BindView(R.id.activity_event_search_category_spinner)  Spinner spnCategory;
@@ -114,7 +113,6 @@ public class EventSearchSettingsActivity extends AppCompatActivity {
 
             @Override
             public void onSuccess(CategoryAggregate categories) {
-                EventSearchSettingsActivity.this.categories = categories;
                 IntegerStringSpinnerAdapter adapter = IntegerStringSpinnerAdapter.createAdapterForCategoriesSpinner(EventSearchSettingsActivity.this, categories, getString(R.string.event_search_settings_activity_spinner_default_text));
                 spnCategory.setAdapter(adapter);
             }

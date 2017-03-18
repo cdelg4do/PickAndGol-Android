@@ -368,7 +368,7 @@ public class NewEventActivity extends AppCompatActivity {
         Event tempEvent = null;     // This object is just a container of some data from the form
 
         String eventName = txtName.getText().toString();
-        Integer selectedCategoryIndex = ((int) spnCategory.getSelectedItemId()) - 1;
+        Integer selectedCategoryIndex = (int) spnCategory.getSelectedItemId();
         String eventDescription = txtDescription.getText().toString();
 
         if (eventName.equals("")) {
