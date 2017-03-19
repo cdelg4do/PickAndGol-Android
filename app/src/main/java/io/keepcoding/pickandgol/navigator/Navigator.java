@@ -1,6 +1,5 @@
 package io.keepcoding.pickandgol.navigator;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -181,7 +180,7 @@ public class Navigator {
      * @param initialLongitude  initial longitude to center the picker map
      * @return                  a reference to the intent created (useful for testing)
      */
-    public static Intent fromNewPubActivityToLocationPickerActivity(final Activity newPubActivity,
+    public static Intent fromNewPubActivityToLocationPickerActivity(final NewPubActivity newPubActivity,
                                                                     @Nullable Double initialLatitude,
                                                                     @Nullable Double initialLongitude) {
 

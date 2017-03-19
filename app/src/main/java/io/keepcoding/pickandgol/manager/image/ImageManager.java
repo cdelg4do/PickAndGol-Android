@@ -32,6 +32,7 @@ import static io.keepcoding.pickandgol.manager.image.ImageManagerSettings.CACHE_
 import static io.keepcoding.pickandgol.manager.image.ImageManagerSettings.CACHE_SIZE_MB;
 import static io.keepcoding.pickandgol.manager.image.ImageManagerSettings.DEBUG_INDICATORS;
 import static io.keepcoding.pickandgol.manager.image.ImageManagerSettings.ENABLE_LOGGING;
+import static io.keepcoding.pickandgol.manager.image.ImageManagerSettings.PROCESSOR_TEMP_DIR;
 import static io.keepcoding.pickandgol.manager.image.ImageManagerSettings.S3_BUCKET;
 import static io.keepcoding.pickandgol.manager.image.ImageManagerSettings.S3_POOL_ID;
 import static io.keepcoding.pickandgol.manager.image.ImageManagerSettings.S3_POOL_REGION;
@@ -480,7 +481,10 @@ public class ImageManager {
      * @param remoteImageFilename   the remote file name to get its full url.
      * @return                      the full remote url of the file.
      */
-    public String getRemoteImageUrl(String remoteImageFilename) {
+    public @Nullable String getRemoteImageUrl(@Nullable String remoteImageFilename) {
+
+        if (remoteImageFilename == null)
+            return null;
 
         return "https://"+ S3_BUCKET +".s3.amazonaws.com/"+ remoteImageFilename;
     }
@@ -521,13 +525,84 @@ public class ImageManager {
      * Attempts to process a local image file, making it to fit into specific dimensions,
      * rotating it (if necessary) and compressing it according to the appropriate settings.
      * If the process succeeds, a new image file is created and passed to the listener.
+     * The resulting file will have a default filename.
      *
      * @param sourceFile    the image file to be processed.
      * @param listener      listener for the processing operation.
      */
     public void processImage(File sourceFile, ImageProcessingListener listener) {
 
-        new ImageProcessor(sourceFile, listener).execute();
+        new ImageProcessor(sourceFile, null, listener).execute();
+    }
+
+    /**
+     * Attempts to process a local image file, making it to fit into specific dimensions,
+     * rotating it (if necessary) and compressing it according to the appropriate settings.
+     * If the process succeeds, a new image file is created and passed to the listener.
+     * The result will have the given filename (useful if processing several pictures, to keep them all).
+     *
+     * @param sourceFile    the image file to be processed.
+     * @param destFilename  name for the generated image file (without any extension)
+     * @param listener      listener for the processing operation.
+     */
+    public void processImage(File sourceFile, String destFilename, ImageProcessingListener listener) {
+
+        new ImageProcessor(sourceFile, destFilename, listener).execute();
+    }
+
+    /**
+     * Empties the temp folder used by the ImageProcessor (deletes files but not subfolders).
+     *
+     * @return true if all files of the temp folder were removed, false in other case.
+     */
+    public boolean cleanProcessorTempFolder() {
+
+        File tempFolder = PROCESSOR_TEMP_DIR;
+
+        if ( ! tempFolder.isDirectory() )
+            return false;
+
+        String[] folderChildren = tempFolder.list();
+
+        for (int i=0; i<folderChildren.length; i++) {
+
+            File child = new File(tempFolder, folderChildren[i]);
+
+            boolean success = true;
+            if ( !child.isDirectory() )
+                success = child.delete();
+
+            if (!success)
+                return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Empties the temp folder used by the ImageProcessor (deletes files and subfolders).
+     *
+     * @return true if all contents of the temp folder were removed, false in other case.
+     */
+    public boolean emptyProcessorTempFolder() {
+
+        File tempFolder = PROCESSOR_TEMP_DIR;
+
+        if ( ! tempFolder.isDirectory() )
+            return false;
+
+        String[] folderChildren = tempFolder.list();
+
+        for (int i=0; i<folderChildren.length; i++) {
+
+            File child = new File(tempFolder, folderChildren[i]);
+            boolean success = deleteFileOrDir(child);
+
+            if (!success)
+                return false;
+        }
+
+        return true;
     }
 
     /**
@@ -589,6 +664,26 @@ public class ImageManager {
                 }
             }
         });
+    }
+
+    // Deletes the given File (or all its contents if it is a directory)
+    private static boolean deleteFileOrDir(File dir) {
+
+        // If it is a directory, first delete its contents recursively
+        if (dir.isDirectory()) {
+
+            String[] children = dir.list();
+
+            for (int i=0; i<children.length; i++) {
+
+                boolean success = deleteFileOrDir( new File(dir, children[i]) );
+                if (!success)
+                    return false;
+            }
+        }
+
+        // Now, delete the given File/Directory
+        return dir.delete();
     }
 
 }

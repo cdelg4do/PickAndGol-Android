@@ -22,5 +22,5 @@
     <string name="new_pub_date">Date:</string>
     <string name="new_pub_time">Time:</string>
     <string name="new_pub_web">Web site (optional):</string>
-    <string name="new_pub_images">Images (optional):</string>
+    <string name="new_pub_images">Images, max. 4 (optional):</string>
 </resources>

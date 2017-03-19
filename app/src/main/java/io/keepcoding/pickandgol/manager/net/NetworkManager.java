@@ -24,6 +24,7 @@ import java.util.Map;
 import io.keepcoding.pickandgol.manager.net.response.EventDetailResponse;
 import io.keepcoding.pickandgol.manager.net.response.EventListResponse;
 import io.keepcoding.pickandgol.manager.net.response.LoginResponse;
+import io.keepcoding.pickandgol.manager.net.response.PubDetailResponse;
 import io.keepcoding.pickandgol.manager.net.response.UserResponse;
 
 import static android.content.Context.CONNECTIVITY_SERVICE;
@@ -293,6 +294,10 @@ public class NetworkManager {
                 parsedResponse = parseEventDetailResponse(response);
                 break;
 
+            case PUB_DETAIL:
+                parsedResponse = parsePubDetailResponse(response);
+                break;
+
             default:
                 parsedResponse = null;
                 break;
@@ -377,6 +382,24 @@ public class NetworkManager {
         }
 
         return eventDetailResponse;
+    }
+
+    // JsonResponseType: PUB_DETAIL
+    @Nullable
+    private PubDetailResponse parsePubDetailResponse(String responseString) {
+
+        PubDetailResponse pubDetailResponse = null;
+
+        try {
+            Reader reader = new StringReader(responseString);
+            Gson gson = new GsonBuilder().create();
+            pubDetailResponse = gson.fromJson(reader, PubDetailResponse.class);
+        }
+        catch (RuntimeException e) {
+            e.printStackTrace();
+        }
+
+        return pubDetailResponse;
     }
 
 }

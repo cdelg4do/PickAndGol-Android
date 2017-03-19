@@ -440,7 +440,8 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
                 Pub currentPub = new Pub("58c782770c0ef45dfc5875df", "La Biblioteca",
                                          43.558096, -5.923779,
                                          "https://www.facebook.com/Cafe.LaBiblioteca",
-                                         "58b471ddd9f0163f6eee6375", new ArrayList<String>()
+                                         "58b471ddd9f0163f6eee6375",
+                                         new ArrayList<String>(), new ArrayList<String>()
                 );
 
                 Navigator.fromPubDetailActivityToNewEventActivity(this, currentPub);
@@ -472,6 +473,9 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
 
             case R.id.drawer_menu_create_pub:
 
+                Navigator.fromMainActivityToNewPubActivity(this);
+
+                /**
                 locationChecker.checkBeforeAsking(new CheckPermissionListener() {
                     @Override
                     public void onPermissionDenied() {
@@ -493,6 +497,7 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
                         });
                     }
                 });
+                **/
 
                 mainDrawer.closeDrawers();
                 break;

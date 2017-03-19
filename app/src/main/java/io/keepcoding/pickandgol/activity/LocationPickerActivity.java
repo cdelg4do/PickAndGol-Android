@@ -26,9 +26,13 @@ import io.keepcoding.pickandgol.R;
 import io.keepcoding.pickandgol.navigator.Navigator;
 import io.keepcoding.pickandgol.util.Utils;
 
+import static com.google.android.gms.maps.GoogleMap.MAP_TYPE_HYBRID;
 import static com.google.android.gms.maps.GoogleMap.MAP_TYPE_NORMAL;
-import static com.google.android.gms.maps.GoogleMap.MAP_TYPE_SATELLITE;
 
+
+/**
+ * This class represents an activity where the user can select a location on a map.
+ */
 public class LocationPickerActivity extends AppCompatActivity {
 
     private static final String LOG_TAG = "LocationPickerActivity";
@@ -240,10 +244,10 @@ public class LocationPickerActivity extends AppCompatActivity {
             public void onClick(View view) {
 
                 if (map.getMapType() == MAP_TYPE_NORMAL) {
-                    map.setMapType(MAP_TYPE_SATELLITE);
+                    map.setMapType(MAP_TYPE_HYBRID);
                     toggleMapView.setImageResource(R.drawable.ic_map_view);
                 }
-                else if (map.getMapType() == MAP_TYPE_SATELLITE) {
+                else if (map.getMapType() == MAP_TYPE_HYBRID) {
                     map.setMapType(MAP_TYPE_NORMAL);
                     toggleMapView.setImageResource(R.drawable.ic_satellite_view);
                 }

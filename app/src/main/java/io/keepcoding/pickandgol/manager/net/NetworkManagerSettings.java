@@ -17,6 +17,7 @@ public class NetworkManagerSettings {
     //public static final String URL_SEARCH_EVENTS = "http://www.mocky.io/v2/58c5ea6d0f0000a92cb59e12";
     public static final String URL_EVENT_DETAIL = "http://www.mocky.io/v2/58bf9d000f000077107b9576";
     public static final String URL_CREATE_EVENT = "http://pickandgol.com/api/v1/events";
+    public static final String URL_CREATE_PUB = "http://pickandgol.com/api/v1/pubs";
 
     // Available JSON response types expected from the server
     public static enum JsonResponseType {
@@ -24,6 +25,7 @@ public class NetworkManagerSettings {
         LOGIN,           // LoginResponse
         USER,            // UserResponse
         EVENT_LIST,     // EventListResponse
-        EVENT_DETAIL    // EventDetailResponse
+        EVENT_DETAIL,   // EventDetailResponse
+        PUB_DETAIL      // PubDetailResponse
     }
 }

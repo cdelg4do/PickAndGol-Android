@@ -65,7 +65,10 @@
             android:windowSoftInputMode="adjustPan">
         </activity>
 
-        <activity android:name=".activity.NewPubActivity">
+        <activity
+            android:name=".activity.NewPubActivity"
+            android:configChanges="orientation|screenSize"
+            android:windowSoftInputMode="adjustPan">
         </activity>
 
         <activity android:name=".activity.LocationPickerActivity">

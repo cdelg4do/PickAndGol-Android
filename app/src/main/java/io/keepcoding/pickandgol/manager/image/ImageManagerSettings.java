@@ -38,5 +38,6 @@ public class ImageManagerSettings {
     public static final CompressFormat COMPRESS_FORMAT = JPEG;
     public static final int COMPRESS_QUALITY = 90;
     public static final File PROCESSOR_TEMP_DIR = PickAndGolApp.getContext().getExternalCacheDir();
-    public static final String PROCESSOR_TEMP_FILENAME = "processed_tmp.jpg";
+    public static final String PROCESSOR_TEMP_FILENAME = "processed_tmp";
+    public static final String PROCESSOR_TEMP_EXTENSION = "jpg";
 }

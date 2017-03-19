@@ -18,11 +18,12 @@ public class Pub implements Collectible, Serializable {
     private String url;
     private String owner;
     private List<String> events;
+    private List<String> photos;
 
 
     // Full constructor
     public Pub(String id, String name, boolean hasLocation, double latitude, double longitude,
-                String url, String owner, List<String> events) {
+                String url, String owner, List<String> events, List<String> photos) {
 
         this.id = id;
         this.name = name;
@@ -32,19 +33,21 @@ public class Pub implements Collectible, Serializable {
         this.url = url;
         this.owner = owner;
         this.events = events;
+        this.photos = photos;
     }
 
     // Constructor for Pub with a location
     public Pub(String id, String name, double latitude, double longitude,
-                    String url, String owner, List<String> events) {
+                    String url, String owner, List<String> events, List<String> photos) {
 
-        this(id, name, true, latitude, longitude, url, owner, events);
+        this(id, name, true, latitude, longitude, url, owner, events, photos);
     }
 
     // Constructor for Pub without location
-    public Pub(String id, String name, String url, String owner, List<String> events) {
+    public Pub(String id, String name, String url, String owner,
+               List<String> events, List<String> photos) {
 
-        this(id, name, false, 0, 0, url, owner, events);
+        this(id, name, false, 0, 0, url, owner, events, photos);
     }
 
 
@@ -81,6 +84,10 @@ public class Pub implements Collectible, Serializable {
 
     public List<String> getEvents() {
         return events;
+    }
+
+    public List<String> getPhotos() {
+        return photos;
     }
 
 
@@ -126,6 +133,11 @@ public class Pub implements Collectible, Serializable {
         return this;
     }
 
+    public Pub setPhotos(List<String> photos) {
+        this.photos = photos;
+        return this;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -140,6 +152,6 @@ public class Pub implements Collectible, Serializable {
 
         return id.equals(pub.id) && name.equals(pub.name) && hasLocation == pub.hasLocation
                 && latitude == pub.latitude && longitude == pub.longitude && url.equals(pub.url)
-                && owner.equals(pub.owner) && events.equals(pub.events);
+                && owner.equals(pub.owner) && events.equals(pub.events) && photos.equals(pub.photos);
     }
 }
