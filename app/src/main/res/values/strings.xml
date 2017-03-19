@@ -16,6 +16,9 @@
     <string name="new_event_time">Time:</string>
     <string name="new_event_description">Description (optional):</string>
     <string name="new_event_image">Image (optional):</string>
+    <string name="new_event_activity_create_event">Create an Event</string>
+    <string name="new_event_activity_spinner_default_text"><![CDATA[<Choose One>]]></string>
+    <string name="event_search_settings_activity_spinner_default_text">All</string>
 
     <string name="new_pub_name">Name:</string>
     <string name="new_pub_location">Location:</string>
