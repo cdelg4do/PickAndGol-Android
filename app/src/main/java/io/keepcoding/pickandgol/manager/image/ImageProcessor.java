@@ -13,6 +13,7 @@ import java.io.IOException;
 
 import static io.keepcoding.pickandgol.manager.image.ImageManagerSettings.COMPRESS_FORMAT;
 import static io.keepcoding.pickandgol.manager.image.ImageManagerSettings.COMPRESS_QUALITY;
+import static io.keepcoding.pickandgol.manager.image.ImageManagerSettings.PROCESSOR_TEMP_EXTENSION;
 import static io.keepcoding.pickandgol.manager.image.ImageManagerSettings.RESIZE_MAX_HEIGHT;
 import static io.keepcoding.pickandgol.manager.image.ImageManagerSettings.RESIZE_MAX_WIDTH;
 import static io.keepcoding.pickandgol.manager.image.ImageManagerSettings.PROCESSOR_TEMP_DIR;
@@ -30,16 +31,22 @@ class ImageProcessor extends AsyncTask<Void, Void, Void> {
     private File sourceFile;
     private ImageManager.ImageProcessingListener listener;
     private Exception error;
+    private String tempFilename;
     private String tempFilePath;
 
-    ImageProcessor(File sourceFile, ImageManager.ImageProcessingListener listener) {
+    ImageProcessor(File sourceFile, String tempFilename, ImageManager.ImageProcessingListener listener) {
         this.sourceFile = sourceFile;
         this.listener = listener;
         error = null;
 
+        if (tempFilename != null)
+            this.tempFilename = tempFilename +"."+ PROCESSOR_TEMP_EXTENSION;
+        else
+            this.tempFilename = PROCESSOR_TEMP_FILENAME +"."+ PROCESSOR_TEMP_EXTENSION;
+
         try                 {   tempFilePath = new File(PROCESSOR_TEMP_DIR.getPath(),
-                PROCESSOR_TEMP_FILENAME
-                                                   ).getCanonicalPath();    }
+                                                        this.tempFilename
+                                                       ).getCanonicalPath();            }
 
         catch (Exception e) {   tempFilePath = null;    }
     }

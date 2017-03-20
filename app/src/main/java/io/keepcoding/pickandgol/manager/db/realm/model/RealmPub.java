@@ -25,14 +25,17 @@ public class RealmPub extends RealmObject {
     private String url;
     private RealmUserId owner;
     private RealmList<RealmEventId> events;
+    private RealmList<RealmString> photos;
 
     // An empty public constructor is mandatory for Realm when using customized constructors
     public RealmPub() {
     }
 
     // Full constructor is private, use the public constructors instead
-    private RealmPub(String id, String name, boolean hasLocation, double latitude, double longitude,
-                     String url, RealmUserId owner, RealmList<RealmEventId> events) {
+    private RealmPub(String id, String name, boolean hasLocation,
+                     double latitude, double longitude,
+                     String url, RealmUserId owner,
+                     RealmList<RealmEventId> events, RealmList<RealmString> photos) {
 
         this.id = id;
         this.name = name;
@@ -42,19 +45,21 @@ public class RealmPub extends RealmObject {
         this.url = url;
         this.owner = owner;
         this.events = events;
+        this.photos = photos;
     }
 
     // Constructor for RealmPub with a location
-    public RealmPub(String id, String name, double latitude, double longitude,
-                    String url, RealmUserId owner, RealmList<RealmEventId> events) {
+    public RealmPub(String id, String name, double latitude, double longitude,String url,
+                    RealmUserId owner, RealmList<RealmEventId> events, RealmList<RealmString> photos) {
 
-        this(id, name, true, latitude, longitude, url, owner, events);
+        this(id, name, true, latitude, longitude, url, owner, events, photos);
     }
 
     // Constructor for RealmPub without location
-    public RealmPub(String id, String name, String url, RealmUserId owner, RealmList<RealmEventId> events) {
+    public RealmPub(String id, String name, String url, RealmUserId owner,
+                    RealmList<RealmEventId> events, RealmList<RealmString> photos) {
 
-        this(id, name, false, 0, 0, url, owner, events);
+        this(id, name, false, 0, 0, url, owner, events, photos);
     }
 
 
@@ -90,6 +95,10 @@ public class RealmPub extends RealmObject {
 
     public RealmList<RealmEventId> getEvents() {
         return events;
+    }
+
+    public RealmList<RealmString> getPhotos() {
+        return photos;
     }
 
 
@@ -135,6 +144,11 @@ public class RealmPub extends RealmObject {
         return this;
     }
 
+    public RealmPub setPhotos(RealmList<RealmString> photos) {
+        this.photos = photos;
+        return this;
+    }
+
 
     // Mapping methods (memory <-> database):
 
@@ -147,6 +161,10 @@ public class RealmPub extends RealmObject {
         for (String eventId: pub.getEvents() )
             events.add( new RealmEventId(eventId) );
 
+        RealmList<RealmString> photos = new RealmList<>();
+        for (String photo: pub.getPhotos() )
+            photos.add( new RealmString(photo) );
+
         RealmUserId owner = new RealmUserId( pub.getOwner() );
 
         RealmPub realmPub = new RealmPub()
@@ -157,7 +175,8 @@ public class RealmPub extends RealmObject {
                 .setLongitude( pub.getLongitude() )
                 .setUrl( pub.getUrl() )
                 .setOwner(owner)
-                .setEvents(events);
+                .setEvents(events)
+                .setPhotos(photos);
 
         return realmPub;
     }
@@ -168,6 +187,10 @@ public class RealmPub extends RealmObject {
         for (RealmEventId eventId : this.getEvents() )
             events.add( eventId.getId() );
 
+        List<String> photos = new ArrayList<>();
+        for (RealmString photo : this.getPhotos() )
+            photos.add( photo.getValue() );
+
         Pub pub = new Pub(this.getId(),
                           this.getName(),
                           this.hasLocation(),
@@ -175,7 +198,8 @@ public class RealmPub extends RealmObject {
                           this.getLongitude(),
                           this.getUrl(),
                           this.getOwner().getId(),
-                          events
+                          events,
+                          photos
         );
 
         return pub;

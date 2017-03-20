@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
@@ -14,12 +15,12 @@ import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import java.util.HashMap;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.keepcoding.pickandgol.R;
 import io.keepcoding.pickandgol.adapter.IntegerStringSpinnerAdapter;
+import io.keepcoding.pickandgol.interactor.GetCategoriesInteractor;
+import io.keepcoding.pickandgol.model.CategoryAggregate;
 import io.keepcoding.pickandgol.navigator.Navigator;
 import io.keepcoding.pickandgol.search.EventSearchParams;
 
@@ -29,6 +30,7 @@ import static io.keepcoding.pickandgol.activity.MainActivity.CURRENT_EVENT_SEARC
 import static io.keepcoding.pickandgol.activity.MainActivity.SHOW_DISTANCE_SELECTOR_KEY;
 
 public class EventSearchSettingsActivity extends AppCompatActivity {
+    private static final String LOG_TAG = EventSearchSettingsActivity.class.getCanonicalName();
 
     private EventSearchParams currentSearchParams;
     private boolean useLocation;
@@ -102,20 +104,19 @@ public class EventSearchSettingsActivity extends AppCompatActivity {
 
 
     private void setupCategorySpinner() {
+        GetCategoriesInteractor interactor = new GetCategoriesInteractor();
+        interactor.execute(this, new GetCategoriesInteractor.Listener() {
+            @Override
+            public void onFail(String message) {
+                Log.e(LOG_TAG, message);
+            }
 
-        //TODO: load the categories from the database
-
-        Integer[] categoryIds = {1, 2, 3, 4, 5, 6, 7, 8};
-
-        String[] categoryNames = {"Football", "Formula 1", "Rugby", "Basketball",
-                "Tennis", "Handball", "Baseball", "Cycling"};
-
-        HashMap<Integer,String> spinnerMap = new HashMap<Integer, String>();
-        for (int i = 0; i < categoryIds.length; i++)
-            spinnerMap.put(categoryIds[i], categoryNames[i]);
-
-        IntegerStringSpinnerAdapter adapter = new IntegerStringSpinnerAdapter(this, categoryIds, categoryNames, "All");
-        spnCategory.setAdapter(adapter);
+            @Override
+            public void onSuccess(CategoryAggregate categories) {
+                IntegerStringSpinnerAdapter adapter = IntegerStringSpinnerAdapter.createAdapterForCategoriesSpinner(EventSearchSettingsActivity.this, categories, getString(R.string.event_search_settings_activity_spinner_default_text));
+                spnCategory.setAdapter(adapter);
+            }
+        });
     }
 
 

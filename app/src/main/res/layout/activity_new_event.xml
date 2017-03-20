@@ -241,7 +241,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginLeft="10dp"
-                            android:text="Remove Image"
+                            android:text="Remove"
                             android:layout_centerVertical="true"
                             android:layout_toRightOf="@+id/activity_new_event_image_holder"
                             android:visibility="invisible"

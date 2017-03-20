@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -22,7 +23,6 @@ import android.widget.TextView;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -34,10 +34,12 @@ import io.keepcoding.pickandgol.fragment.DatePickerFragment;
 import io.keepcoding.pickandgol.fragment.TimePickerFragment;
 import io.keepcoding.pickandgol.interactor.CreateEventInteractor;
 import io.keepcoding.pickandgol.interactor.CreateEventInteractor.CreateEventInteractorListener;
+import io.keepcoding.pickandgol.interactor.GetCategoriesInteractor;
 import io.keepcoding.pickandgol.manager.image.ImageManager;
 import io.keepcoding.pickandgol.manager.image.ImageManager.ImagePickingListener;
 import io.keepcoding.pickandgol.manager.image.ImageManager.ImageProcessingListener;
 import io.keepcoding.pickandgol.manager.session.SessionManager;
+import io.keepcoding.pickandgol.model.CategoryAggregate;
 import io.keepcoding.pickandgol.model.Event;
 import io.keepcoding.pickandgol.model.Pub;
 import io.keepcoding.pickandgol.navigator.Navigator;
@@ -47,7 +49,8 @@ import io.keepcoding.pickandgol.util.Utils;
 
 import static android.view.View.VISIBLE;
 import static io.keepcoding.pickandgol.manager.image.ImageManagerSettings.IMAGE_PICKER_REQUEST_CODE;
-import static io.keepcoding.pickandgol.util.PermissionChecker.PermissionTag.CAMERA_SET;
+import static io.keepcoding.pickandgol.util.PermissionChecker.PermissionTag.PICTURES_SET;
+import static io.keepcoding.pickandgol.util.PermissionChecker.REQUEST_FOR_PICTURES_PERMISSION;
 
 
 /**
@@ -57,8 +60,8 @@ public class NewEventActivity extends AppCompatActivity {
 
     private final static String LOG_TAG = "NewEventActivity";
 
-    public final static String PUB_MODEL_KEY = "PUB_MODEL_KEY";
-    public final static String NEW_EVENT_KEY = "NEW_EVENT_KEY";
+    public final static String PUB_MODEL_KEY = "PUB_MODEL_KEY";  // Used to retrieve the pub used as model
+    public final static String NEW_EVENT_KEY = "NEW_EVENT_KEY";  // Used to return the new event in the intent
 
 
     private Pub model;
@@ -66,10 +69,11 @@ public class NewEventActivity extends AppCompatActivity {
     private SessionManager sm;
     private ImageManager im;
 
-    private PermissionChecker cameraChecker;
+    private PermissionChecker picturesChecker;
 
     Integer yyyy, mm, dd, hh, mins;
     private File imageFileToUpload;
+    private CategoryAggregate categories;
 
     @BindView(R.id.activity_new_event_name_text)         EditText txtName;
     @BindView(R.id.activity_new_event_category_spinner) Spinner spnCategory;
@@ -88,7 +92,7 @@ public class NewEventActivity extends AppCompatActivity {
         setContentView(R.layout.activity_new_event);
         ButterKnife.bind(this);
 
-        cameraChecker = new PermissionChecker(CAMERA_SET, this);
+        picturesChecker = new PermissionChecker(PICTURES_SET, this);
 
         sm = SessionManager.getInstance(this);
         im = ImageManager.getInstance(this);
@@ -126,6 +130,56 @@ public class NewEventActivity extends AppCompatActivity {
         }
     }
 
+
+    /*** Handlers for activity requests (permissions, intents) ***/
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+
+        if (requestCode == REQUEST_FOR_PICTURES_PERMISSION)
+            picturesChecker.checkAfterAsking();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // If we are coming from the image picker
+        if (requestCode == IMAGE_PICKER_REQUEST_CODE) {
+
+            im.handleImagePickerResult(NewEventActivity.this, requestCode, resultCode, data,
+                    new ImagePickingListener() {
+
+                        @Override
+                        public void onImagePicked(String imagePath) {
+
+                            if (imagePath == null) {
+                                Log.e(LOG_TAG, "Failed to get the path from the image picker");
+                                return;
+                            }
+
+                            else {
+                                processImageThenLoadIt( new File(imagePath) );
+                            }
+
+                        }
+                    });
+        }
+    }
+
+
+    /*** Auxiliary methods ***/
+
+    // Gets from the intent the pub that will be associated to the new event
+    private void loadModel() {
+
+        Intent i = getIntent();
+        model = (Pub) i.getSerializableExtra(PUB_MODEL_KEY);
+
+        if (model == null)
+            finishActivity(null, new Exception("No pub has been provided to register the new event"));
+    }
+
     // Reset all data in the form
     private void resetForm() {
 
@@ -149,7 +203,7 @@ public class NewEventActivity extends AppCompatActivity {
     // and show the home button
     private void setupActionBar() {
 
-        setTitle("Create an Event");
+        setTitle(getString(R.string.new_event_activity_create_event));
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -159,25 +213,26 @@ public class NewEventActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
     }
 
-
+    // Populates the spinner with the categories from the server
     private void setupCategorySpinner() {
 
-        //TODO: load the categories from the database
+        GetCategoriesInteractor interactor = new GetCategoriesInteractor();
+        interactor.execute(this, new GetCategoriesInteractor.Listener() {
+            @Override
+            public void onFail(String message) {
+                Log.e(LOG_TAG, message);
+            }
 
-        Integer[] categoryIds = {1, 2, 3, 4, 5, 6, 7, 8};
-
-        String[] categoryNames = {"Football", "Formula 1", "Rugby", "Basketball",
-                "Tennis", "Handball", "Baseball", "Cycling"};
-
-        HashMap<Integer,String> spinnerMap = new HashMap<Integer, String>();
-        for (int i = 0; i < categoryIds.length; i++)
-            spinnerMap.put(categoryIds[i], categoryNames[i]);
-
-        IntegerStringSpinnerAdapter adapter = new IntegerStringSpinnerAdapter(this, categoryIds, categoryNames, "<Choose One>");
-        spnCategory.setAdapter(adapter);
+            @Override
+            public void onSuccess(CategoryAggregate categories) {
+                NewEventActivity.this.categories = categories;
+                IntegerStringSpinnerAdapter adapter = IntegerStringSpinnerAdapter.createAdapterForCategoriesSpinner(NewEventActivity.this, categories, getString(R.string.new_event_activity_spinner_default_text));
+                spnCategory.setAdapter(adapter);
+            }
+        });
     }
 
-
+    // Set listeners for the activity buttons
     private void setupButtons() {
 
         btnCancel.setOnClickListener(new View.OnClickListener() {
@@ -208,7 +263,7 @@ public class NewEventActivity extends AppCompatActivity {
         });
     }
 
-
+    // Sets the behaviour for the date/time and picture pickers
     private void setupPickers() {
 
         // Date & Time pickers:
@@ -277,44 +332,20 @@ public class NewEventActivity extends AppCompatActivity {
         });
     }
 
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        // If we are coming from the image picker
-        if (requestCode == IMAGE_PICKER_REQUEST_CODE) {
-
-            im.handleImagePickerResult(NewEventActivity.this, requestCode, resultCode, data,
-                                       new ImagePickingListener() {
-
-                @Override
-                public void onImagePicked(String imagePath) {
-
-                    if (imagePath == null) {
-                        Log.e(LOG_TAG, "Failed to get the path from the image picker");
-                        return;
-                    }
-
-                    else {
-                        processImageThenLoadIt( new File(imagePath) );
-                    }
-
-                }
-            });
-        }
-    }
-
-
+    // Checks if the app has permission to access the camera/gallery, if so then opens the image picker
     private void showImagePicker() {
 
-        // Check if we have permission to access the camera, before opening the image picker
-        cameraChecker.checkBeforeAsking(new PermissionChecker.CheckPermissionListener() {
+        picturesChecker.checkBeforeAsking(new PermissionChecker.CheckPermissionListener() {
             @Override
             public void onPermissionDenied() {
-                String title = "Camera access denied";
-                String msg = "Pick And Gol will not be able to take images from your device camera.";
-                Utils.simpleDialog(NewEventActivity.this, title, msg);
+                String title = "Pictures access denied";
+                String msg = "Pick And Gol might not be able to take pictures from your camera or gallery.";
+                Utils.simpleDialog(NewEventActivity.this, title, msg, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        im.showImagePicker(NewEventActivity.this);
+                    }
+                });
             }
 
             @Override
@@ -324,7 +355,7 @@ public class NewEventActivity extends AppCompatActivity {
         });
     }
 
-
+    // Prepares an image file to be uploaded, then shows it in the activity image holder
     private void processImageThenLoadIt(File sourceImageFile) {
 
         if (sourceImageFile == null || ! sourceImageFile.isFile() )
@@ -351,23 +382,14 @@ public class NewEventActivity extends AppCompatActivity {
         });
     }
 
-
-    private void loadModel() {
-
-        Intent i = getIntent();
-        model = (Pub) i.getSerializableExtra(PUB_MODEL_KEY);
-
-        if (model == null)
-            finishActivity(null, new Exception("No pub has been provided to register the new event"));
-    }
-
-
+    // If all fields in the form are valid, returns an Event object with the form values.
+    // (if there are invalid field values, then returns null)
     private Event validateFormData() {
 
         Event tempEvent = null;     // This object is just a container of some data from the form
 
         String eventName = txtName.getText().toString();
-        Integer selectedCategoryId = (int) spnCategory.getSelectedItemId();
+        Integer selectedCategoryIndex = (int) spnCategory.getSelectedItemId();
         String eventDescription = txtDescription.getText().toString();
 
         if (eventName.equals("")) {
@@ -375,7 +397,7 @@ public class NewEventActivity extends AppCompatActivity {
             txtName.requestFocus();
         }
 
-        else if (selectedCategoryId == 0) {
+        else if (selectedCategoryIndex < 0) {
             Utils.simpleDialog(this, "Invalid data", "You must select a category for the event.");
             spnCategory.requestFocus();
         }
@@ -388,7 +410,10 @@ public class NewEventActivity extends AppCompatActivity {
         // All data are correct, prepare the temp Event
         else {
             Date eventDate = Utils.getDateFromIntegers(yyyy, mm, dd, hh, mins);
-            String eventCategory = selectedCategoryId.toString();
+            String eventCategory = null;
+            if (categories.get(selectedCategoryIndex) != null) {
+                eventCategory = categories.get(selectedCategoryIndex).getId();
+            }
 
             if (eventDescription.equals(""))
                 eventDescription = null;
@@ -407,7 +432,7 @@ public class NewEventActivity extends AppCompatActivity {
         return tempEvent;
     }
 
-
+    // Attempts to upload the selected image (if any) to S3, then calls to register the given event
     private void uploadImageIfNecessaryThenRegisterNewEvent(final Event event) {
 
         if (event.getPhotoUrl() == null) {
@@ -432,49 +457,6 @@ public class NewEventActivity extends AppCompatActivity {
             }
         });
     }
-
-
-    private void registerNewEvent(Event event) {
-
-        String name = event.getName();
-        Date date = event.getDate();
-        String pubId = event.getPubs().get(0);
-        String categoryId = event.getCategory();
-        String description = event.getDescription();
-        String photoUrl = im.getRemoteImageUrl( event.getPhotoUrl() );
-        String token = sm.getSessionToken();
-
-        final ProgressDialog pDialog = Utils.newProgressDialog(this, "Registering event...");
-        pDialog.show();
-
-        new CreateEventInteractor().execute(this, name, date, pubId, categoryId,
-                                            description, photoUrl, token,
-                                            new CreateEventInteractorListener() {
-
-            @Override
-            public void onCreateEventFail(Exception e) {
-                pDialog.dismiss();
-
-                Utils.simpleDialog(NewEventActivity.this, "Error registering new event", e.getMessage());
-            }
-
-            @Override
-            public void onCreateEventSuccess(final Event createdEvent) {
-                pDialog.dismiss();
-
-                Utils.simpleDialog(NewEventActivity.this,
-                                   "New Event",
-                                   "The event '"+ createdEvent.getName() +"' has been created.",
-                                   new DialogInterface.OnClickListener() {
-                                       @Override
-                                       public void onClick(DialogInterface dialogInterface, int i) {
-                                           finishActivity(createdEvent, null);
-                                       }
-                });
-            }
-        });
-    }
-
 
     // Upload file to Amazon S3 bucket
     private void doUploadImage(final String filePath, final String remoteFileName, final ErrorSuccessListener listener) {
@@ -523,7 +505,49 @@ public class NewEventActivity extends AppCompatActivity {
         });
     }
 
+    // Sends a remote request to register a new event in the system
+    private void registerNewEvent(Event event) {
 
+        String name = event.getName();
+        Date date = event.getDate();
+        String pubId = event.getPubs().get(0);
+        String categoryId = event.getCategory();
+        String description = event.getDescription();
+        String photoUrl = im.getRemoteImageUrl( event.getPhotoUrl() );
+        String token = sm.getSessionToken();
+
+        final ProgressDialog pDialog = Utils.newProgressDialog(this, "Registering event...");
+        pDialog.show();
+
+        new CreateEventInteractor().execute(this, name, date, pubId, categoryId,
+                                            description, photoUrl, token,
+                                            new CreateEventInteractorListener() {
+
+            @Override
+            public void onCreateEventFail(Exception e) {
+                pDialog.dismiss();
+
+                Utils.simpleDialog(NewEventActivity.this, "Error registering new event", e.getMessage());
+            }
+
+            @Override
+            public void onCreateEventSuccess(final Event createdEvent) {
+                pDialog.dismiss();
+
+                Utils.simpleDialog(NewEventActivity.this,
+                                   "New Event",
+                                   "The event '"+ createdEvent.getName() +"' has been created.",
+                                   new DialogInterface.OnClickListener() {
+                                       @Override
+                                       public void onClick(DialogInterface dialogInterface, int i) {
+                                           finishActivity(createdEvent, null);
+                                       }
+                });
+            }
+        });
+    }
+
+    // Finishes this activity, passing back the created event (if any)
     private void finishActivity(@Nullable Event newEvent, @Nullable Exception error) {
 
         if (error != null)
@@ -531,9 +555,4 @@ public class NewEventActivity extends AppCompatActivity {
 
         Navigator.backFromNewEventActivity(this, newEvent);
     }
-
-
-
-
-
 }

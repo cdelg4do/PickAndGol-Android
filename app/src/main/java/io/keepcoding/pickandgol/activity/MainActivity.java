@@ -2,6 +2,7 @@ package io.keepcoding.pickandgol.activity;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.location.Address;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -22,12 +23,12 @@ import android.widget.TextView;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.keepcoding.pickandgol.R;
-import io.keepcoding.pickandgol.dialog.ChooseRemoteUrlDialog;
 import io.keepcoding.pickandgol.dialog.LoginDialog;
 import io.keepcoding.pickandgol.fragment.EditUserFragment;
 import io.keepcoding.pickandgol.fragment.EventListFragment;
@@ -51,16 +52,15 @@ import io.keepcoding.pickandgol.util.PermissionChecker;
 import io.keepcoding.pickandgol.util.Utils;
 
 import static io.keepcoding.pickandgol.activity.MainActivity.ImagePurpose.UPLOAD_TO_CLOUD;
-import static io.keepcoding.pickandgol.dialog.ChooseRemoteUrlDialog.ChooseRemoteUrlListener;
 import static io.keepcoding.pickandgol.interactor.LoginInteractor.LoginInteractorListener;
 import static io.keepcoding.pickandgol.interactor.UserDetailInteractor.UserDetailInteractorListener;
 import static io.keepcoding.pickandgol.manager.image.ImageManagerSettings.IMAGE_PICKER_REQUEST_CODE;
 import static io.keepcoding.pickandgol.util.PermissionChecker.CheckPermissionListener;
-import static io.keepcoding.pickandgol.util.PermissionChecker.PermissionTag.CAMERA_SET;
 import static io.keepcoding.pickandgol.util.PermissionChecker.PermissionTag.LOCATION_SET;
+import static io.keepcoding.pickandgol.util.PermissionChecker.PermissionTag.PICTURES_SET;
 import static io.keepcoding.pickandgol.util.PermissionChecker.PermissionTag.RW_STORAGE_SET;
-import static io.keepcoding.pickandgol.util.PermissionChecker.REQUEST_FOR_CAMERA_PERMISSION;
 import static io.keepcoding.pickandgol.util.PermissionChecker.REQUEST_FOR_LOCATION_PERMISSION;
+import static io.keepcoding.pickandgol.util.PermissionChecker.REQUEST_FOR_PICTURES_PERMISSION;
 import static io.keepcoding.pickandgol.util.PermissionChecker.REQUEST_FOR_STORAGE_PERMISSION;
 
 
@@ -70,6 +70,8 @@ import static io.keepcoding.pickandgol.util.PermissionChecker.REQUEST_FOR_STORAG
 public class MainActivity extends AppCompatActivity implements EventListFragment.EventListListener {
 
     private final static String LOG_TAG = "MainActivity";
+
+    public static final int LOCATION_PICKER_PERMISSION_REQ_CODE = 501;
 
     public static String CURRENT_EVENT_SEARCH_PARAMS_KEY = "CURRENT_EVENT_SEARCH_PARAMS_KEY";
     public static String SHOW_DISTANCE_SELECTOR_KEY = "SHOW_DISTANCE_SELECTOR_KEY";
@@ -116,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
 
     // Declare as many Permission Checkers as permission requests we need on this activity
     private PermissionChecker storageChecker;
-    private PermissionChecker cameraChecker;
+    private PermissionChecker picturesChecker;
     private PermissionChecker locationChecker;
 
     // Reference to UI elements to be bind with Butterknife (not before the header is inflated)
@@ -134,7 +136,7 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
 
         // Init all the permission checkers that will be used in this activity
         storageChecker = new PermissionChecker(RW_STORAGE_SET, this);
-        cameraChecker = new PermissionChecker(CAMERA_SET, this);
+        picturesChecker = new PermissionChecker(PICTURES_SET, this);
         locationChecker = new PermissionChecker(LOCATION_SET, this);
 
         // Init all the managers used in this activity
@@ -288,10 +290,13 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
         if (requestCode == REQUEST_FOR_STORAGE_PERMISSION)
             storageChecker.checkAfterAsking();
 
-        else if (requestCode == REQUEST_FOR_CAMERA_PERMISSION)
-            cameraChecker.checkAfterAsking();
+        else if (requestCode == REQUEST_FOR_PICTURES_PERMISSION)
+            picturesChecker.checkAfterAsking();
 
         else if (requestCode == REQUEST_FOR_LOCATION_PERMISSION)
+            locationChecker.checkAfterAsking();
+
+        else if (requestCode == LOCATION_PICKER_PERMISSION_REQ_CODE)
             locationChecker.checkAfterAsking();
     }
 
@@ -310,7 +315,7 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
                 @Override
                 public void onPermissionDenied() {
                     String msg = "Pick And Gol will not be able to search based on your location.";
-                    Utils.shortSnack(MainActivity.this, msg);
+                    Utils.shortToast(MainActivity.this, msg);
 
                     searchEventsFirstPage(newSearchParams, null);
                     mainDrawer.closeDrawers();
@@ -349,6 +354,43 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
                 }
             });
         }
+
+        else if (requestCode == Navigator.LOCATION_PICKER_ACTIVITY_REQUEST_CODE) {
+
+            if (resultCode == RESULT_OK) {
+                final Double selectedLat = (Double) data.getSerializableExtra(LocationPickerActivity.SELECTED_LATITUDE_KEY);
+                final Double selectedLong = (Double) data.getSerializableExtra(LocationPickerActivity.SELECTED_LONGITUDE_KEY);
+
+                gm.requestReverseDecodedAddress(selectedLat, selectedLong,
+                                                new GeoManager.GeoReverseLocationListener() {
+                    @Override
+                    public void onReverseLocationError(Throwable error) {
+                        Utils.simpleDialog(MainActivity.this,
+                                           "Location selected",
+                                           selectedLat +", "+ selectedLong +"\n\n"+
+                                           "< "+ error.getMessage() +" >");
+                    }
+
+                    @Override
+                    public void onReverseLocationSuccess(@NonNull List<Address> addresses) {
+
+                        Address address = addresses.get(0);
+                        String fullAddress = "\n";
+
+                        for(int i = 0; i <= address.getMaxAddressLineIndex(); i++)
+                            fullAddress = fullAddress + address.getAddressLine(i) +"\n";
+
+                        Utils.simpleDialog(MainActivity.this,
+                                "Location selected",
+                                selectedLat + ", " + selectedLong + "\n" +
+                                        fullAddress);
+                    }
+                });
+
+            }
+            else
+                Utils.simpleDialog(this, "Location selected", "No location was selected.");
+        }
     }
 
 
@@ -378,7 +420,7 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
                     @Override
                     public void onPermissionDenied() {
                         String msg = "Pick And Gol will not be able to search based on your location.";
-                        Utils.shortSnack(MainActivity.this, msg);
+                        Utils.shortToast(MainActivity.this, msg);
 
                         searchEventsFirstPage(lastEventSearchParams, null);
                         mainDrawer.closeDrawers();
@@ -398,7 +440,8 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
                 Pub currentPub = new Pub("58c782770c0ef45dfc5875df", "La Biblioteca",
                                          43.558096, -5.923779,
                                          "https://www.facebook.com/Cafe.LaBiblioteca",
-                                         "58b471ddd9f0163f6eee6375", new ArrayList<String>()
+                                         "58b471ddd9f0163f6eee6375",
+                                         new ArrayList<String>(), new ArrayList<String>()
                 );
 
                 Navigator.fromPubDetailActivityToNewEventActivity(this, currentPub);
@@ -408,12 +451,15 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
             case R.id.drawer_menu_upload_image:
 
                 // Check if we have permission to access the camera, before opening the image picker
-                cameraChecker.checkBeforeAsking(new CheckPermissionListener() {
+                picturesChecker.checkBeforeAsking(new CheckPermissionListener() {
                     @Override
                     public void onPermissionDenied() {
-                        String title = "Camera access denied";
-                        String msg = "Pick And Gol will not be able to take images from your device camera.";
+                        String title = "Pictures access denied";
+                        String msg = "Pick And Gol might not be able to take pictures from your camera or gallery.";
                         Utils.simpleDialog(MainActivity.this, title, msg);
+
+                        lastPickedImagePurpose = UPLOAD_TO_CLOUD;
+                        im.showImagePicker(MainActivity.this);
                     }
 
                     @Override
@@ -425,6 +471,38 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
 
                 break;
 
+            case R.id.drawer_menu_create_pub:
+
+                Navigator.fromMainActivityToNewPubActivity(this);
+
+                /**
+                locationChecker.checkBeforeAsking(new CheckPermissionListener() {
+                    @Override
+                    public void onPermissionDenied() {
+                        Navigator.fromNewPubActivityToLocationPickerActivity(MainActivity.this, null, null);
+                    }
+
+                    @Override
+                    public void onPermissionGranted() {
+                        gm.requestLastLocation(new GeoManager.GeoDirectLocationListener() {
+                            @Override
+                            public void onLocationError(Throwable error) {
+                                Navigator.fromNewPubActivityToLocationPickerActivity(MainActivity.this, null, null);
+                            }
+
+                            @Override
+                            public void onLocationSuccess(double latitude, double longitude) {
+                                Navigator.fromNewPubActivityToLocationPickerActivity(MainActivity.this, latitude, longitude);
+                            }
+                        });
+                    }
+                });
+                **/
+
+                mainDrawer.closeDrawers();
+                break;
+
+            /*
             case R.id.drawer_menu_show_remote_image:
 
                 new ChooseRemoteUrlDialog(MainActivity.this,
@@ -437,6 +515,7 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
                     }
                 }).show();
                 break;
+            */
 
             case R.id.drawer_menu_user_detail:
 
@@ -528,7 +607,7 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
             new SearchEventsInteractor().execute(MainActivity.this, searchParams, interactorListener);
         }
         else {
-            gm.requestLastLocation(new GeoManager.GeoManagerListener() {
+            gm.requestLastLocation(new GeoManager.GeoDirectLocationListener() {
                 @Override
                 public void onLocationError(Throwable error) {
                     lastEventSearchParams = searchParams;
@@ -848,7 +927,7 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
             @Override
             public void onPermissionDenied() {
                 String msg = "Pick And Gol will not be able to search based on your location.";
-                Utils.shortSnack(MainActivity.this, msg);
+                Utils.shortToast(MainActivity.this, msg);
 
                 searchEventsFirstPage(lastEventSearchParams, swipeCaller);
             }

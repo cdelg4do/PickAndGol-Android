@@ -29,7 +29,17 @@ public class RequestParams {
     }
 
     public RequestParams addParam(String key, String value) {
-        params.put(key,value);
+
+        String existingValue = params.get(key);
+
+        if (existingValue == null)
+            params.put(key,value);
+
+        // If this is a multi value parameter, it will be sent as: param = 'value1,value2,value3...'
+        else
+            params.put(key, existingValue +","+ value);
+
+
         return this;
     }
 

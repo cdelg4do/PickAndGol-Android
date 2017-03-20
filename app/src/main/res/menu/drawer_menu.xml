@@ -22,10 +22,10 @@
             android:title="Upload an image"/>
 
         <item
-            android:id="@+id/drawer_menu_show_remote_image"
+            android:id="@+id/drawer_menu_create_pub"
             android:icon="@android:drawable/stat_sys_download"
             android:checkable = "true"
-            android:title="Show a remote image"/>
+            android:title="Create Pub"/>
 
         <item
             android:id="@+id/drawer_menu_user_detail"

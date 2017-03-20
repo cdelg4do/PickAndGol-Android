@@ -21,19 +21,19 @@ import static io.keepcoding.pickandgol.manager.net.NetworkManagerSettings.URL_CR
 /**
  * This class is an interactor in charge of:
  *
- * - First (in background):
- * - Second (in the main thread):
+ * - First (in background): request the creation of a new event in the system.
+ * - Second (in the main thread): call the given listener with the result of the operation.
  */
 public class CreateEventInteractor {
 
     // Param keynames for the event creation operation
-    public static final String REQUEST_PARAM_KEY_TOKEN = "token";
-    public static final String REQUEST_PARAM_KEY_NAME = "name";
-    public static final String REQUEST_PARAM_KEY_DATE = "date";
-    public static final String REQUEST_PARAM_KEY_PUB = "pub";
-    public static final String REQUEST_PARAM_KEY_CATEGORY = "category";
-    public static final String REQUEST_PARAM_KEY_DESCRIPTION = "description";
-    public static final String REQUEST_PARAM_KEY_PHOTO_URL = "photo_url";
+    private static final String REQUEST_PARAM_KEY_TOKEN = "token";
+    private static final String REQUEST_PARAM_KEY_NAME = "name";
+    private static final String REQUEST_PARAM_KEY_DATE = "date";
+    private static final String REQUEST_PARAM_KEY_PUB = "pub";
+    private static final String REQUEST_PARAM_KEY_CATEGORY = "category";
+    private static final String REQUEST_PARAM_KEY_DESCRIPTION = "description";
+    private static final String REQUEST_PARAM_KEY_PHOTO_URL = "photo_url";
 
 
     // This interface describes the behavior of a listener waiting for the the async operation
@@ -46,15 +46,15 @@ public class CreateEventInteractor {
      * Sends the request, gets the response and then builds a model object with the retrieved data,
      * then passes it to the listener. In case of fail, passes the error exception to the listener.
      *
-     * @param context   context for the operation.
-     * @param name
-     * @param date
-     * @param pubId
-     * @param categoryId
-     * @param description
-     * @param photoUrl
-     * @param token     session token to send to the server
-     * @param listener  listener that will process the result of the operation.
+     * @param context       context for the operation.
+     * @param name          name for the new event.
+     * @param date          date for the new event.
+     * @param pubId         id of the pub the new event is associated to.
+     * @param categoryId    id of the category the new event belongs to.
+     * @param description   description for the new event.
+     * @param photoUrl      url of the picture for the new event.
+     * @param token         session token to send to the server
+     * @param listener      listener that will process the result of the operation.
      */
     public void execute(final @NonNull Context context,
                         final @NonNull String name,

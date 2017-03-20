@@ -18,6 +18,15 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    productFlavors {
+        devel {
+            buildConfigField 'String', 'HOST', '"http://10.0.2.2:3000"'
+        }
+
+        production {
+            buildConfigField 'String', 'HOST', '"http://pickandgol.com"'
+        }
+    }
 }
 
 dependencies {

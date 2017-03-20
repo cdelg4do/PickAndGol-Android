@@ -21,9 +21,11 @@ import java.io.StringReader;
 import java.lang.ref.WeakReference;
 import java.util.Map;
 
+import io.keepcoding.pickandgol.manager.net.response.CategoryListResponse;
 import io.keepcoding.pickandgol.manager.net.response.EventDetailResponse;
 import io.keepcoding.pickandgol.manager.net.response.EventListResponse;
 import io.keepcoding.pickandgol.manager.net.response.LoginResponse;
+import io.keepcoding.pickandgol.manager.net.response.PubDetailResponse;
 import io.keepcoding.pickandgol.manager.net.response.UserResponse;
 
 import static android.content.Context.CONNECTIVITY_SERVICE;
@@ -293,13 +295,21 @@ public class NetworkManager {
                 parsedResponse = parseEventDetailResponse(response);
                 break;
 
+            case PUB_DETAIL:
+                parsedResponse = parsePubDetailResponse(response);
+                break;
+
+            case CATEGORY_LIST:
+                parsedResponse = parseCategoryListResponse(response);
+                break;
+
             default:
                 parsedResponse = null;
                 break;
         }
 
         if (parsedResponse != null)
-            Log.d(LOG_TAG, "Parsed response (expected type '"+ expectedType.toString() +"'): \n" +parsedResponse.debugString());
+            Log.d(LOG_TAG, "Parsed response (expected type '"+ expectedType.toString() +"'): \n"+ parsedResponse.debugString());
 
         return parsedResponse;
     }
@@ -377,6 +387,42 @@ public class NetworkManager {
         }
 
         return eventDetailResponse;
+    }
+
+    // JsonResponseType: PUB_DETAIL
+    @Nullable
+    private PubDetailResponse parsePubDetailResponse(String responseString) {
+
+        PubDetailResponse pubDetailResponse = null;
+
+        try {
+            Reader reader = new StringReader(responseString);
+            Gson gson = new GsonBuilder().create();
+            pubDetailResponse = gson.fromJson(reader, PubDetailResponse.class);
+        }
+        catch (RuntimeException e) {
+            e.printStackTrace();
+        }
+
+        return pubDetailResponse;
+    }
+
+    // JsonResponseType: CATEGORY_LIST
+    @Nullable
+    private CategoryListResponse parseCategoryListResponse(String responseString) {
+
+        CategoryListResponse categoryListResponse = null;
+
+        try {
+            Reader reader = new StringReader(responseString);
+            Gson gson = new GsonBuilder().create();
+            categoryListResponse = gson.fromJson(reader, CategoryListResponse.class);
+        }
+        catch (RuntimeException e) {
+            e.printStackTrace();
+        }
+
+        return categoryListResponse;
     }
 
 }
