@@ -3,7 +3,6 @@ package io.keepcoding.pickandgol.util;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 
@@ -18,8 +17,8 @@ import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.support.v4.app.ActivityCompat.shouldShowRequestPermissionRationale;
 import static android.support.v4.content.PermissionChecker.PERMISSION_GRANTED;
-import static io.keepcoding.pickandgol.util.PermissionChecker.PermissionTag.CAMERA_SET;
 import static io.keepcoding.pickandgol.util.PermissionChecker.PermissionTag.LOCATION_SET;
+import static io.keepcoding.pickandgol.util.PermissionChecker.PermissionTag.PICTURES_SET;
 import static io.keepcoding.pickandgol.util.PermissionChecker.PermissionTag.RW_STORAGE_SET;
 
 
@@ -38,16 +37,19 @@ import static io.keepcoding.pickandgol.util.PermissionChecker.PermissionTag.RW_S
  */
 public class PermissionChecker {
 
-    // Available request codes (to use in activity.onRequestPermissionsResult() )
+    // Static object that associates a PermissionTag with a predefined set of permissions to check
+    private static Map<PermissionTag, PermissionSet> permissionMap;
+
+    // Default request codes (to use in activity.onRequestPermissionsResult() )
     public static final int REQUEST_FOR_STORAGE_PERMISSION = 100;
-    public static final int REQUEST_FOR_CAMERA_PERMISSION = 101;
+    public static final int REQUEST_FOR_PICTURES_PERMISSION = 101;
     public static final int REQUEST_FOR_LOCATION_PERMISSION = 102;
 
-    // Available permissions to check
+    // Available permission sets to check
     public enum PermissionTag {
-        RW_STORAGE_SET,
-        CAMERA_SET,
-        LOCATION_SET
+        RW_STORAGE_SET,     // Read & Write access to the external storage
+        PICTURES_SET,       // Access to the camera & Read access to the external storage
+        LOCATION_SET        // Access to device fine location
     }
 
     // Use this interface to listen for permission requests
@@ -56,7 +58,6 @@ public class PermissionChecker {
         void onPermissionGranted();
     }
 
-    private static Map<PermissionTag, PermissionSet> permissionMap;
     private Activity activity;
     private PermissionTag tag;
     private String explanationTitle;
@@ -69,36 +70,33 @@ public class PermissionChecker {
      *
      * @param tag       the tag that identifies the set of permissions to check.
      * @param activity  the activity in where the operation takes place.
-     //* @param listener  listener for the operation.
      */
-    public PermissionChecker(@NonNull PermissionTag tag,
-                            final @NonNull Activity activity) {
+    public PermissionChecker(@NonNull PermissionTag tag, final @NonNull Activity activity) {
 
         if (permissionMap == null)
             initMap();
 
         this.tag = tag;
         this.activity = activity;
-        this.listener = listener;
 
         switch (tag) {
 
             case RW_STORAGE_SET:
                 explanationTitle = "Storage access required";
                 explanationMsg = "Pick And Gol will request access to your device storage " +
-                        "in order to load and send pictures.";
+                        "in order to store temporary files.";
                 break;
 
-            case CAMERA_SET:
-                explanationTitle = "Camera access required";
+            case PICTURES_SET:
+                explanationTitle = "Pictures permissions required";
                 explanationMsg = "Pick And Gol will request access to your device camera " +
-                        "and storage in order take pictures.";
+                        "and/or gallery in order to take pictures.";
                 break;
 
             case LOCATION_SET:
                 explanationTitle = "Access to device's location";
                 explanationMsg = "In order to perform searches based on your location, " +
-                        "Pick And Gol will ask you to grant access to this device's location.";
+                        "Pick And Gol will ask you for access to the device location.";
                 break;
 
             default:
@@ -118,81 +116,64 @@ public class PermissionChecker {
             return;
 
         this.listener = listener;
+        final String[] permissionsToCheck = permissionMap.get(tag).getPermissionArray();
+        final int requestCode = permissionMap.get(tag).getRequestCode();;
 
-        PermissionSet pSet = permissionMap.get(tag);
-        String permissionToCheck = pSet.getPermissionToCheck();
-        final String[] permissionsToRequest = pSet.getPermissionArray();
-        final int requestCode = pSet.getRequestCode();
-
-        boolean showExplanation = (
-                explanationTitle != null
-                && explanationMsg != null
-                && shouldShowRequestPermissionRationale(activity,permissionToCheck)
+        boolean showExplanation = (explanationTitle != null &&
+                                   explanationMsg != null &&
+                                   shouldShowExplanatoryMessage(permissionsToCheck)
         );
 
-        if (ContextCompat.checkSelfPermission(activity, permissionToCheck) == PERMISSION_GRANTED)
+        if ( allPermissionsAreGranted(permissionsToCheck) )
             listener.onPermissionGranted();
 
-        else {
-
+        else
             if (showExplanation)
                 Utils.simpleDialog(activity, explanationTitle, explanationMsg, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        requestPermissions(permissionsToRequest, requestCode);
+                        requestPermissions(permissionsToCheck, requestCode);
                     }
                 });
-
             else
-                requestPermissions(permissionsToRequest, requestCode);
-        }
+                requestPermissions(permissionsToCheck, requestCode);
     }
 
     /**
      * Checks if the given permission set has been granted. If not, asks the user for them.
-     * This method allows to specify a different request code than the standard one, if not null.
-     * This is useful if you need different callbacks in an Activity for the same permission request.
      * (the calling activity should implement onRequestPermissionsResult() to handle the answer)
+     *
+     * This method allows to specify a different request code than the default one.
+     * This is useful if you need different callbacks in an Activity for the same permission request.
      *
      * @param listener a listener for the operation.
      */
-    public void checkBeforeAsking(@Nullable Integer givenCode, @NonNull CheckPermissionListener listener) {
+    public void checkBeforeAsking(final int requestCode, @NonNull CheckPermissionListener listener) {
 
         if (listener == null)
             return;
 
-        if (givenCode == null)
-            checkBeforeAsking(listener);
-
         this.listener = listener;
+        final String[] permissionsToCheck = permissionMap.get(tag).getPermissionArray();
 
-        PermissionSet pSet = permissionMap.get(tag);
-        String permissionToCheck = pSet.getPermissionToCheck();
-        final String[] permissionsToRequest = pSet.getPermissionArray();
-        final int requestCode = givenCode;
-
-        boolean showExplanation = (
-                explanationTitle != null
-                        && explanationMsg != null
-                        && shouldShowRequestPermissionRationale(activity,permissionToCheck)
+        boolean showExplanation = (explanationTitle != null &&
+                                   explanationMsg != null &&
+                                   shouldShowExplanatoryMessage(permissionsToCheck)
         );
 
-        if (ContextCompat.checkSelfPermission(activity, permissionToCheck) == PERMISSION_GRANTED)
+        if ( allPermissionsAreGranted(permissionsToCheck) )
             listener.onPermissionGranted();
 
-        else {
-
+        else
             if (showExplanation)
                 Utils.simpleDialog(activity, explanationTitle, explanationMsg, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-                        requestPermissions(permissionsToRequest, requestCode);
+                        requestPermissions(permissionsToCheck, requestCode);
                     }
                 });
-
             else
-                requestPermissions(permissionsToRequest, requestCode);
-        }
+                requestPermissions(permissionsToCheck, requestCode);
     }
 
     /**
@@ -205,12 +186,10 @@ public class PermissionChecker {
         if (listener == null)
             return;
 
-        String permissionToCheck = permissionMap.get(tag).getPermissionToCheck();
+        String[] permissionsToCheck = permissionMap.get(tag).getPermissionArray();
 
-        if (ContextCompat.checkSelfPermission(activity, permissionToCheck) == PERMISSION_GRANTED)
-            listener.onPermissionGranted();
-        else
-            listener.onPermissionDenied();
+        if ( allPermissionsAreGranted(permissionsToCheck) )     listener.onPermissionGranted();
+        else                                                    listener.onPermissionDenied();
     }
 
 
@@ -224,27 +203,27 @@ public class PermissionChecker {
 
         PermissionSet storageSet = new PermissionSet(
                 REQUEST_FOR_STORAGE_PERMISSION,
-                READ_EXTERNAL_STORAGE,
                 new String[] {  READ_EXTERNAL_STORAGE,
                                 WRITE_EXTERNAL_STORAGE  }
         );
 
-        PermissionSet cameraSet = new PermissionSet(
-                REQUEST_FOR_CAMERA_PERMISSION,
-                CAMERA,
+        // Note: the taken pictures and image processing results are stored in the app cache folder,
+        //       that does not require any permission to be read/written.
+        // (if using another folder, WRITE_EXTERNAL_STORAGE permission might be necessary too)
+        PermissionSet picturesSet = new PermissionSet(
+                REQUEST_FOR_PICTURES_PERMISSION,
                 new String[] {  CAMERA,
-                                WRITE_EXTERNAL_STORAGE  }
+                                READ_EXTERNAL_STORAGE   }
         );
 
         PermissionSet locationSet = new PermissionSet(
                 REQUEST_FOR_LOCATION_PERMISSION,
-                ACCESS_FINE_LOCATION,
                 new String[] {  ACCESS_FINE_LOCATION  }
         );
 
 
         permissionMap.put(RW_STORAGE_SET, storageSet);
-        permissionMap.put(CAMERA_SET, cameraSet);
+        permissionMap.put(PICTURES_SET, picturesSet);
         permissionMap.put(LOCATION_SET, locationSet);
     }
 
@@ -258,19 +237,41 @@ public class PermissionChecker {
         );
     }
 
-    // This class contains the permission to check, permissions to request and request code
+    // Determines if all the given permissions have been granted
+    private boolean allPermissionsAreGranted(String[] permissionsToCheck) {
+
+        boolean allGranted = true;
+
+        for (int i = 0; i < permissionsToCheck.length && allGranted; i++)
+            if (ContextCompat.checkSelfPermission(activity, permissionsToCheck[i]) != PERMISSION_GRANTED)
+                allGranted = false;
+
+        return allGranted;
+    }
+
+    // Determines if an explanatory message should be shown before asking for the given permissions
+    private boolean shouldShowExplanatoryMessage(String[] permissionsToCheck) {
+
+        boolean showExplanation = false;
+
+        for (int i = 0; i < permissionsToCheck.length && !showExplanation; i++)
+            if ( shouldShowRequestPermissionRationale(activity, permissionsToCheck[i]) )
+                showExplanation = true;
+
+        return showExplanation;
+    }
+
+    // This class contains the permissions to request and request code
     // that will be associated to some specific PermissionTag
     private class PermissionSet {
 
         int requestCode;
-        private String permissionToCheck;
         private List<String> permissionList;
 
 
-        public PermissionSet(int requestCode, String permissionToCheck, String[] permissionArray) {
+        public PermissionSet(int requestCode, String[] permissionArray) {
 
             this.requestCode = requestCode;
-            this.permissionToCheck = permissionToCheck;
             this.permissionList = new ArrayList<>();
 
             for (String p : permissionArray)
@@ -278,8 +279,6 @@ public class PermissionChecker {
         }
 
         public int getRequestCode() {   return requestCode; }
-
-        public String getPermissionToCheck() {  return permissionToCheck;   }
 
         public String[] getPermissionArray() {
 

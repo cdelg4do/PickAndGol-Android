@@ -9,6 +9,8 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.os.Parcelable;
 import android.provider.MediaStore;
+import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import java.io.File;
@@ -17,8 +19,11 @@ import java.util.List;
 
 import io.keepcoding.pickandgol.manager.image.ImageManager.ImagePickingListener;
 
+import static android.Manifest.permission.CAMERA;
+import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.content.Intent.ACTION_GET_CONTENT;
 import static android.provider.MediaStore.ACTION_IMAGE_CAPTURE;
+import static android.support.v4.content.PermissionChecker.PERMISSION_GRANTED;
 import static io.keepcoding.pickandgol.manager.image.ImageManagerSettings.CUSTOM_CAMERA_DIR;
 import static io.keepcoding.pickandgol.manager.image.ImageManagerSettings.CUSTOM_CAMERA_FILENAME;
 import static io.keepcoding.pickandgol.manager.image.ImageManagerSettings.IMAGE_PICKER_REQUEST_CODE;
@@ -35,19 +40,23 @@ abstract class ImagePicker {
     private final static String LOG_TAG = "ImagePicker";
 
     /**
-     * Shows the camera/gallery image chooser.
+     * Shows the camera/gallery image chooser, using IMAGE_PICKER_REQUEST_CODE as request code.
+     * If there are no associated apps in the system, or not enough permissions, then does nothing.
      *
      * @param activity  the activity from where the picker is shown.
      */
     static void showImagePicker(Activity activity) {
 
-        Intent imagePickerChooser = createImagePickerIntent(activity);
-        activity.startActivityForResult(imagePickerChooser, IMAGE_PICKER_REQUEST_CODE);
+        Intent imageChooser = createImageChooserIntent(activity);
+
+        if (imageChooser != null)
+            activity.startActivityForResult(imageChooser, IMAGE_PICKER_REQUEST_CODE);
     }
 
 
     /**
-     * Handles the image picker result from activity.onActivityResult().
+     * Handles the image picker result.
+     * (this is meant to be called from onActivityResult() method of the activity)
      *
      * @param activity  the activity from where the picker is shown.
      */
@@ -83,64 +92,86 @@ abstract class ImagePicker {
 
     /** Auxiliary methods **/
 
-    // Creates a chooser intent with all registered options for image picking (camera and gallery)
-    private static Intent createImagePickerIntent(Activity activity) {
+    // Creates a chooser intent with all registered options for image picking (camera and/or gallery)
+    // (if no permissions to access the camera nor the gallery were granted, it will return null).
+    private static @Nullable Intent createImageChooserIntent(Activity activity) {
 
-        // Custom uri for the images taken with the camera
-        // (if it is null, images will be stored in the camera folder like any other camera photo)
-        Uri cameraOutputUri = null;
+        // In order to create a chooser intent, at least one of this permissions
+        // (CAMERA or READ_EXTERNAL_STORAGE) should be granted. If not, return null.
+        if ( ContextCompat.checkSelfPermission(activity, CAMERA) != PERMISSION_GRANTED &&
+             ContextCompat.checkSelfPermission(activity, READ_EXTERNAL_STORAGE) != PERMISSION_GRANTED ) {
 
-        if (CUSTOM_CAMERA_DIR != null)
-            cameraOutputUri = Uri.fromFile(new File(CUSTOM_CAMERA_DIR.getPath(), CUSTOM_CAMERA_FILENAME));
+            return null;
+        }
 
         List<Intent> allIntents = new ArrayList<>();
         PackageManager packageManager = activity.getPackageManager();
 
-        // Collect all camera intents
-        Intent cameraIntent = new Intent(ACTION_IMAGE_CAPTURE);
-        List<ResolveInfo> listCam = packageManager.queryIntentActivities(cameraIntent, 0);
+        // Only collect camera intents if the app has Camera access permission
+        if (ContextCompat.checkSelfPermission(activity, CAMERA) == PERMISSION_GRANTED) {
 
-        for (ResolveInfo res : listCam) {
+            // Custom uri for the images taken with the camera
+            // (if it is null, images will be stored in the camera folder like any other camera photo)
+            Uri cameraOutputUri = null;
 
-            Intent intent = new Intent(cameraIntent);
-            intent.setComponent(new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
-            intent.setPackage(res.activityInfo.packageName);
+            if (CUSTOM_CAMERA_DIR != null)
+                cameraOutputUri = Uri.fromFile(new File(CUSTOM_CAMERA_DIR.getPath(), CUSTOM_CAMERA_FILENAME));
 
-            // This will make the file available on the disk,
-            // and no data will be included in the onActivityResult() call.
-            if (cameraOutputUri != null)
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, cameraOutputUri);
+            // Collect all camera intents
+            Intent cameraIntent = new Intent(ACTION_IMAGE_CAPTURE);
+            List<ResolveInfo> listCam = packageManager.queryIntentActivities(cameraIntent, 0);
 
-            allIntents.add(intent);
+            for (ResolveInfo res : listCam) {
+
+                Intent intent = new Intent(cameraIntent);
+                intent.setComponent(new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
+                intent.setPackage(res.activityInfo.packageName);
+
+                // This will make the file available on the disk,
+                // and no data will be included in the onActivityResult() call.
+                if (cameraOutputUri != null)
+                    intent.putExtra(MediaStore.EXTRA_OUTPUT, cameraOutputUri);
+
+                allIntents.add(intent);
+            }
         }
 
-        // Collect all gallery intents
-        Intent galleryIntent = new Intent(ACTION_GET_CONTENT);
-        galleryIntent.setType("image/*");
+        // Only collect gallery intents if the app has Read access permission to the external storage
+        if (ContextCompat.checkSelfPermission(activity, READ_EXTERNAL_STORAGE) == PERMISSION_GRANTED) {
 
-        List<ResolveInfo> listGallery = packageManager.queryIntentActivities(galleryIntent, 0);
+            // Collect all gallery intents
+            Intent galleryIntent = new Intent(ACTION_GET_CONTENT);
+            galleryIntent.setType("image/*");
 
-        for (ResolveInfo res : listGallery) {
+            List<ResolveInfo> listGallery = packageManager.queryIntentActivities(galleryIntent, 0);
 
-            Intent intent = new Intent(galleryIntent);
-            intent.setComponent(new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
-            intent.setPackage(res.activityInfo.packageName);
+            for (ResolveInfo res : listGallery) {
 
-            allIntents.add(intent);
+                Intent intent = new Intent(galleryIntent);
+                intent.setComponent(new ComponentName(res.activityInfo.packageName, res.activityInfo.name));
+                intent.setPackage(res.activityInfo.packageName);
+
+                allIntents.add(intent);
+            }
         }
 
-        // Extract the main intent (for Documents system app) from the list
-        Intent mainIntent = allIntents.get(allIntents.size() - 1);
-
+        // Get rid of the "Recent documents" system app (it is useless as picture picker)
         for (Intent intent : allIntents)
             if (intent.getComponent().getClassName().equals("com.android.documentsui.DocumentsActivity")) {
-                mainIntent = intent;
+                allIntents.remove(intent);
                 break;
             }
 
+        // If no intents of any type were collected, return null
+        if (allIntents.size() == 0)
+            return null;
+
+        // Take one of the collected intents -the last one- out of the list to build the chooser
+        // from it, then add to the chooser the other intents from the list (we choose the last
+        // intent, so that the chooser options will keep the same order they had in the list)
+        Intent mainIntent = allIntents.get(allIntents.size() - 1);
         allIntents.remove(mainIntent);
 
-        // Create a chooser from the main intent, and add all other intents in the list
         Intent chooserIntent = Intent.createChooser(mainIntent, "Select a source for the image");
         chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS,
                 allIntents.toArray( new Parcelable[allIntents.size()] ));

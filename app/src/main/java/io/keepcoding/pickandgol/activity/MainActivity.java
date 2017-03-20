@@ -56,11 +56,11 @@ import static io.keepcoding.pickandgol.interactor.LoginInteractor.LoginInteracto
 import static io.keepcoding.pickandgol.interactor.UserDetailInteractor.UserDetailInteractorListener;
 import static io.keepcoding.pickandgol.manager.image.ImageManagerSettings.IMAGE_PICKER_REQUEST_CODE;
 import static io.keepcoding.pickandgol.util.PermissionChecker.CheckPermissionListener;
-import static io.keepcoding.pickandgol.util.PermissionChecker.PermissionTag.CAMERA_SET;
 import static io.keepcoding.pickandgol.util.PermissionChecker.PermissionTag.LOCATION_SET;
+import static io.keepcoding.pickandgol.util.PermissionChecker.PermissionTag.PICTURES_SET;
 import static io.keepcoding.pickandgol.util.PermissionChecker.PermissionTag.RW_STORAGE_SET;
-import static io.keepcoding.pickandgol.util.PermissionChecker.REQUEST_FOR_CAMERA_PERMISSION;
 import static io.keepcoding.pickandgol.util.PermissionChecker.REQUEST_FOR_LOCATION_PERMISSION;
+import static io.keepcoding.pickandgol.util.PermissionChecker.REQUEST_FOR_PICTURES_PERMISSION;
 import static io.keepcoding.pickandgol.util.PermissionChecker.REQUEST_FOR_STORAGE_PERMISSION;
 
 
@@ -118,7 +118,7 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
 
     // Declare as many Permission Checkers as permission requests we need on this activity
     private PermissionChecker storageChecker;
-    private PermissionChecker cameraChecker;
+    private PermissionChecker picturesChecker;
     private PermissionChecker locationChecker;
 
     // Reference to UI elements to be bind with Butterknife (not before the header is inflated)
@@ -136,7 +136,7 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
 
         // Init all the permission checkers that will be used in this activity
         storageChecker = new PermissionChecker(RW_STORAGE_SET, this);
-        cameraChecker = new PermissionChecker(CAMERA_SET, this);
+        picturesChecker = new PermissionChecker(PICTURES_SET, this);
         locationChecker = new PermissionChecker(LOCATION_SET, this);
 
         // Init all the managers used in this activity
@@ -290,8 +290,8 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
         if (requestCode == REQUEST_FOR_STORAGE_PERMISSION)
             storageChecker.checkAfterAsking();
 
-        else if (requestCode == REQUEST_FOR_CAMERA_PERMISSION)
-            cameraChecker.checkAfterAsking();
+        else if (requestCode == REQUEST_FOR_PICTURES_PERMISSION)
+            picturesChecker.checkAfterAsking();
 
         else if (requestCode == REQUEST_FOR_LOCATION_PERMISSION)
             locationChecker.checkAfterAsking();
@@ -451,11 +451,11 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
             case R.id.drawer_menu_upload_image:
 
                 // Check if we have permission to access the camera, before opening the image picker
-                cameraChecker.checkBeforeAsking(new CheckPermissionListener() {
+                picturesChecker.checkBeforeAsking(new CheckPermissionListener() {
                     @Override
                     public void onPermissionDenied() {
-                        String title = "Camera access denied";
-                        String msg = "Pick And Gol will not be able to take images from your device camera.";
+                        String title = "Pictures access denied";
+                        String msg = "Pick And Gol might not be able to take pictures from your camera or gallery.";
                         Utils.simpleDialog(MainActivity.this, title, msg);
 
                         lastPickedImagePurpose = UPLOAD_TO_CLOUD;

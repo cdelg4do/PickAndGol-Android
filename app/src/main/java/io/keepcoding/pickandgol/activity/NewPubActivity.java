@@ -50,8 +50,10 @@ import static io.keepcoding.pickandgol.activity.LocationPickerActivity.SELECTED_
 import static io.keepcoding.pickandgol.activity.LocationPickerActivity.SELECTED_LONGITUDE_KEY;
 import static io.keepcoding.pickandgol.manager.image.ImageManagerSettings.IMAGE_PICKER_REQUEST_CODE;
 import static io.keepcoding.pickandgol.navigator.Navigator.LOCATION_PICKER_ACTIVITY_REQUEST_CODE;
-import static io.keepcoding.pickandgol.util.PermissionChecker.PermissionTag.CAMERA_SET;
 import static io.keepcoding.pickandgol.util.PermissionChecker.PermissionTag.LOCATION_SET;
+import static io.keepcoding.pickandgol.util.PermissionChecker.PermissionTag.PICTURES_SET;
+import static io.keepcoding.pickandgol.util.PermissionChecker.REQUEST_FOR_PICTURES_PERMISSION;
+import static io.keepcoding.pickandgol.util.PermissionChecker.REQUEST_FOR_LOCATION_PERMISSION;
 
 
 /**
@@ -61,16 +63,15 @@ public class NewPubActivity extends AppCompatActivity {
 
     private final static String LOG_TAG = "NewPubActivity";
 
-    public final static String NEW_PUB_KEY = "NEW_PUB_KEY";
-
-    public final static int MAX_IMAGES = 4; // Max number of images that can be attached to a pub.
+    public final static String NEW_PUB_KEY = "NEW_PUB_KEY"; // Used to return the new pub in the intent
+    public final static int MAX_IMAGES = 4;                 // Max images that can be attached to a pub
 
 
     private SessionManager sm;
     private ImageManager im;
     private GeoManager gm;
 
-    private PermissionChecker cameraChecker;
+    private PermissionChecker picturesChecker;
     private PermissionChecker locationChecker;
 
     private Double latitude, longitude;
@@ -94,7 +95,7 @@ public class NewPubActivity extends AppCompatActivity {
         setContentView(R.layout.activity_new_pub);
         ButterKnife.bind(this);
 
-        cameraChecker = new PermissionChecker(CAMERA_SET, this);
+        picturesChecker = new PermissionChecker(PICTURES_SET, this);
         locationChecker = new PermissionChecker(LOCATION_SET, this);
 
         sm = SessionManager.getInstance(this);
@@ -131,6 +132,82 @@ public class NewPubActivity extends AppCompatActivity {
         }
     }
 
+
+    /*** Handlers for activity requests (permissions, intents) ***/
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+
+        if (requestCode == REQUEST_FOR_PICTURES_PERMISSION)
+            picturesChecker.checkAfterAsking();
+
+        else if (requestCode == REQUEST_FOR_LOCATION_PERMISSION)
+            locationChecker.checkAfterAsking();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // If we are coming from the location picker
+        if (requestCode == LOCATION_PICKER_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK) {
+
+            final Double selectedLat = (double) data.getSerializableExtra(SELECTED_LATITUDE_KEY);
+            final Double selectedLong = (double) data.getSerializableExtra(SELECTED_LONGITUDE_KEY);
+
+            if (selectedLat != null && selectedLong != null) {
+
+                latitude = selectedLat;
+                longitude = selectedLong;
+
+                gm.requestReverseDecodedAddress(selectedLat, selectedLong,
+                        new GeoReverseLocationListener() {
+                            @Override
+                            public void onReverseLocationError(Throwable error) {
+                                txtLocation.setText("Undefined location ("+ latitude +", "+ longitude +")");
+                            }
+
+                            @Override
+                            public void onReverseLocationSuccess(@NonNull List<Address> addresses) {
+
+                                Address address = addresses.get(0);
+
+                                StringBuilder fullAddress = new StringBuilder("");
+                                for(int i = 0; i <= address.getMaxAddressLineIndex(); i++)
+                                    fullAddress.append(address.getAddressLine(i) +", ");
+
+                                fullAddress.setLength(fullAddress.length() - 2);    // to remove the last ', '
+                                txtLocation.setText(fullAddress.toString());
+                            }
+                        });
+            }
+        }
+
+        // If we are coming from the image picker
+        else if (requestCode == IMAGE_PICKER_REQUEST_CODE) {
+
+            im.handleImagePickerResult(NewPubActivity.this, requestCode, resultCode, data,
+                    new ImagePickingListener() {
+
+                        @Override
+                        public void onImagePicked(String imagePath) {
+
+                            if (imagePath == null) {
+                                Log.e(LOG_TAG, "Failed to get the path from the image picker");
+                                return;
+                            }
+
+                            else {
+                                processImageThenLoadIt( new File(imagePath) );
+                            }
+                        }
+                    });
+        }
+    }
+
+
+    /*** Auxiliary methods ***/
+
     // Reset all data in the form
     private void resetForm() {
 
@@ -159,7 +236,7 @@ public class NewPubActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
     }
 
-
+    // Set listeners for the activity buttons
     private void setupButtons() {
 
         btnCancel.setOnClickListener(new View.OnClickListener() {
@@ -180,7 +257,7 @@ public class NewPubActivity extends AppCompatActivity {
         });
     }
 
-
+    // Sets the behaviour for the location and picture pickers
     private void setupPickers() {
 
         // Location picker:
@@ -269,77 +346,22 @@ public class NewPubActivity extends AppCompatActivity {
         }
     }
 
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        // If we are coming from the location picker
-        if (requestCode == LOCATION_PICKER_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK) {
-
-            final Double selectedLat = (double) data.getSerializableExtra(SELECTED_LATITUDE_KEY);
-            final Double selectedLong = (double) data.getSerializableExtra(SELECTED_LONGITUDE_KEY);
-
-            if (selectedLat != null && selectedLong != null) {
-
-                latitude = selectedLat;
-                longitude = selectedLong;
-
-                gm.requestReverseDecodedAddress(selectedLat, selectedLong,
-                        new GeoReverseLocationListener() {
-                            @Override
-                            public void onReverseLocationError(Throwable error) {
-                                txtLocation.setText("Undefined location ("+ latitude +", "+ longitude +")");
-                            }
-
-                            @Override
-                            public void onReverseLocationSuccess(@NonNull List<Address> addresses) {
-
-                                Address address = addresses.get(0);
-
-                                StringBuilder fullAddress = new StringBuilder("");
-                                for(int i = 0; i <= address.getMaxAddressLineIndex(); i++)
-                                    fullAddress.append(address.getAddressLine(i) +", ");
-
-                                fullAddress.setLength(fullAddress.length() - 2);    // to remove the last ', '
-                                txtLocation.setText(fullAddress.toString());
-                            }
-                        });
-            }
-        }
-
-        // If we are coming from the image picker
-        else if (requestCode == IMAGE_PICKER_REQUEST_CODE) {
-
-            im.handleImagePickerResult(NewPubActivity.this, requestCode, resultCode, data,
-                    new ImagePickingListener() {
-
-                        @Override
-                        public void onImagePicked(String imagePath) {
-
-                            if (imagePath == null) {
-                                Log.e(LOG_TAG, "Failed to get the path from the image picker");
-                                return;
-                            }
-
-                            else {
-                                processImageThenLoadIt( new File(imagePath) );
-                            }
-                        }
-                    });
-        }
-    }
-
-
+    // Checks if the app has permission to access the camera/gallery, if so then opens the image picker
     private void showImagePicker() {
 
         // Check if we have permission to access the camera, before opening the image picker
-        cameraChecker.checkBeforeAsking(new PermissionChecker.CheckPermissionListener() {
+        picturesChecker.checkBeforeAsking(new PermissionChecker.CheckPermissionListener() {
             @Override
             public void onPermissionDenied() {
-                String title = "Camera access denied";
-                String msg = "Pick And Gol will not be able to take images from your device camera.";
-                Utils.simpleDialog(NewPubActivity.this, title, msg);
+
+                String title = "Pictures access denied";
+                String msg = "Pick And Gol might not be able to take pictures from your camera or gallery.";
+                Utils.simpleDialog(NewPubActivity.this, title, msg, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        im.showImagePicker(NewPubActivity.this);
+                    }
+                });
             }
 
             @Override
@@ -349,7 +371,7 @@ public class NewPubActivity extends AppCompatActivity {
         });
     }
 
-
+    // Prepares an image file to be uploaded, then shows it in an activity image holder
     private void processImageThenLoadIt(File sourceImageFile) {
 
         if (sourceImageFile == null || ! sourceImageFile.isFile() )
@@ -387,7 +409,8 @@ public class NewPubActivity extends AppCompatActivity {
         });
     }
 
-
+    // If all fields in the form are valid, returns a Pub object with the form values.
+    // (if there are invalid field values, then returns null)
     private @Nullable Pub validateFormData() {
 
         Pub tempPub = null;     // This object is just a container of some data from the form
@@ -420,7 +443,7 @@ public class NewPubActivity extends AppCompatActivity {
         return tempPub;
     }
 
-
+    // Attempts to upload the selected images (if any) to S3, then calls to register the given pub
     private void uploadImagesIfNecessaryThenRegisterNewPub(final Pub pub) {
 
         if (pub.getPhotos().size() == 0) {
@@ -442,52 +465,6 @@ public class NewPubActivity extends AppCompatActivity {
         });
     }
 
-
-    private void registerNewPub(Pub pub) {
-
-        String name = pub.getName();
-        double latitude = pub.getLatitude();
-        double longitude = pub.getLongitude();
-        String userId = sm.getUserId();
-        String token = sm.getSessionToken();
-        String url = pub.getUrl();
-
-        List<String> photoUrls = new ArrayList<>();
-        for (int i = 0; i < pub.getPhotos().size(); i++) {
-            String newPhotoUrl = im.getRemoteImageUrl( pub.getPhotos().get(i) );
-            photoUrls.add(newPhotoUrl);
-        }
-
-        final ProgressDialog pDialog = Utils.newProgressDialog(this, "Registering pub...");
-        pDialog.show();
-
-        new CreatePubInteractor().execute(this, name, latitude, longitude, userId, url, photoUrls, token, new CreatePubInteractorListener() {
-
-                    @Override
-                    public void onCreatePubFail(Exception e) {
-                        pDialog.dismiss();
-
-                        Utils.simpleDialog(NewPubActivity.this, "Error registering new pub", e.getMessage());
-                    }
-
-                    @Override
-                    public void onCreatePubSuccess(final Pub createdPub) {
-                        pDialog.dismiss();
-
-                        Utils.simpleDialog(NewPubActivity.this,
-                                "New Pub",
-                                "The pub '"+ createdPub.getName() +"' has been registered.",
-                                new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface dialogInterface, int i) {
-                                        finishActivity(createdPub, null);
-                                    }
-                                });
-                    }
-                });
-    }
-
-
     // Attempts to upload the given image files to Amazon S3 (one after each other)
     // In case one of them fails, the process stops and listener.onError() is called.
     // If all the images are uploaded, then listener.onSuccess() is called.
@@ -505,7 +482,6 @@ public class NewPubActivity extends AppCompatActivity {
 
         uploadNextImage(0, imageFiles, remoteFilenames, pDialog, listener);
     }
-
 
     // Attempts to upload the given current image.
     // In case of success, a recursive call with the next image is executed.
@@ -568,7 +544,84 @@ public class NewPubActivity extends AppCompatActivity {
         }
     }
 
+    // Sends a remote request to register a new pub in the system
+    private void registerNewPub(Pub pub) {
 
+        String name = pub.getName();
+        double latitude = pub.getLatitude();
+        double longitude = pub.getLongitude();
+        String userId = sm.getUserId();
+        String token = sm.getSessionToken();
+        String url = pub.getUrl();
+
+        List<String> photoUrls = new ArrayList<>();
+        for (int i = 0; i < pub.getPhotos().size(); i++) {
+            String newPhotoUrl = im.getRemoteImageUrl( pub.getPhotos().get(i) );
+            photoUrls.add(newPhotoUrl);
+        }
+
+        final ProgressDialog pDialog = Utils.newProgressDialog(this, "Registering pub...");
+        pDialog.show();
+
+        new CreatePubInteractor().execute(this, name, latitude, longitude, userId, url, photoUrls, token, new CreatePubInteractorListener() {
+
+                    @Override
+                    public void onCreatePubFail(Exception e) {
+                        pDialog.dismiss();
+
+                        Utils.simpleDialog(NewPubActivity.this, "Error registering new pub", e.getMessage());
+                    }
+
+                    @Override
+                    public void onCreatePubSuccess(final Pub createdPub) {
+                        pDialog.dismiss();
+
+                        Utils.simpleDialog(NewPubActivity.this,
+                                "New Pub",
+                                "The pub '"+ createdPub.getName() +"' has been registered.",
+                                new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialogInterface, int i) {
+                                        finishActivity(createdPub, null);
+                                    }
+                                });
+                    }
+                });
+    }
+
+    // Finishes this activity, passing back the created event (if any)
+    private void finishActivity(@Nullable Pub newPub, @Nullable Exception error) {
+
+        if (error != null)
+            Log.e(LOG_TAG, "Error: "+ error.toString());
+
+        // Remove all possible temp image files created by this activity
+        im.cleanProcessorTempFolder();
+
+        Navigator.backFromNewPubActivity(this, newPub);
+    }
+
+
+    /** The following methods describe the multiple image picker behavior **/
+
+    // Clear all selected images and resets the image pickers to their initial state
+    private void resetImageTableRows() {
+
+        for (int i = 0; i < MAX_IMAGES; i++) {
+
+            if (imageFilesToUpload[i] != null)
+                imageFilesToUpload[i].delete();
+
+            imageFilesToUpload[i] = null;
+            imageHolders[i].setImageResource(R.drawable.add_image_placeholder);
+            imageButtons[i].setVisibility(INVISIBLE);
+
+            if (i != 0)
+                imageTableRows[i].setVisibility(GONE);
+        }
+    }
+
+    // Removes the associated selected picture from its image holder
     private void removeImage(int index) {
 
         if (index < 0 || index >= MAX_IMAGES)
@@ -609,7 +662,6 @@ public class NewPubActivity extends AppCompatActivity {
         }
     }
 
-
     // Gets a list with the filenames for all the remotely stored images
     private List<String> getRemoteImageFilenames() {
 
@@ -623,19 +675,7 @@ public class NewPubActivity extends AppCompatActivity {
         return imageNames;
     }
 
-
-    private int getSelectedImageCount() {
-
-        int total = 0;
-
-        for (int i = 0; i < MAX_IMAGES; i++)
-            if (imageFilesToUpload[i] != null)
-                total++;
-
-        return total;
-    }
-
-
+    // Gets the index of the first unused image picker (0 .. MAX_IMAGES)
     private @Nullable Integer getFirstNullImageIndex() {
 
         Integer foundIndex = null;
@@ -647,34 +687,5 @@ public class NewPubActivity extends AppCompatActivity {
         }
 
         return foundIndex;
-    }
-
-
-    private void resetImageTableRows() {
-
-        for (int i = 0; i < MAX_IMAGES; i++) {
-
-            if (imageFilesToUpload[i] != null)
-                imageFilesToUpload[i].delete();
-
-            imageFilesToUpload[i] = null;
-            imageHolders[i].setImageResource(R.drawable.add_image_placeholder);
-            imageButtons[i].setVisibility(INVISIBLE);
-
-            if (i != 0)
-                imageTableRows[i].setVisibility(GONE);
-        }
-    }
-
-
-    private void finishActivity(@Nullable Pub newPub, @Nullable Exception error) {
-
-        if (error != null)
-            Log.e(LOG_TAG, "Error: "+ error.toString());
-
-        // Remove all possible temp image files created by this activity
-        im.cleanProcessorTempFolder();
-
-        Navigator.backFromNewPubActivity(this, newPub);
     }
 }
