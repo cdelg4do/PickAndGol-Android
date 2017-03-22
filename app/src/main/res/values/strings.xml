@@ -19,4 +19,14 @@
     <string name="new_event_activity_create_event">Create an Event</string>
     <string name="new_event_activity_spinner_default_text"><![CDATA[<Choose One>]]></string>
     <string name="event_search_settings_activity_spinner_default_text">All</string>
+    <string name="event_activity_event">Event</string>
+    <string name="event_activity_title_camera_access">Camera access denied</string>
+    <string name="event_activity_message_camera_access">Pick And Gol will not be able to take images from your device camera.</string>
+    <string name="event_activity_image_process_error">Unable to process image</string>
+    <string name="event_activity_validate_error_title">Invalid data</string>
+    <string name="event_activity_error_name_event">You must specify a name for the event.</string>
+    <string name="event_activity_error_category_event">You must select a category for the event.</string>
+    <string name="event_activity_error_date_event"><![CDATA[You must specify date & hour for the event.]]></string>
+    <string name="event_activity_image_upload_error_title">Image Upload error</string>
+    <string name="event_activity_image_upload_error_message">The selected image could not be uploaded. Please try again.</string>
 </resources>

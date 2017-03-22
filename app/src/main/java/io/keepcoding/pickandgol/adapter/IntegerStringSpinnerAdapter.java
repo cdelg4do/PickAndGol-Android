@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
+import java.util.Arrays;
+
 import io.keepcoding.pickandgol.model.CategoryAggregate;
 
 
@@ -90,6 +92,10 @@ public class IntegerStringSpinnerAdapter extends BaseAdapter {
         text.setText(values[pos]);
 
         return view;
+    }
+
+    public int getPositionForCategoryName(String categoryName) {
+        return Arrays.binarySearch(values, categoryName);
     }
 
     public static IntegerStringSpinnerAdapter createAdapterForCategoriesSpinner(final Context context,

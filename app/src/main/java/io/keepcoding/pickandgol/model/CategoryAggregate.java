@@ -6,7 +6,7 @@ import android.support.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CategoryAggregate implements Iterable<Category>, Updatable<Category> {
+public class CategoryAggregate implements Iterable<Category>, Updatable<Category>, Searchable<Category> {
     private List<Category> categories;
 
     public CategoryAggregate() {
@@ -55,5 +55,17 @@ public class CategoryAggregate implements Iterable<Category>, Updatable<Category
         for (int i = 0; i < moreElements.size(); i++) {
             categories.add(moreElements.get(i));
         }
+    }
+
+    @Nullable
+    @Override
+    public Category search(String id) {
+        for (Category category: categories) {
+            if (category.getId().equals(id)) {
+                return category;
+            }
+        }
+
+        return null;
     }
 }
