@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import io.keepcoding.pickandgol.activity.DetailEventActivity;
+import io.keepcoding.pickandgol.activity.EventActivity;
 import io.keepcoding.pickandgol.activity.EventSearchSettingsActivity;
 import io.keepcoding.pickandgol.activity.LocationPickerActivity;
 import io.keepcoding.pickandgol.activity.MainActivity;
@@ -26,10 +28,11 @@ import static io.keepcoding.pickandgol.activity.LocationPickerActivity.INITIAL_L
 public class Navigator {
 
     public static final int EVENT_SEARCH_ACTIVITY_REQUEST_CODE = 1001;
-    public static final int NEW_EVENT_ACTIVITY_REQUEST_CODE = 1002;
+    private static final int NEW_EVENT_ACTIVITY_REQUEST_CODE = 1002;
     public static final int PUB_SEARCH_ACTIVITY_REQUEST_CODE = 1003;
-    public static final int NEW_PUB_ACTIVITY_REQUEST_CODE = 1004;
+    private static final int NEW_PUB_ACTIVITY_REQUEST_CODE = 1004;
     public static final int LOCATION_PICKER_ACTIVITY_REQUEST_CODE = 1005;
+    private static final int EDIT_EVENT_ACTIVITY_REQUEST_CODE = 1006;
 
     /**
      * Navigates from an instance of SplashActivity to another of MainActivity
@@ -114,8 +117,8 @@ public class Navigator {
      * @param newEvent          the new event created in the activity (if not null)
      * @return                  a reference to the intent created (useful for testing)
      */
-    public static Intent backFromNewEventActivity(final NewEventActivity newEventActivity,
-                                                  @Nullable Event newEvent) {
+    public static Intent backFromEventActivity(final EventActivity newEventActivity,
+                                               @Nullable Event newEvent) {
 
         Intent i = new Intent();
 
@@ -224,5 +227,14 @@ public class Navigator {
         return i;
     }
 
+    public static Intent fromMainActivityToEditEventActivity(final MainActivity mainActivity,
+                                                             @NonNull Pub currentPub,
+                                                             @NonNull Event event) {
+        Intent i = new Intent(mainActivity, DetailEventActivity.class);
+        i.putExtra(DetailEventActivity.PUB_MODEL_KEY, currentPub);
+        i.putExtra(DetailEventActivity.EVENT_MODEL_KEY, event);
+        mainActivity.startActivityForResult(i, EDIT_EVENT_ACTIVITY_REQUEST_CODE);
 
+        return i;
+    }
 }

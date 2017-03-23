@@ -916,7 +916,14 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
 
     @Override
     public void onItemClicked(Event event, int position) {
-        Utils.shortSnack(MainActivity.this, event.getName() +" clicked.");
+        Pub currentPub = new Pub("58c782770c0ef45dfc5875df", "La Biblioteca",
+                43.558096, -5.923779,
+                "https://www.facebook.com/Cafe.LaBiblioteca",
+                "58b471ddd9f0163f6eee6375",
+                new ArrayList<String>(), new ArrayList<String>()
+        );
+
+        Navigator.fromMainActivityToEditEventActivity(this, currentPub, event);
     }
 
     @Override

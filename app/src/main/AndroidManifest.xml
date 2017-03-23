@@ -73,6 +73,10 @@
 
         <activity android:name=".activity.LocationPickerActivity">
         </activity>
+        <activity android:name=".activity.DetailEventActivity"
+            android:windowSoftInputMode="adjustPan"
+            android:configChanges="orientation|screenSize">
+        </activity>
 
         <!-- Amazon S3 Transfer Utility service -->
         <service

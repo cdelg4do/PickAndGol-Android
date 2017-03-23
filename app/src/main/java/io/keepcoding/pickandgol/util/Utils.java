@@ -225,6 +225,27 @@ public class Utils {
         return isoString;
     }
 
+    public static String getDateString(Date date) {
+        TimeZone utc = TimeZone.getTimeZone("UTC");
+        DateFormat isoFormatter = DateFormat.getDateInstance();
+        isoFormatter.setTimeZone(utc);
+        return isoFormatter.format(date);
+    }
+
+    public static String getDateString(int year, int month, int day) {
+        Calendar cal = Calendar.getInstance();
+        cal.set(year, month, day);
+        Date date = cal.getTime();
+        return getDateString(date);
+    }
+
+    public static String getTimeString(Date date) {
+        TimeZone utc = TimeZone.getTimeZone("UTC");
+        DateFormat isoFormatter = DateFormat.getTimeInstance(DateFormat.SHORT);
+        isoFormatter.setTimeZone(utc);
+        return isoFormatter.format(date);
+    }
+
 
     /*
         Other auxiliary methods
