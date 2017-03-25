@@ -26,6 +26,7 @@ import io.keepcoding.pickandgol.manager.net.response.EventDetailResponse;
 import io.keepcoding.pickandgol.manager.net.response.EventListResponse;
 import io.keepcoding.pickandgol.manager.net.response.LoginResponse;
 import io.keepcoding.pickandgol.manager.net.response.PubDetailResponse;
+import io.keepcoding.pickandgol.manager.net.response.UserRegisterResponse;
 import io.keepcoding.pickandgol.manager.net.response.UserResponse;
 
 import static android.content.Context.CONNECTIVITY_SERVICE;
@@ -303,6 +304,10 @@ public class NetworkManager {
                 parsedResponse = parseCategoryListResponse(response);
                 break;
 
+            case REGISTER:
+                parsedResponse = parseUserRegisterResponse(response);
+                break;
+
             default:
                 parsedResponse = null;
                 break;
@@ -425,4 +430,20 @@ public class NetworkManager {
         return categoryListResponse;
     }
 
+    @Nullable
+    private UserRegisterResponse parseUserRegisterResponse(String responseString) {
+
+        UserRegisterResponse userResponse = null;
+
+        try {
+            Reader reader = new StringReader(responseString);
+            Gson gson = new GsonBuilder().create();
+            userResponse = gson.fromJson(reader, UserRegisterResponse.class);
+        }
+        catch (RuntimeException e) {
+            e.printStackTrace();
+        }
+
+        return userResponse;
+    }
 }

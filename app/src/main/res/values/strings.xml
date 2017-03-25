@@ -37,4 +37,26 @@
     <string name="event_activity_error_date_event"><![CDATA[You must specify date & hour for the event.]]></string>
     <string name="event_activity_image_upload_error_title">Image Upload error</string>
     <string name="event_activity_image_upload_error_message">The selected image could not be uploaded. Please try again.</string>
+    <string name="drawer_menu_login">Log in</string>
+    <string name="drawer_menu_logout">Log out</string>
+    <string name="drawer_menu_signin">Sign in</string>
+    <string name="drawer_menu_event_search">Event Search</string>
+    <string name="drawer_menu_create_event">Create Event</string>
+    <string name="drawer_menu_upload_image">Upload an image</string>
+    <string name="drawer_menu_create_pub">Create Pub</string>
+    <string name="drawer_menu_user_detail">User detail</string>
+    <string name="drawer_menu_your_account">Your account</string>
+    <string name="new_user_name">Name:</string>
+    <string name="new_user_name_hint">Enter a name for the new user</string>
+    <string name="new_user_email">Email</string>
+    <string name="new_user_email_hint">Enter an email address</string>
+    <string name="new_user_password">Password</string>
+    <string name="new_user_cancel_button">Cancel</string>
+    <string name="new_user_sign_in_button">Sign in</string>
+    <string name="new_user_password_hint">Enter a password</string>
+    <string name="activity_new_user_title">Sign in</string>
+    <string name="new_user_activity_validate_error_title">Invalid data</string>
+    <string name="new_user_activity_validate_error_name">You must specify a name for the new user.</string>
+    <string name="new_user_activity_validate_error_email">You must specify an email for the new user.</string>
+    <string name="new_user_activity_validate_error_password">You must specify a password for the new user</string>
 </resources>

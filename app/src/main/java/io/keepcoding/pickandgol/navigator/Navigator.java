@@ -11,6 +11,7 @@ import io.keepcoding.pickandgol.activity.LocationPickerActivity;
 import io.keepcoding.pickandgol.activity.MainActivity;
 import io.keepcoding.pickandgol.activity.NewEventActivity;
 import io.keepcoding.pickandgol.activity.NewPubActivity;
+import io.keepcoding.pickandgol.activity.NewUserActivity;
 import io.keepcoding.pickandgol.activity.SplashActivity;
 import io.keepcoding.pickandgol.model.Event;
 import io.keepcoding.pickandgol.model.Pub;
@@ -234,6 +235,13 @@ public class Navigator {
         i.putExtra(DetailEventActivity.PUB_MODEL_KEY, currentPub);
         i.putExtra(DetailEventActivity.EVENT_MODEL_KEY, event);
         mainActivity.startActivityForResult(i, EDIT_EVENT_ACTIVITY_REQUEST_CODE);
+
+        return i;
+    }
+
+    public static Intent fromMainActivityToNewUserActivity(final MainActivity mainActivity) {
+        Intent i = new Intent(mainActivity, NewUserActivity.class);
+        mainActivity.startActivity(i);
 
         return i;
     }

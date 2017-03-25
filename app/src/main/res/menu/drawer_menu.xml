@@ -7,48 +7,53 @@
             android:id="@+id/event_search"
             android:icon="@android:drawable/ic_menu_gallery"
             android:checked = "true"
-            android:title="Event Search"/>
+            android:title="@string/drawer_menu_event_search"/>
 
         <item
             android:id="@+id/create_event"
             android:icon="@android:drawable/ic_menu_today"
             android:checkable = "true"
-            android:title="Create Event"/>
+            android:title="@string/drawer_menu_create_event"/>
 
         <item
             android:id="@+id/drawer_menu_upload_image"
             android:icon="@android:drawable/stat_sys_upload"
             android:checkable="false"
-            android:title="Upload an image"/>
+            android:title="@string/drawer_menu_upload_image"/>
 
         <item
             android:id="@+id/drawer_menu_create_pub"
             android:icon="@android:drawable/stat_sys_download"
             android:checkable = "true"
-            android:title="Create Pub"/>
+            android:title="@string/drawer_menu_create_pub"/>
 
         <item
             android:id="@+id/drawer_menu_user_detail"
             android:icon="@android:drawable/ic_menu_mapmode"
             android:checkable = "false"
-            android:title="User detail"/>
+            android:title="@string/drawer_menu_user_detail"/>
 
         <item
             android:id="@+id/account_section"
-            android:title="Your account">
+            android:title="@string/drawer_menu_your_account">
             <menu>
 
                 <item
                     android:id="@+id/drawer_menu_log_in"
                     android:icon="@android:drawable/ic_input_add"
                     android:checkable = "false"
-                    android:title="Log in" />
+                    android:title="@string/drawer_menu_login" />
 
                 <item
                     android:id="@+id/drawer_menu_log_out"
                     android:icon="@android:drawable/stat_notify_more"
                     android:checkable = "false"
-                    android:title="Log out" />
+                    android:title="@string/drawer_menu_logout" />
+                <item
+                    android:id="@+id/drawer_menu_register"
+                    android:icon="@android:drawable/ic_input_add"
+                    android:checkable = "false"
+                    android:title="@string/drawer_menu_signin" />
             </menu>
         </item>
 
