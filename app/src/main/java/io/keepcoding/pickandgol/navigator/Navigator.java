@@ -11,11 +11,13 @@ import io.keepcoding.pickandgol.activity.LocationPickerActivity;
 import io.keepcoding.pickandgol.activity.MainActivity;
 import io.keepcoding.pickandgol.activity.NewEventActivity;
 import io.keepcoding.pickandgol.activity.NewPubActivity;
+import io.keepcoding.pickandgol.activity.PubSearchSettingsActivity;
 import io.keepcoding.pickandgol.activity.SplashActivity;
 import io.keepcoding.pickandgol.model.Event;
 import io.keepcoding.pickandgol.model.Pub;
 import io.keepcoding.pickandgol.model.User;
 import io.keepcoding.pickandgol.search.EventSearchParams;
+import io.keepcoding.pickandgol.search.PubSearchParams;
 
 import static android.app.Activity.RESULT_CANCELED;
 import static android.app.Activity.RESULT_OK;
@@ -264,6 +266,45 @@ public class Navigator {
         }
 
         userActivity.finish();
+
+        return i;
+    }
+
+    /**
+     * Navigates from an instance of MainActivity to another of PubSearchSettingsActivity,
+     * passing a given PubSearchParams object under MainActivity.CURRENT_PUB_SEARCH_PARAMS_KEY
+     * (the MainActivity will wait for result PUB_SEARCH_ACTIVITY_REQUEST_CODE)
+     *
+     * @param mainActivity  context for the intent created during the operation
+     * @return              a reference to the intent created (useful for testing)
+     */
+    public static Intent fromMainActivityToPubSearchActivity(final MainActivity mainActivity,
+                                                             @NonNull PubSearchParams currentSearchParams,
+                                                             boolean showDistanceSelector) {
+
+        Intent i = new Intent(mainActivity, PubSearchSettingsActivity.class);
+        i.putExtra(MainActivity.CURRENT_PUB_SEARCH_PARAMS_KEY, currentSearchParams);
+        i.putExtra(MainActivity.SHOW_DISTANCE_SELECTOR_KEY, showDistanceSelector);
+        mainActivity.startActivityForResult(i, PUB_SEARCH_ACTIVITY_REQUEST_CODE);
+
+        return i;
+    }
+
+    /**
+     * Returns from an instance of PubSearchSettingsActivity to the previous activity,
+     * sending back a new PubSearchParams object.
+     *
+     * @param pubSearchSettingsActivity   context for the intent created during the operation
+     * @param newSearchParams             the new search settings that have been set on the Activity
+     * @return                            a reference to the intent created (useful for testing)
+     */
+    public static Intent backFromPubSearchActivity(final PubSearchSettingsActivity pubSearchSettingsActivity,
+                                                   @NonNull PubSearchParams newSearchParams) {
+
+        Intent i = new Intent();
+        i.putExtra(MainActivity.NEW_PUB_SEARCH_PARAMS_KEY, newSearchParams);
+        pubSearchSettingsActivity.setResult(RESULT_OK, i);
+        pubSearchSettingsActivity.finish();
 
         return i;
     }

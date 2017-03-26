@@ -31,10 +31,15 @@ import butterknife.ButterKnife;
 import io.keepcoding.pickandgol.R;
 import io.keepcoding.pickandgol.dialog.LoginDialog;
 import io.keepcoding.pickandgol.fragment.EventListFragment;
+import io.keepcoding.pickandgol.fragment.EventListFragment.EventListListener;
 import io.keepcoding.pickandgol.fragment.MainContentFragment;
+import io.keepcoding.pickandgol.fragment.PubListFragment;
+import io.keepcoding.pickandgol.fragment.PubListFragment.PubListListener;
 import io.keepcoding.pickandgol.interactor.LoginInteractor;
 import io.keepcoding.pickandgol.interactor.SearchEventsInteractor;
 import io.keepcoding.pickandgol.interactor.SearchEventsInteractor.SearchEventsInteractorListener;
+import io.keepcoding.pickandgol.interactor.SearchPubsInteractor;
+import io.keepcoding.pickandgol.interactor.SearchPubsInteractor.SearchPubsInteractorListener;
 import io.keepcoding.pickandgol.manager.geo.GeoManager;
 import io.keepcoding.pickandgol.manager.image.ImageManager;
 import io.keepcoding.pickandgol.manager.image.ImageManager.ImageProcessingListener;
@@ -42,13 +47,17 @@ import io.keepcoding.pickandgol.manager.session.SessionManager;
 import io.keepcoding.pickandgol.model.Event;
 import io.keepcoding.pickandgol.model.EventAggregate;
 import io.keepcoding.pickandgol.model.Pub;
+import io.keepcoding.pickandgol.model.PubAggregate;
 import io.keepcoding.pickandgol.model.User;
 import io.keepcoding.pickandgol.navigator.Navigator;
 import io.keepcoding.pickandgol.search.EventSearchParams;
+import io.keepcoding.pickandgol.search.PubSearchParams;
 import io.keepcoding.pickandgol.util.PermissionChecker;
 import io.keepcoding.pickandgol.util.Utils;
 
 import static io.keepcoding.pickandgol.activity.MainActivity.ImagePurpose.UPLOAD_TO_CLOUD;
+import static io.keepcoding.pickandgol.activity.MainActivity.ShowingFragment.EVENT_LIST;
+import static io.keepcoding.pickandgol.activity.MainActivity.ShowingFragment.PUB_LIST;
 import static io.keepcoding.pickandgol.interactor.LoginInteractor.LoginInteractorListener;
 import static io.keepcoding.pickandgol.manager.image.ImageManagerSettings.IMAGE_PICKER_REQUEST_CODE;
 import static io.keepcoding.pickandgol.util.PermissionChecker.CheckPermissionListener;
@@ -63,20 +72,23 @@ import static io.keepcoding.pickandgol.util.PermissionChecker.REQUEST_FOR_STORAG
 /**
  * This class is the application main activity
  */
-public class MainActivity extends AppCompatActivity implements EventListFragment.EventListListener {
+public class MainActivity extends AppCompatActivity implements EventListListener, PubListListener {
 
     private final static String LOG_TAG = "MainActivity";
 
     public static final int LOCATION_PICKER_PERMISSION_REQ_CODE = 501;
 
     public static String CURRENT_EVENT_SEARCH_PARAMS_KEY = "CURRENT_EVENT_SEARCH_PARAMS_KEY";
+    public static String CURRENT_PUB_SEARCH_PARAMS_KEY = "CURRENT_PUB_SEARCH_PARAMS_KEY";
     public static String SHOW_DISTANCE_SELECTOR_KEY = "SHOW_DISTANCE_SELECTOR_KEY";
     public static String NEW_EVENT_SEARCH_PARAMS_KEY = "NEW_EVENT_SEARCH_PARAMS_KEY";
+    public static String NEW_PUB_SEARCH_PARAMS_KEY = "NEW_PUB_SEARCH_PARAMS_KEY";
 
     // This helps to know what was the fragment showing before the activity was destroyed
     // (if it is OTHER, it means that does not mind)
-    private enum ShowingFragment {
+    public enum ShowingFragment {
         EVENT_LIST,
+        PUB_LIST,
         OTHER
     }
 
@@ -88,7 +100,9 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
 
     private final String ACTIONBAR_TITLE_SAVED_STATE = "ACTIONBAR_TITLE_SAVED_STATE";
     private final String LAST_EVENT_SEARCH_SAVED_STATE = "LAST_EVENT_SEARCH_SAVED_STATE";
-    private final String LAST_TOTAL_RESULTS_SAVED_STATE = "LAST_TOTAL_RESULTS_SAVED_STATE";
+    private final String LAST_PUB_SEARCH_SAVED_STATE = "LAST_PUB_SEARCH_SAVED_STATE";
+    private final String LAST_EVENT_TOTAL_RESULTS_SAVED_STATE = "LAST_EVENT_TOTAL_RESULTS_SAVED_STATE";
+    private final String LAST_PUB_TOTAL_RESULTS_SAVED_STATE = "LAST_PUB_TOTAL_RESULTS_SAVED_STATE";
     private final String SHOWING_FRAGMENT_SAVED_STATE = "SHOWING_FRAGMENT_SAVED_STATE";
 
     private final int DEFAULT_DRAWER_ITEM = R.id.event_search;
@@ -101,9 +115,12 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
 
     private Fragment mainFragment;
     private EventListFragment eventListFragment;
+    private PubListFragment pubListFragment;
 
     private EventSearchParams lastEventSearchParams;
+    private PubSearchParams lastPubSearchParams;
     private int lastEventSearchTotalResults;
+    private int lastPubSearchTotalResults;
 
     private DrawerLayout mainDrawer;
     private View drawerHeader;
@@ -149,9 +166,12 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
 
             showingFragment = ShowingFragment.OTHER;
 
-            // Set initial event search params: empty
+            // Set initial event search and initial pub search params
             lastEventSearchParams = EventSearchParams.buildEmptyParams();
             lastEventSearchTotalResults = 0;
+
+            lastPubSearchParams = PubSearchParams.buildEmptyParams();
+            lastPubSearchTotalResults = 0;
 
             doDefaultOperation();
         }
@@ -177,10 +197,24 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
                 return true;
 
             case R.id.main_menu_search:
-                Navigator.fromMainActivityToEventSearchActivity(
-                        this,
-                        lastEventSearchParams,
-                        GeoManager.isLocationAccessGranted(this));
+
+                if (showingFragment == EVENT_LIST)
+
+                    Navigator.fromMainActivityToEventSearchActivity(
+                            this,
+                            lastEventSearchParams,
+                            GeoManager.isLocationAccessGranted(this)
+                    );
+
+
+                else if (showingFragment == PUB_LIST)
+
+                    Navigator.fromMainActivityToPubSearchActivity(
+                            this,
+                            lastPubSearchParams,
+                            GeoManager.isLocationAccessGranted(this)
+                    );
+
                 return true;
 
             default:
@@ -194,7 +228,9 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
 
         outState.putString(ACTIONBAR_TITLE_SAVED_STATE, actionBarTitle);
         outState.putSerializable(LAST_EVENT_SEARCH_SAVED_STATE, lastEventSearchParams);
-        outState.putInt(LAST_TOTAL_RESULTS_SAVED_STATE, lastEventSearchTotalResults);
+        outState.putInt(LAST_EVENT_TOTAL_RESULTS_SAVED_STATE, lastEventSearchTotalResults);
+        outState.putSerializable(LAST_PUB_SEARCH_SAVED_STATE, lastPubSearchParams);
+        outState.putInt(LAST_PUB_TOTAL_RESULTS_SAVED_STATE, lastPubSearchTotalResults);
         outState.putSerializable(SHOWING_FRAGMENT_SAVED_STATE, showingFragment);
 
         super.onSaveInstanceState(outState);
@@ -208,11 +244,18 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
         setTitle(actionBarTitle);
 
         lastEventSearchParams = (EventSearchParams) savedInstanceState.getSerializable(LAST_EVENT_SEARCH_SAVED_STATE);
-        lastEventSearchTotalResults = savedInstanceState.getInt(LAST_TOTAL_RESULTS_SAVED_STATE);
+        lastEventSearchTotalResults = savedInstanceState.getInt(LAST_EVENT_TOTAL_RESULTS_SAVED_STATE);
+
+        lastPubSearchParams = (PubSearchParams) savedInstanceState.getSerializable(LAST_PUB_SEARCH_SAVED_STATE);
+        lastPubSearchTotalResults = savedInstanceState.getInt(LAST_PUB_TOTAL_RESULTS_SAVED_STATE);
 
         showingFragment = (ShowingFragment) savedInstanceState.getSerializable(SHOWING_FRAGMENT_SAVED_STATE);
-        if (showingFragment == ShowingFragment.EVENT_LIST)
+
+        if (showingFragment == EVENT_LIST)
             eventListFragment = (EventListFragment) getSupportFragmentManager().findFragmentById(R.id.mainContentFragment_placeholder);
+
+        else if (showingFragment == PUB_LIST)
+            pubListFragment = (PubListFragment) getSupportFragmentManager().findFragmentById(R.id.mainContentFragment_placeholder);
     }
 
     // Set the layout toolbar as the activity action bar
@@ -325,6 +368,31 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
             });
         }
 
+        // If we are coming from the Pub Search Settings Activity
+        else if (requestCode == Navigator.PUB_SEARCH_ACTIVITY_REQUEST_CODE &&
+                resultCode == RESULT_OK) {
+
+            final PubSearchParams newSearchParams = (PubSearchParams) data.getSerializableExtra(NEW_PUB_SEARCH_PARAMS_KEY);
+
+            // Check if we have permission to access the device location, before performing a search
+            locationChecker.checkBeforeAsking(new CheckPermissionListener() {
+                @Override
+                public void onPermissionDenied() {
+                    String msg = "Pick And Gol will not be able to search based on your location.";
+                    Utils.shortToast(MainActivity.this, msg);
+
+                    searchPubsFirstPage(newSearchParams, null);
+                    mainDrawer.closeDrawers();
+                }
+
+                @Override
+                public void onPermissionGranted() {
+                    searchPubsFirstPage(newSearchParams, null);
+                    mainDrawer.closeDrawers();
+                }
+            });
+        }
+
         // If we are coming from the image picker
         else if (requestCode == IMAGE_PICKER_REQUEST_CODE) {
 
@@ -416,7 +484,7 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
 
             case R.id.event_search:
 
-                showingFragment = ShowingFragment.EVENT_LIST;
+                showingFragment = EVENT_LIST;
 
                 actionBarTitle = menuItem.getTitle().toString();
                 setTitle(actionBarTitle);
@@ -454,6 +522,34 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
                 mainDrawer.closeDrawers();
                 break;
 
+            case R.id.pub_search:
+
+                showingFragment = PUB_LIST;
+
+                actionBarTitle = menuItem.getTitle().toString();
+                setTitle(actionBarTitle);
+
+                // Check if we have permission to access the device location, before performing a search
+                locationChecker.checkBeforeAsking(new CheckPermissionListener() {
+                    @Override
+                    public void onPermissionDenied() {
+                        String msg = "Pick And Gol will not be able to search based on your location.";
+                        Utils.shortToast(MainActivity.this, msg);
+
+                        searchPubsFirstPage(lastPubSearchParams, null);
+                        mainDrawer.closeDrawers();
+                    }
+
+                    @Override
+                    public void onPermissionGranted() {
+                        searchPubsFirstPage(lastPubSearchParams, null);
+                        mainDrawer.closeDrawers();
+                    }
+                });
+
+                break;
+
+            /*
             case R.id.drawer_menu_upload_image:
 
                 // Check if we have permission to access the camera, before opening the image picker
@@ -476,34 +572,35 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
                 });
 
                 break;
+            */
 
             case R.id.drawer_menu_create_pub:
 
                 Navigator.fromMainActivityToNewPubActivity(this);
 
-                /**
-                 locationChecker.checkBeforeAsking(new CheckPermissionListener() {
-                @Override
-                public void onPermissionDenied() {
-                Navigator.fromNewPubActivityToLocationPickerActivity(MainActivity.this, null, null);
-                }
+                /*
+                locationChecker.checkBeforeAsking(new CheckPermissionListener() {
+                    @Override
+                    public void onPermissionDenied() {
+                        Navigator.fromNewPubActivityToLocationPickerActivity(MainActivity.this, null, null);
+                    }
 
-                @Override
-                public void onPermissionGranted() {
-                gm.requestLastLocation(new GeoManager.GeoDirectLocationListener() {
-                @Override
-                public void onLocationError(Throwable error) {
-                Navigator.fromNewPubActivityToLocationPickerActivity(MainActivity.this, null, null);
-                }
+                    @Override
+                    public void onPermissionGranted() {
+                        gm.requestLastLocation(new GeoManager.GeoDirectLocationListener() {
+                            @Override
+                            public void onLocationError(Throwable error) {
+                                Navigator.fromNewPubActivityToLocationPickerActivity(MainActivity.this, null, null);
+                            }
 
-                @Override
-                public void onLocationSuccess(double latitude, double longitude) {
-                Navigator.fromNewPubActivityToLocationPickerActivity(MainActivity.this, latitude, longitude);
-                }
+                            @Override
+                            public void onLocationSuccess(double latitude, double longitude) {
+                                Navigator.fromNewPubActivityToLocationPickerActivity(MainActivity.this, latitude, longitude);
+                            }
+                        });
+                    }
                 });
-                }
-                });
-                 **/
+                */
 
                 mainDrawer.closeDrawers();
                 break;
@@ -658,6 +755,106 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
             public void onSearchEventsSuccess(EventAggregate events) {
 
                 eventListFragment.addMoreEvents(events);
+            }
+        });
+    }
+
+
+    private void searchPubsFirstPage(final @NonNull PubSearchParams searchParams, final @Nullable SwipeRefreshLayout swipeCaller) {
+
+        searchParams.setOffset(0);
+
+        // If we didn't come from a swipe gesture, show a progress dialog
+        final ProgressDialog pDialog = Utils.newProgressDialog(this, "Searching pubs...");
+        if ( swipeCaller == null )
+            pDialog.show();
+
+        // Define what to do with the search results
+        final SearchPubsInteractorListener interactorListener = new SearchPubsInteractorListener() {
+
+            @Override
+            public void onSearchPubsFail(Exception e) {
+
+                if (swipeCaller != null)    swipeCaller.setRefreshing(false);
+                else                        pDialog.dismiss();
+
+                Log.e(LOG_TAG, "Failed to search pubs: "+ e.toString() );
+                Utils.simpleDialog(MainActivity.this, "Pub search error", e.getMessage());
+            }
+
+            @Override
+            public void onSearchPubsSuccess(PubAggregate pubs) {
+
+                if (swipeCaller == null)    pDialog.dismiss();
+                else                        swipeCaller.setRefreshing(false);
+
+                lastPubSearchTotalResults = pubs.getTotalResults();
+
+                pubListFragment = PubListFragment.newInstance(pubs);
+
+                getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.mainContentFragment_placeholder, pubListFragment)
+                        .commit();
+
+                Utils.shortSnack(MainActivity.this, pubs.getTotalResults() +" pub(s) found");
+            }
+        };
+
+
+        // The current location will be sent only if it is available
+        searchParams.setCoordinates(null, null);
+
+        if ( !GeoManager.isLocationAccessGranted(this) ) {
+            lastPubSearchParams = searchParams;
+            new SearchPubsInteractor().execute(MainActivity.this, searchParams, interactorListener);
+        }
+        else {
+            gm.requestLastLocation(new GeoManager.GeoDirectLocationListener() {
+                @Override
+                public void onLocationError(Throwable error) {
+                    lastPubSearchParams = searchParams;
+                    new SearchPubsInteractor().execute(MainActivity.this, searchParams, interactorListener);
+                }
+
+                @Override
+                public void onLocationSuccess(double latitude, double longitude) {
+                    searchParams.setCoordinates(latitude, longitude);
+                    lastPubSearchParams = searchParams;
+                    new SearchPubsInteractor().execute(MainActivity.this, searchParams, interactorListener);
+                }
+            });
+        }
+    }
+
+
+    private void searchPubsNextPage(final @NonNull PubSearchParams searchParams) {
+
+        int newOffset = searchParams.getOffset() + searchParams.getLimit();
+
+        // If we are already at the last page of results, do nothing and return
+        if (newOffset >= lastPubSearchTotalResults)
+            return;
+
+        searchParams.setOffset(newOffset);
+
+        lastPubSearchParams = searchParams;
+
+        // No need to set the location for "next page" requests,
+        // so we can launch the request without checking permissions for the location services.
+        new SearchPubsInteractor().execute(MainActivity.this, searchParams, new SearchPubsInteractorListener() {
+
+            @Override
+            public void onSearchPubsFail(Exception e) {
+
+                Log.e(LOG_TAG, "Failed to search more pubs: "+ e.toString() );
+                Utils.shortSnack(MainActivity.this, "Error: "+ e.getMessage());
+            }
+
+            @Override
+            public void onSearchPubsSuccess(PubAggregate pubs) {
+
+                pubListFragment.addMorePubs(pubs);
             }
         });
     }
@@ -874,7 +1071,6 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
     }
 
 
-
     /*** Implementation of EventListFragment.EventListListener interface ***/
 
     @Override
@@ -906,5 +1102,38 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
     @Override
     public void onLoadNextPage() {
         searchEventsNextPage(lastEventSearchParams);
+    }
+
+
+    /*** Implementation of PubListFragment.PubListListener interface ***/
+
+    @Override
+    public void onPubClicked(Pub pub, int position) {
+        Utils.shortSnack(MainActivity.this, pub.getName() +" clicked.");
+    }
+
+    @Override
+    public void onPubListSwipeRefresh(@Nullable final SwipeRefreshLayout swipeCaller) {
+
+        // Check if we have permission to access the device location, before performing a search
+        locationChecker.checkBeforeAsking(new CheckPermissionListener() {
+            @Override
+            public void onPermissionDenied() {
+                String msg = "Pick And Gol will not be able to search based on your location.";
+                Utils.shortToast(MainActivity.this, msg);
+
+                searchPubsFirstPage(lastPubSearchParams, swipeCaller);
+            }
+
+            @Override
+            public void onPermissionGranted() {
+                searchPubsFirstPage(lastPubSearchParams, swipeCaller);
+            }
+        });
+    }
+
+    @Override
+    public void onPubListLoadNextPage() {
+        searchPubsNextPage(lastPubSearchParams);
     }
 }

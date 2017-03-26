@@ -42,7 +42,7 @@
     <string name="drawer_menu_signin">Sign in</string>
     <string name="drawer_menu_event_search">Event Search</string>
     <string name="drawer_menu_create_event">Create Event</string>
-    <string name="drawer_menu_upload_image">Upload an image</string>
+    <string name="drawer_menu_pub_search">Pub Search</string>
     <string name="drawer_menu_create_pub">Create Pub</string>
     <string name="drawer_menu_user_detail">User detail</string>
     <string name="drawer_menu_your_account">Your account</string>

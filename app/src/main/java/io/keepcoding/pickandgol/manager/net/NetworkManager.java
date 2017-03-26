@@ -26,6 +26,7 @@ import io.keepcoding.pickandgol.manager.net.response.EventDetailResponse;
 import io.keepcoding.pickandgol.manager.net.response.EventListResponse;
 import io.keepcoding.pickandgol.manager.net.response.LoginResponse;
 import io.keepcoding.pickandgol.manager.net.response.PubDetailResponse;
+import io.keepcoding.pickandgol.manager.net.response.PubListResponse;
 import io.keepcoding.pickandgol.manager.net.response.UserRegisterResponse;
 import io.keepcoding.pickandgol.manager.net.response.UserResponse;
 
@@ -296,6 +297,10 @@ public class NetworkManager {
                 parsedResponse = parseEventDetailResponse(response);
                 break;
 
+            case PUB_LIST:
+                parsedResponse = parsePubListResponse(response);
+                break;
+
             case PUB_DETAIL:
                 parsedResponse = parsePubDetailResponse(response);
                 break;
@@ -392,6 +397,24 @@ public class NetworkManager {
         }
 
         return eventDetailResponse;
+    }
+
+    // JsonResponseType: PUB_LIST
+    @Nullable
+    private PubListResponse parsePubListResponse(String responseString) {
+
+        PubListResponse pubListResponse = null;
+
+        try {
+            Reader reader = new StringReader(responseString);
+            Gson gson = new GsonBuilder().create();
+            pubListResponse = gson.fromJson(reader, PubListResponse.class);
+        }
+        catch (RuntimeException e) {
+            e.printStackTrace();
+        }
+
+        return pubListResponse;
     }
 
     // JsonResponseType: PUB_DETAIL

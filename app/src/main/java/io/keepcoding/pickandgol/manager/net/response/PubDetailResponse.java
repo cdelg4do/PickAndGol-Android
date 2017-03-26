@@ -5,6 +5,7 @@ import android.support.annotation.Nullable;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import io.keepcoding.pickandgol.manager.net.ParsedData;
@@ -79,14 +80,25 @@ public class PubDetailResponse implements ParsedResponse {
         }
 
         public List<String> getEvents() {
+
+            if (events == null)
+                events = new ArrayList<>();
+
             return events;
         }
 
         public List<String> getPhotos() {
+
+            if (photos == null)
+                photos = new ArrayList<>();
+
             return photos;
         }
 
 
+        /**
+         * This class represents the 'location' field of a pub.
+         */
         public class Location {
 
             @SerializedName("coordinates")       private List<Double> coordinates;

@@ -3,6 +3,7 @@ package io.keepcoding.pickandgol.model;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,7 +11,7 @@ import java.util.List;
 /**
  * This class is an aggregate of Pub objects, obtained from a pub search.
  */
-public class PubAggregate implements Iterable<Pub>, Updatable<Pub>, Searchable<Pub> {
+public class PubAggregate implements Iterable<Pub>, Updatable<Pub>, Searchable<Pub>, Serializable {
 
     // The list of pubs contained in this aggregate
     private List<Pub> pubList;
