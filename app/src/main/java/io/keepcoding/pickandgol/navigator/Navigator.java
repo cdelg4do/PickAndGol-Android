@@ -4,15 +4,13 @@ import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
-import io.keepcoding.pickandgol.activity.DetailEventActivity;
 import io.keepcoding.pickandgol.activity.EditUserActivity;
-import io.keepcoding.pickandgol.activity.EventActivity;
+import io.keepcoding.pickandgol.activity.EventDetailActivity;
 import io.keepcoding.pickandgol.activity.EventSearchSettingsActivity;
 import io.keepcoding.pickandgol.activity.LocationPickerActivity;
 import io.keepcoding.pickandgol.activity.MainActivity;
 import io.keepcoding.pickandgol.activity.NewEventActivity;
 import io.keepcoding.pickandgol.activity.NewPubActivity;
-import io.keepcoding.pickandgol.activity.NewUserActivity;
 import io.keepcoding.pickandgol.activity.SplashActivity;
 import io.keepcoding.pickandgol.model.Event;
 import io.keepcoding.pickandgol.model.Pub;
@@ -121,8 +119,8 @@ public class Navigator {
      * @param newEvent          the new event created in the activity (if not null)
      * @return                  a reference to the intent created (useful for testing)
      */
-    public static Intent backFromEventActivity(final EventActivity newEventActivity,
-                                               @Nullable Event newEvent) {
+    public static Intent backFromNewEventActivity(final NewEventActivity newEventActivity,
+                                                  @Nullable Event newEvent) {
 
         Intent i = new Intent();
 
@@ -217,9 +215,9 @@ public class Navigator {
 
         Intent i = new Intent();
 
-        boolean latitudeWasSelected = (selectedLongitude != null && selectedLongitude != null);
+        boolean locationWasSelected = (selectedLatitude != null && selectedLongitude != null);
 
-        if (latitudeWasSelected) {
+        if (locationWasSelected) {
             i.putExtra(LocationPickerActivity.SELECTED_LATITUDE_KEY, selectedLatitude);
             i.putExtra(LocationPickerActivity.SELECTED_LONGITUDE_KEY, selectedLongitude);
             locationPickerActivity.setResult(RESULT_OK, i);
@@ -231,19 +229,19 @@ public class Navigator {
         return i;
     }
 
-    public static Intent fromMainActivityToEditEventActivity(final MainActivity mainActivity,
-                                                             @NonNull Pub currentPub,
-                                                             @NonNull Event event) {
-        Intent i = new Intent(mainActivity, DetailEventActivity.class);
-        i.putExtra(DetailEventActivity.PUB_MODEL_KEY, currentPub);
-        i.putExtra(DetailEventActivity.EVENT_MODEL_KEY, event);
-        mainActivity.startActivityForResult(i, EDIT_EVENT_ACTIVITY_REQUEST_CODE);
+    /**
+     * Navigates from an instance of MainActivity to another of EventDetailActivity,
+     * passing the Event object to show under EventDetailActivity.EVENT_MODEL_KEY.
+     *
+     * @param mainActivity  context for the intent created during the operation
+     * @param event         event to show in the new activity
+     * @return              a reference to the intent created (useful for testing)
+     */
+    public static Intent fromMainActivityToEventDetailActivity(final MainActivity mainActivity,
+                                                               @NonNull Event event) {
 
-        return i;
-    }
-
-    public static Intent fromMainActivityToNewUserActivity(final MainActivity mainActivity) {
-        Intent i = new Intent(mainActivity, NewUserActivity.class);
+        Intent i = new Intent(mainActivity, EventDetailActivity.class);
+        i.putExtra(EventDetailActivity.EVENT_MODEL_KEY, event);
         mainActivity.startActivity(i);
 
         return i;

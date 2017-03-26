@@ -127,11 +127,17 @@ public class RealmDBManagerTests {
         events.add("58a058b633674f1e95cd411f");
         events.add("58a0288b8b00070cab093c62");
 
+        List<String> photos = new ArrayList<String>();
+        photos.add("https://pickandgol.s3.amazonaws.com/67e19952-2226-4718-bd83-cb62d89ff3cb.jpg");
+
         return new Pub("58b2aef6d9f0163f6eee656h",
                 "Casa Paco",
+                true,
                 40.41665,
                 -3.70381,
                 "www.casapaco.es",
-                "589a12e6448fec0896cb49fa", events);
+                "589a12e6448fec0896cb49fa",
+                events,
+                photos);
     }
 }

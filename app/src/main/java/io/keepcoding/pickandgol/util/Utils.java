@@ -225,6 +225,39 @@ public class Utils {
         return isoString;
     }
 
+    public static String getYyyyMmDdFormattedString(Date date) {
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+
+        int year = cal.get(Calendar.YEAR);
+        int month = cal.get(Calendar.MONTH) + 1;    // calendar months start in 0
+        int day = cal.get(Calendar.DAY_OF_MONTH);
+
+        String strYyyy = ""+ year;
+        String strMm = (month < 10) ? "0"+ month : ""+ month;
+        String strDd = (day < 10) ? "0"+ day : ""+ day;
+
+        String formattedString = strDd +"/"+ strMm +"/"+ strYyyy;
+        return formattedString;
+    }
+
+    public static String getHhMmFormattedString(Date date) {
+
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+
+        int hour = cal.get(Calendar.HOUR_OF_DAY);
+        int minute = cal.get(Calendar.MINUTE);
+
+        String strHh = (hour < 10) ? "0"+ hour : ""+ hour;
+        String strMm = (minute < 10) ? "0"+ minute : ""+ minute;
+
+        String formattedString = strHh +":"+ strMm;
+        return formattedString;
+    }
+
+    /*
     public static String getDateString(Date date) {
         TimeZone utc = TimeZone.getTimeZone("UTC");
         DateFormat isoFormatter = DateFormat.getDateInstance();
@@ -245,6 +278,7 @@ public class Utils {
         isoFormatter.setTimeZone(utc);
         return isoFormatter.format(date);
     }
+    */
 
 
     /*

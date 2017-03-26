@@ -1,0 +1,226 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_shop_detail"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="io.keepcoding.pickandgol.activity.EventDetailActivity">
+
+    <!-- Toolbar for the actvity -->
+    <include layout="@layout/toolbar_main"/>
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:isScrollContainer="true"
+            android:layout_height="match_parent"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:id="@+id/scrollView">
+
+            <LinearLayout
+                android:id="@+id/contentOfScrollView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/activity_event_detail_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="15dp"
+                    android:textColor="@android:color/black"
+                    android:textStyle="normal|bold"
+                    android:textSize="22sp"
+                    android:gravity="center_vertical|center_horizontal"
+                    tools:text="Example of Event Name"/>
+
+                <LinearLayout
+                    android:id="@+id/activity_event_detail_image_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="10dp"
+                    android:gravity="center_horizontal">
+
+                    <ImageView
+                        android:id="@+id/activity_event_detail_image_holder"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:adjustViewBounds="true"
+                        android:maxHeight="250dp"
+                        tools:src="@drawable/default_placeholder"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/activity_event_detail_category_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:id="@+id/activity_event_detail_category_label"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Category:"
+                        android:textSize="17sp"
+                        android:textStyle="normal|bold"/>
+
+                    <TextView
+                        android:id="@+id/activity_event_detail_category_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:gravity="start"
+                        android:textSize="18sp"
+                        tools:text="Football"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/activity_event_detail_description_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:id="@+id/activity_event_detail_description_label"
+                        android:text="Description:"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textSize="17sp"
+                        android:textStyle="normal|bold"/>
+
+                    <TextView
+                        android:id="@+id/activity_event_detail_description_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:textSize="18sp"
+                        tools:text="blah blah blah blah blah blah blah blahblah blah blahblah blah blahblah blahblahblah blah blah blah blah blahblah blah."/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/activity_event_detail_date_time_layout"
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_horizontal"
+                    android:layout_marginTop="10dp"
+                    android:padding="10dp">
+
+                    <RelativeLayout
+                        android:id="@+id/activity_event_detail_date_layout"
+                        xmlns:android="http://schemas.android.com/apk/res/android"
+                        xmlns:tools="http://schemas.android.com/tools"
+                        android:orientation="vertical"
+                        android:layout_weight="0.5"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginRight="5dp">
+
+                        <TextView
+                            android:id="@+id/activity_event_detail_date_label"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="10dp"
+                            android:text="@string/new_event_date"
+                            android:textStyle="normal|bold"
+                            android:textSize="17sp"/>
+
+                        <TextView
+                            android:id="@+id/activity_event_detail_date_text"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:padding="10dp"
+                            android:textAlignment="center"
+                            android:layout_below="@+id/activity_event_detail_date_label"
+                            android:textStyle="normal|bold"
+                            android:textSize="18sp"
+                            tools:text="24/03/2017"/>
+
+                    </RelativeLayout>
+
+                    <RelativeLayout
+                        android:id="@+id/activity_event_detail_time_layout"
+                        xmlns:android="http://schemas.android.com/apk/res/android"
+                        xmlns:tools="http://schemas.android.com/tools"
+                        android:orientation="vertical"
+                        android:layout_weight="0.5"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="5dp">
+
+                        <TextView
+                            android:id="@+id/activity_event_detail_time_label"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="10dp"
+                            android:text="@string/new_event_time"
+                            android:textStyle="normal|bold"
+                            android:textSize="17sp"/>
+
+                        <TextView
+                            android:id="@+id/activity_event_detail_time_text"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:padding="10dp"
+                            android:textAlignment="center"
+                            android:layout_below="@+id/activity_event_detail_time_label"
+                            android:textStyle="normal|bold"
+                            android:textSize="18sp"
+                            tools:text="20:50"/>
+
+                    </RelativeLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/activity_event_detail_pubs_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:id="@+id/activity_event_detail_pubs_label"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Pubs showing this event:"
+                        android:textSize="17sp"
+                        android:textStyle="normal|bold"/>
+
+                    <TextView
+                        android:id="@+id/activity_event_detail_pubs_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:textSize="18sp"
+                        tools:text="15 pub(s)"/>
+
+                    <Button
+                        android:id="@+id/activity_event_detail_pubs_button"
+                        android:layout_width="match_parent"
+                        android:layout_height="60dp"
+                        android:text="Show pubs in map"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </ScrollView>
+
+    </RelativeLayout>
+
+</LinearLayout>

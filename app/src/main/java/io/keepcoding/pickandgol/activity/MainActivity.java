@@ -302,7 +302,7 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
 
         // If we are coming from the Event Search Settings Activity
         if (requestCode == Navigator.EVENT_SEARCH_ACTIVITY_REQUEST_CODE &&
-            resultCode == RESULT_OK) {
+                resultCode == RESULT_OK) {
 
             final EventSearchParams newSearchParams = (EventSearchParams) data.getSerializableExtra(NEW_EVENT_SEARCH_PARAMS_KEY);
 
@@ -358,36 +358,40 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
                 final Double selectedLong = (Double) data.getSerializableExtra(LocationPickerActivity.SELECTED_LONGITUDE_KEY);
 
                 gm.requestReverseDecodedAddress(selectedLat, selectedLong,
-                                                new GeoManager.GeoReverseLocationListener() {
-                    @Override
-                    public void onReverseLocationError(Throwable error) {
-                        Utils.simpleDialog(MainActivity.this,
-                                           "Location selected",
-                                           selectedLat +", "+ selectedLong +"\n\n"+
-                                           "< "+ error.getMessage() +" >");
-                    }
+                        new GeoManager.GeoReverseLocationListener() {
+                            @Override
+                            public void onReverseLocationError(Throwable error) {
+                                Utils.simpleDialog(MainActivity.this,
+                                        "Location selected",
+                                        selectedLat +", "+ selectedLong +"\n\n"+
+                                                "< "+ error.getMessage() +" >");
+                            }
 
-                    @Override
-                    public void onReverseLocationSuccess(@NonNull List<Address> addresses) {
+                            @Override
+                            public void onReverseLocationSuccess(@NonNull List<Address> addresses) {
 
-                        Address address = addresses.get(0);
-                        String fullAddress = "\n";
+                                Address address = addresses.get(0);
+                                String fullAddress = "\n";
 
-                        for(int i = 0; i <= address.getMaxAddressLineIndex(); i++)
-                            fullAddress = fullAddress + address.getAddressLine(i) +"\n";
+                                for(int i = 0; i <= address.getMaxAddressLineIndex(); i++)
+                                    fullAddress = fullAddress + address.getAddressLine(i) +"\n";
 
-                        Utils.simpleDialog(MainActivity.this,
-                                "Location selected",
-                                selectedLat + ", " + selectedLong + "\n" +
-                                        fullAddress);
-                    }
-                });
+                                Utils.simpleDialog(MainActivity.this,
+                                        "Location selected",
+                                        selectedLat + ", " + selectedLong + "\n" +
+                                                fullAddress);
+                            }
+                        });
 
             }
             else
                 Utils.simpleDialog(this, "Location selected", "No location was selected.");
-        } else if (requestCode == Navigator.EDIT_USER_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK) {
+        }
+
+        else if (requestCode == Navigator.EDIT_USER_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK) {
+
             User userModified = (User) data.getSerializableExtra(EditUserActivity.SAVED_USER_KEY);
+
             if (userModified != null) {
                 updateSessionManagerWithUserModified(userModified);
                 updateHeaderFromSessionInfo();
@@ -440,10 +444,10 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
             case R.id.create_event:
 
                 Pub currentPub = new Pub("58c782770c0ef45dfc5875df", "La Biblioteca",
-                                         43.558096, -5.923779,
-                                         "https://www.facebook.com/Cafe.LaBiblioteca",
-                                         "58b471ddd9f0163f6eee6375",
-                                         new ArrayList<String>(), new ArrayList<String>()
+                        43.558096, -5.923779,
+                        "https://www.facebook.com/Cafe.LaBiblioteca",
+                        "58b471ddd9f0163f6eee6375",
+                        new ArrayList<String>(), new ArrayList<String>()
                 );
 
                 Navigator.fromPubDetailActivityToNewEventActivity(this, currentPub);
@@ -478,28 +482,28 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
                 Navigator.fromMainActivityToNewPubActivity(this);
 
                 /**
-                locationChecker.checkBeforeAsking(new CheckPermissionListener() {
-                    @Override
-                    public void onPermissionDenied() {
-                        Navigator.fromNewPubActivityToLocationPickerActivity(MainActivity.this, null, null);
-                    }
+                 locationChecker.checkBeforeAsking(new CheckPermissionListener() {
+                @Override
+                public void onPermissionDenied() {
+                Navigator.fromNewPubActivityToLocationPickerActivity(MainActivity.this, null, null);
+                }
 
-                    @Override
-                    public void onPermissionGranted() {
-                        gm.requestLastLocation(new GeoManager.GeoDirectLocationListener() {
-                            @Override
-                            public void onLocationError(Throwable error) {
-                                Navigator.fromNewPubActivityToLocationPickerActivity(MainActivity.this, null, null);
-                            }
+                @Override
+                public void onPermissionGranted() {
+                gm.requestLastLocation(new GeoManager.GeoDirectLocationListener() {
+                @Override
+                public void onLocationError(Throwable error) {
+                Navigator.fromNewPubActivityToLocationPickerActivity(MainActivity.this, null, null);
+                }
 
-                            @Override
-                            public void onLocationSuccess(double latitude, double longitude) {
-                                Navigator.fromNewPubActivityToLocationPickerActivity(MainActivity.this, latitude, longitude);
-                            }
-                        });
-                    }
+                @Override
+                public void onLocationSuccess(double latitude, double longitude) {
+                Navigator.fromNewPubActivityToLocationPickerActivity(MainActivity.this, latitude, longitude);
+                }
                 });
-                **/
+                }
+                });
+                 **/
 
                 mainDrawer.closeDrawers();
                 break;
@@ -541,10 +545,6 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
 
                 doLogOutOperation();
                 mainDrawer.closeDrawers();
-                break;
-
-            case R.id.drawer_menu_register:
-                Navigator.fromMainActivityToNewUserActivity(this);
                 break;
 
             default:
@@ -790,10 +790,12 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
 
     private void updateSessionManagerWithUserModified(final User userModified) {
         if (sm.getUserEmail() == null || !sm.getUserEmail().equals(userModified.getEmail())) {
+
             sm.updateUserEmail(userModified.getEmail());
         }
 
         if (sm.getUserName() == null || !sm.getUserName().equals(userModified.getName())) {
+
             sm.updateUserName(userModified.getName());
         }
     }
@@ -877,14 +879,8 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
 
     @Override
     public void onItemClicked(Event event, int position) {
-        Pub currentPub = new Pub("58c782770c0ef45dfc5875df", "La Biblioteca",
-                43.558096, -5.923779,
-                "https://www.facebook.com/Cafe.LaBiblioteca",
-                "58b471ddd9f0163f6eee6375",
-                new ArrayList<String>(), new ArrayList<String>()
-        );
 
-        Navigator.fromMainActivityToEditEventActivity(this, currentPub, event);
+        Navigator.fromMainActivityToEventDetailActivity(this, event);
     }
 
     @Override
