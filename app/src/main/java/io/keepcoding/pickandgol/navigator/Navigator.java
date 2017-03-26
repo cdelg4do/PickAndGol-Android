@@ -5,6 +5,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import io.keepcoding.pickandgol.activity.DetailEventActivity;
+import io.keepcoding.pickandgol.activity.EditUserActivity;
 import io.keepcoding.pickandgol.activity.EventActivity;
 import io.keepcoding.pickandgol.activity.EventSearchSettingsActivity;
 import io.keepcoding.pickandgol.activity.LocationPickerActivity;
@@ -15,6 +16,7 @@ import io.keepcoding.pickandgol.activity.NewUserActivity;
 import io.keepcoding.pickandgol.activity.SplashActivity;
 import io.keepcoding.pickandgol.model.Event;
 import io.keepcoding.pickandgol.model.Pub;
+import io.keepcoding.pickandgol.model.User;
 import io.keepcoding.pickandgol.search.EventSearchParams;
 
 import static android.app.Activity.RESULT_CANCELED;
@@ -34,6 +36,7 @@ public class Navigator {
     private static final int NEW_PUB_ACTIVITY_REQUEST_CODE = 1004;
     public static final int LOCATION_PICKER_ACTIVITY_REQUEST_CODE = 1005;
     private static final int EDIT_EVENT_ACTIVITY_REQUEST_CODE = 1006;
+    public static final int EDIT_USER_ACTIVITY_REQUEST_CODE = 1007;
 
     /**
      * Navigates from an instance of SplashActivity to another of MainActivity
@@ -242,6 +245,27 @@ public class Navigator {
     public static Intent fromMainActivityToNewUserActivity(final MainActivity mainActivity) {
         Intent i = new Intent(mainActivity, NewUserActivity.class);
         mainActivity.startActivity(i);
+
+        return i;
+    }
+
+    public static Intent fromMainActivityToEditUserActivity(final MainActivity mainActivity) {
+        Intent i = new Intent(mainActivity, EditUserActivity.class);
+        mainActivity.startActivityForResult(i, EDIT_USER_ACTIVITY_REQUEST_CODE);
+
+        return i;
+    }
+
+    public static Intent backFromEditUserActivity(final EditUserActivity userActivity, final User userModified) {
+        Intent i = new Intent();
+        if (userModified != null) {
+            i.putExtra(EditUserActivity.SAVED_USER_KEY, userModified);
+            userActivity.setResult(RESULT_OK, i);
+        } else {
+            userActivity.setResult(RESULT_CANCELED);
+        }
+
+        userActivity.finish();
 
         return i;
     }

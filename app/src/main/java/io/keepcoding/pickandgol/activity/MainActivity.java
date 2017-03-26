@@ -30,14 +30,11 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.keepcoding.pickandgol.R;
 import io.keepcoding.pickandgol.dialog.LoginDialog;
-import io.keepcoding.pickandgol.fragment.EditUserFragment;
 import io.keepcoding.pickandgol.fragment.EventListFragment;
 import io.keepcoding.pickandgol.fragment.MainContentFragment;
-import io.keepcoding.pickandgol.interactor.EditUserInteractor;
 import io.keepcoding.pickandgol.interactor.LoginInteractor;
 import io.keepcoding.pickandgol.interactor.SearchEventsInteractor;
 import io.keepcoding.pickandgol.interactor.SearchEventsInteractor.SearchEventsInteractorListener;
-import io.keepcoding.pickandgol.interactor.UserDetailInteractor;
 import io.keepcoding.pickandgol.manager.geo.GeoManager;
 import io.keepcoding.pickandgol.manager.image.ImageManager;
 import io.keepcoding.pickandgol.manager.image.ImageManager.ImageProcessingListener;
@@ -53,7 +50,6 @@ import io.keepcoding.pickandgol.util.Utils;
 
 import static io.keepcoding.pickandgol.activity.MainActivity.ImagePurpose.UPLOAD_TO_CLOUD;
 import static io.keepcoding.pickandgol.interactor.LoginInteractor.LoginInteractorListener;
-import static io.keepcoding.pickandgol.interactor.UserDetailInteractor.UserDetailInteractorListener;
 import static io.keepcoding.pickandgol.manager.image.ImageManagerSettings.IMAGE_PICKER_REQUEST_CODE;
 import static io.keepcoding.pickandgol.util.PermissionChecker.CheckPermissionListener;
 import static io.keepcoding.pickandgol.util.PermissionChecker.PermissionTag.LOCATION_SET;
@@ -390,6 +386,12 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
             }
             else
                 Utils.simpleDialog(this, "Location selected", "No location was selected.");
+        } else if (requestCode == Navigator.EDIT_USER_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK) {
+            User userModified = (User) data.getSerializableExtra(EditUserActivity.SAVED_USER_KEY);
+            if (userModified != null) {
+                updateSessionManagerWithUserModified(userModified);
+                updateHeaderFromSessionInfo();
+            }
         }
     }
 
@@ -783,60 +785,15 @@ public class MainActivity extends AppCompatActivity implements EventListFragment
             return;
         }
 
-        final String token = sm.getSessionToken();
-
-
-        final ProgressDialog pDialog = Utils.newProgressDialog(this, "Fetching user '"+ id +"' info...");
-        pDialog.show();
-
-        new UserDetailInteractor().execute(this, id, token, new UserDetailInteractorListener() {
-
-            @Override
-            public void onUserDetailFail(Exception e) {
-                pDialog.dismiss();
-                Log.e(LOG_TAG, "Failed to retrieve detail for user '"+ id +"': "+ e.toString() );
-                Utils.simpleDialog(MainActivity.this, "User detail error", e.getMessage());
-            }
-
-            @Override
-            public void onUserDetailSuccess(User user) {
-                pDialog.dismiss();
-
-                EditUserFragment editUserFragment = EditUserFragment.newInstance(user);
-                editUserFragment.setListener(new EditUserFragment.Listener() {
-                    @Override
-                    public void onSaveButtonPushed(final User userModified) {
-                        new EditUserInteractor().execute(MainActivity.this, token, userModified, new EditUserInteractor.Listener() {
-                            @Override
-                            public void onEditUserSuccess() {
-                                updateSessionManagerWithUserModified(userModified);
-
-                                updateHeaderFromSessionInfo();
-                                Utils.simpleDialog(MainActivity.this, "User", "User modified");
-                            }
-
-                            @Override
-                            public void onEditUserFail(final String message) {
-                                Utils.simpleDialog(MainActivity.this, "User modify error", message);
-                            }
-                        });
-                    }
-                });
-
-                getSupportFragmentManager()
-                        .beginTransaction()
-                        .replace(R.id.mainContentFragment_placeholder, editUserFragment)
-                        .commit();
-            }
-        });
+        Navigator.fromMainActivityToEditUserActivity(this);
     }
 
     private void updateSessionManagerWithUserModified(final User userModified) {
-        if (!sm.getUserEmail().equals(userModified.getEmail())) {
+        if (sm.getUserEmail() == null || !sm.getUserEmail().equals(userModified.getEmail())) {
             sm.updateUserEmail(userModified.getEmail());
         }
 
-        if (!sm.getUserName().equals(userModified.getName())) {
+        if (sm.getUserName() == null || !sm.getUserName().equals(userModified.getName())) {
             sm.updateUserName(userModified.getName());
         }
     }

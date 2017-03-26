@@ -41,7 +41,7 @@ public class UserResponse implements ParsedResponse {
         @SerializedName("description")  private String errorDescription;
 
         // These fields only in case of 'OK' result
-        @SerializedName("id")              private String id;
+        @SerializedName("_id")              private String id;
         @SerializedName("email")            private String email;
         @SerializedName("name")             private String name;
         @SerializedName("favorite_pubs")    private List<String> favoritePubs;

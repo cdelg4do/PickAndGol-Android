@@ -59,4 +59,8 @@
     <string name="new_user_activity_validate_error_name">You must specify a name for the new user.</string>
     <string name="new_user_activity_validate_error_email">You must specify an email for the new user.</string>
     <string name="new_user_activity_validate_error_password">You must specify a password for the new user</string>
+    <string name="activity_edit_user_title">Edit user</string>
+    <string name="activity_edit_user_load_error">User detail error</string>
+    <string name="activity_edit_user_modify_error">User modify error</string>
+    <string name="activity_edit_user_validate_error">To change the password you have to write both, old and new passwords</string>
 </resources>
