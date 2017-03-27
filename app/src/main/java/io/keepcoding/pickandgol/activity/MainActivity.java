@@ -644,6 +644,11 @@ public class MainActivity extends AppCompatActivity implements EventListListener
                 mainDrawer.closeDrawers();
                 break;
 
+            case R.id.drawer_menu_register:
+                Navigator.fromMainActivityToNewUserActivity(this);
+                mainDrawer.closeDrawers();
+                break;
+
             default:
 
                 updateFragment(menuItem.getTitle().toString(), null);

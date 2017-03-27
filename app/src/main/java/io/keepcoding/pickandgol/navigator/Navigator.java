@@ -11,6 +11,7 @@ import io.keepcoding.pickandgol.activity.LocationPickerActivity;
 import io.keepcoding.pickandgol.activity.MainActivity;
 import io.keepcoding.pickandgol.activity.NewEventActivity;
 import io.keepcoding.pickandgol.activity.NewPubActivity;
+import io.keepcoding.pickandgol.activity.NewUserActivity;
 import io.keepcoding.pickandgol.activity.PubSearchSettingsActivity;
 import io.keepcoding.pickandgol.activity.SplashActivity;
 import io.keepcoding.pickandgol.model.Event;
@@ -305,6 +306,13 @@ public class Navigator {
         i.putExtra(MainActivity.NEW_PUB_SEARCH_PARAMS_KEY, newSearchParams);
         pubSearchSettingsActivity.setResult(RESULT_OK, i);
         pubSearchSettingsActivity.finish();
+
+        return i;
+    }
+
+    public static Intent fromMainActivityToNewUserActivity(final MainActivity mainActivity) {
+        Intent i = new Intent(mainActivity, NewUserActivity.class);
+        mainActivity.startActivity(i);
 
         return i;
     }
