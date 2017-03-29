@@ -93,7 +93,7 @@
             android:configChanges="orientation|screenSize">
         </activity>
 
-        <activity android:name=".activity.EventPubsMapActivity">
+        <activity android:name=".activity.EventPubsActivity">
         </activity>
 
         <!-- Amazon S3 Transfer Utility service -->

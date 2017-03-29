@@ -795,7 +795,7 @@ public class MainActivity extends AppCompatActivity implements EventListListener
 
                 lastPubSearchTotalResults = pubs.getTotalResults();
 
-                pubListFragment = PubListFragment.newInstance(pubs, false);
+                pubListFragment = PubListFragment.newInstance(pubs, 0, false);
 
                 getSupportFragmentManager()
                         .beginTransaction()

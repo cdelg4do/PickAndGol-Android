@@ -6,7 +6,7 @@ import android.support.annotation.Nullable;
 
 import io.keepcoding.pickandgol.activity.EditUserActivity;
 import io.keepcoding.pickandgol.activity.EventDetailActivity;
-import io.keepcoding.pickandgol.activity.EventPubsMapActivity;
+import io.keepcoding.pickandgol.activity.EventPubsActivity;
 import io.keepcoding.pickandgol.activity.EventSearchSettingsActivity;
 import io.keepcoding.pickandgol.activity.LocationPickerActivity;
 import io.keepcoding.pickandgol.activity.MainActivity;
@@ -343,13 +343,24 @@ public class Navigator {
         return i;
     }
 
-    public static Intent fromEventDetailActivityToEventPubsMapActivity(final EventDetailActivity eventDetailActivity,
-                                                                       @NonNull Event event,
-                                                                       boolean showUserLocation) {
+    /**
+     * Navigates from an instance of EventDetailActivity to another of EventPubsActivity,
+     * passing the Event object which pubs are shown under EventPubsActivity.MODEL_KEY. Also, it
+     * passes a boolean to show the user location under EventPubsActivity.SHOW_USER_LOCATION_KEY.
+     *
+     * @param eventDetailActivity   context for the intent created during the operation
+     * @param event                 event to show in the new activity
+     * @param showUserLocation      true if the activity map should try to show the user location
+     * @return                      a reference to the intent created (useful for testing)
+     */
+    public static Intent fromEventDetailActivityToEventPubsMapActivity(
+            final EventDetailActivity eventDetailActivity,
+            @NonNull Event event,
+            boolean showUserLocation) {
 
-        Intent i = new Intent(eventDetailActivity, EventPubsMapActivity.class);
-        i.putExtra(EventPubsMapActivity.MODEL_KEY, event);
-        i.putExtra(EventPubsMapActivity.SHOW_USER_LOCATION_KEY, showUserLocation);
+        Intent i = new Intent(eventDetailActivity, EventPubsActivity.class);
+        i.putExtra(EventPubsActivity.MODEL_KEY, event);
+        i.putExtra(EventPubsActivity.SHOW_USER_LOCATION_KEY, showUserLocation);
         eventDetailActivity.startActivity(i);
 
         return i;

@@ -6,7 +6,7 @@ android:id="@+id/activity_event_pubs_map"
 android:layout_width="match_parent"
 android:layout_height="match_parent"
 android:orientation="vertical"
-tools:context="io.keepcoding.pickandgol.activity.EventPubsMapActivity">
+tools:context="io.keepcoding.pickandgol.activity.EventPubsActivity">
 
     <!-- Toolbar for the actvity -->
     <include layout="@layout/toolbar_main"/>

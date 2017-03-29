@@ -19,9 +19,22 @@ import static io.keepcoding.pickandgol.adapter.PubListAdapter.LayoutType.ROWS;
 
 
 /**
- * This is an adapter to manage a Pub list (by using a RecyclerView)
+ * This is an adapter to manage a Pub list (by using a RecyclerView).
+ * It supports two different layouts for the recycler: "classic" list and cell grid.
  */
 public class PubListAdapter extends RecyclerView.Adapter<PubListAdapter.PubViewHolder> {
+
+    // Available types of layout to represent the Pub list
+    public static enum LayoutType {
+        ROWS,
+        CELLS
+    }
+
+    // Layouts for the list elements (depending on the chosen layout type)
+    // (make sure they exist and that both have the same view names)
+    private static final int ROW_LAYOUT_ID = R.layout.row_pub;
+    private static final int CELL_LAYOUT_ID = R.layout.item_pub;
+
 
     private Context context;
     private PubAggregate pubs;
@@ -30,21 +43,14 @@ public class PubListAdapter extends RecyclerView.Adapter<PubListAdapter.PubViewH
     private ImageManager im;
     private LayoutInflater inflater;
 
-    // Available types of layout to represent the Pub list
-    public static enum LayoutType {
-        ROWS,
-        CELLS
-    }
 
     public PubListAdapter(Context context, PubAggregate pubs, LayoutType type) {
 
         this.context = context;
         this.pubs = pubs;
 
-        if (type == ROWS)
-            this.layoutId = R.layout.row_pub;
-        else
-            this.layoutId = R.layout.item_pub;
+        if (type == ROWS)   this.layoutId = ROW_LAYOUT_ID;
+        else                this.layoutId = CELL_LAYOUT_ID;
 
         this.im = ImageManager.getInstance(context);
         this.inflater = LayoutInflater.from(context);
@@ -89,7 +95,7 @@ public class PubListAdapter extends RecyclerView.Adapter<PubListAdapter.PubViewH
     }
 
 
-    // Auxiliary class that represents the view holder for an event
+    // Auxiliary class that represents the view holder for a Pub
     class PubViewHolder extends RecyclerView.ViewHolder {
 
         private View view;

@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
@@ -30,53 +31,59 @@ import static io.keepcoding.pickandgol.adapter.PubListAdapter.LayoutType.ROWS;
 
 /**
  * This fragment represents shows a pub list using a RecyclerView.
+ * It can represent the data in a "classic" list, or in the form of a cell grid.
  */
 public class PubListFragment extends Fragment {
 
-    public static final String FRAGMENT_PUBS_KEY = "FRAGMENT_PUBS_KEY";
+    // Number of rows to show if using a grid layout (for portrait and landscape)
+    public static final int GRID_COLUMNS_PORTRAIT = 2;
+    public static final int GRID_COLUMNS_LANDSCAPE = 3;
+
+    // Key strings for arguments to initialize the fragment
+    public static final String FRAGMENT_INITIAL_PUBS_KEY = "FRAGMENT_INITIAL_PUBS_KEY";
+    public static final String FRAGMENT_INITIAL_POSITION_KEY = "FRAGMENT_INITIAL_POSITION_KEY";
     public static final String USE_ROW_LAYOUT_KEY = "USE_ROW_LAYOUT_KEY";
-    public static final int COLUMNS_PORTRAIT = 2;
-    public static final int COLUMNS_LANDSCAPE = 3;
 
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeContainer;
     private PubListAdapter adapter;
-    private PubAggregate pubs;
     private PubListListener listener;
+    private PubAggregate pubs;
+    private int initialScrollPosition;
     private boolean useRowLayout;
 
-
-    public static PubListFragment newInstance(PubAggregate pubs) {
-
-        PubListFragment fragment = new PubListFragment();
-
-        Bundle args = new Bundle();
-        args.putSerializable(FRAGMENT_PUBS_KEY, pubs);
-        args.putBoolean(USE_ROW_LAYOUT_KEY, false);
-        fragment.setArguments(args);
-
-        return fragment;
-    }
-
-    public static PubListFragment newInstance(PubAggregate pubs, boolean useRowLayout) {
+    /**
+     * Call this to initialize a new fragment instance.
+     *
+     * @param initialPubs           the pubs that the fragment will show in the beginning
+     * @param initialScrollPosition the scroll position the list will be located at
+     * @param useRowLayout          true: a "classic" list will be used; false: use a grid layout
+     * @return                      a reference to the new fragment object
+     */
+    public static PubListFragment newInstance(PubAggregate initialPubs,
+                                              int initialScrollPosition,
+                                              boolean useRowLayout) {
 
         PubListFragment fragment = new PubListFragment();
 
         Bundle args = new Bundle();
-        args.putSerializable(FRAGMENT_PUBS_KEY, pubs);
+        args.putSerializable(FRAGMENT_INITIAL_PUBS_KEY, initialPubs);
+        args.putInt(FRAGMENT_INITIAL_POSITION_KEY, initialScrollPosition);
         args.putBoolean(USE_ROW_LAYOUT_KEY, useRowLayout);
         fragment.setArguments(args);
 
         return fragment;
     }
 
+    // When the fragment is created, recover the initial arguments
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Try to recover the arguments passed from newInstance()
         if (getArguments() != null) {
-            pubs = (PubAggregate) getArguments().getSerializable(FRAGMENT_PUBS_KEY);
+
+            pubs = (PubAggregate) getArguments().getSerializable(FRAGMENT_INITIAL_PUBS_KEY);
+            initialScrollPosition = getArguments().getInt(FRAGMENT_INITIAL_POSITION_KEY);
             useRowLayout = getArguments().getBoolean(USE_ROW_LAYOUT_KEY, false);
         }
     }
@@ -107,15 +114,15 @@ public class PubListFragment extends Fragment {
             throw new RuntimeException(getActivity().toString() +" must implement PubListListener");
     }
 
+    // When the fragment is no longer associated to the activity, remove references to the listener
     @Override
     public void onDetach() {
         super.onDetach();
 
-        // Remove the reference to the listener
         listener = null;
     }
 
-
+    // When the fragment's View hierarchy is created, configure the swipe control and the recycler
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
@@ -135,42 +142,6 @@ public class PubListFragment extends Fragment {
 
         return rootView;
     }
-
-
-    // Set the pubs that will be shown by this fragment,
-    // and then update the fragment UI (by setting an adapter for the fragment's RecyclerView)
-    public void setPubsAndUpdateFragmentUI(PubAggregate pubs, boolean useRowLayout) {
-
-        if (useRowLayout)
-            adapter = new PubListAdapter(getActivity(), pubs, ROWS);
-        else
-            adapter = new PubListAdapter(getActivity(), pubs, CELLS);
-
-        adapter.setOnPubClickListener(listener);
-        recyclerView.setAdapter(adapter);
-    }
-
-    // Get the pubs shown so far
-    public PubAggregate getPubs() {
-        return pubs;
-    }
-
-    /*
-    // Get the current scroll position of the RecyclerView
-    public void getCurrentScrollPosition() {
-
-        RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
-
-        int firstVisibleItemPosition = 0;
-
-        if (layoutManager instanceof LinearLayoutManager)
-            firstVisibleItemPosition = ((LinearLayoutManager) layoutManager).findFirstVisibleItemPosition();
-
-        else if (layoutManager instanceof StaggeredGridLayoutManager) {
-
-        }
-    }
-    */
 
     // Configures the fragment RecyclerView
     private void setupRecyclerView(View rootView) {
@@ -196,6 +167,8 @@ public class PubListFragment extends Fragment {
             adapter = new PubListAdapter(getActivity(), pubs, ROWS);
             adapter.setOnPubClickListener(listener);
             recyclerView.setAdapter(adapter);
+
+            layoutMgr.scrollToPosition(initialScrollPosition);
         }
 
         // If the list is represented in the form of a cell grid
@@ -203,9 +176,9 @@ public class PubListFragment extends Fragment {
 
             int columns;
             if (getResources().getConfiguration().orientation == ORIENTATION_LANDSCAPE)
-                columns = COLUMNS_LANDSCAPE;
+                columns = GRID_COLUMNS_LANDSCAPE;
             else
-                columns = COLUMNS_PORTRAIT;
+                columns = GRID_COLUMNS_PORTRAIT;
 
             StaggeredGridLayoutManager layoutMgr = new StaggeredGridLayoutManager(columns, StaggeredGridLayoutManager.VERTICAL);
             //GridLayoutManager layoutMgr = new GridLayoutManager(getActivity(), columns, GridLayoutManager.VERTICAL, false);
@@ -227,9 +200,25 @@ public class PubListFragment extends Fragment {
         }
     }
 
-    // Refreshes the list view
-    private void syncView() {
-        adapter.notifyDataSetChanged();
+    // Gets the pubs shown so far
+    public PubAggregate getPubs() {
+        return pubs;
+    }
+
+    // Gets the current scroll position of the RecyclerView, useful to save the recycler state
+    // (Note: does not work in case of staggered grid layout, returns null)
+    public @Nullable Integer getLinearRecyclerScrollPosition() {
+
+        RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
+
+        if (layoutManager instanceof GridLayoutManager)
+            return ((GridLayoutManager) layoutManager).findFirstVisibleItemPosition();
+
+        if (layoutManager instanceof LinearLayoutManager)
+            return ((LinearLayoutManager) layoutManager).findFirstVisibleItemPosition();
+
+        else
+            return null;
     }
 
     // Adds more pubs to the adapter data source, then refresh the list
