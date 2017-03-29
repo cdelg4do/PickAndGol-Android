@@ -77,9 +77,10 @@
             android:configChanges="orientation|screenSize">
         </activity>
 
-        <activity android:name=".activity.EditUserActivity"
-                  android:windowSoftInputMode="adjustPan"
-                  android:configChanges="orientation|screenSize">
+        <activity
+            android:name=".activity.EditUserActivity"
+            android:windowSoftInputMode="adjustPan"
+            android:configChanges="orientation|screenSize">
         </activity>
 
         <activity
@@ -90,6 +91,9 @@
         <activity android:name=".activity.NewUserActivity"
             android:windowSoftInputMode="adjustPan"
             android:configChanges="orientation|screenSize">
+        </activity>
+
+        <activity android:name=".activity.EventPubsMapActivity">
         </activity>
 
         <!-- Amazon S3 Transfer Utility service -->

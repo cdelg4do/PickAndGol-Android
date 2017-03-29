@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 
 import io.keepcoding.pickandgol.activity.EditUserActivity;
 import io.keepcoding.pickandgol.activity.EventDetailActivity;
+import io.keepcoding.pickandgol.activity.EventPubsMapActivity;
 import io.keepcoding.pickandgol.activity.EventSearchSettingsActivity;
 import io.keepcoding.pickandgol.activity.LocationPickerActivity;
 import io.keepcoding.pickandgol.activity.MainActivity;
@@ -250,24 +251,42 @@ public class Navigator {
         return i;
     }
 
+    /**
+     * Navigates from an instance of MainActivity to another of EditUserActivity.
+     * (the MainActivity will wait for result EDIT_USER_ACTIVITY_REQUEST_CODE)
+     *
+     * @param mainActivity  context for the intent created during the operation
+     * @return              a reference to the intent created (useful for testing)
+     */
     public static Intent fromMainActivityToEditUserActivity(final MainActivity mainActivity) {
+
         Intent i = new Intent(mainActivity, EditUserActivity.class);
         mainActivity.startActivityForResult(i, EDIT_USER_ACTIVITY_REQUEST_CODE);
 
         return i;
     }
 
-    public static Intent backFromEditUserActivity(final EditUserActivity userActivity, final User userModified) {
+    /**
+     * Returns from an instance of EditUserActivity to the previous activity, sending back
+     * an updated version of an User object under EditUserActivity.SAVED_USER_KEY (if not null).
+     *
+     * @param editUserActivity   context for the intent created during the operation
+     * @param modifiedUser       the updated version of the User object, or null
+     * @return                   a reference to the intent created (useful for testing)
+     */
+    public static Intent backFromEditUserActivity(final EditUserActivity editUserActivity,
+                                                  final @Nullable User modifiedUser) {
+
         Intent i = new Intent();
-        if (userModified != null) {
-            i.putExtra(EditUserActivity.SAVED_USER_KEY, userModified);
-            userActivity.setResult(RESULT_OK, i);
-        } else {
-            userActivity.setResult(RESULT_CANCELED);
+
+        if (modifiedUser != null) {
+            i.putExtra(EditUserActivity.SAVED_USER_KEY, modifiedUser);
+            editUserActivity.setResult(RESULT_OK, i);
         }
+        else
+            editUserActivity.setResult(RESULT_CANCELED);
 
-        userActivity.finish();
-
+        editUserActivity.finish();
         return i;
     }
 
@@ -310,9 +329,28 @@ public class Navigator {
         return i;
     }
 
+    /**
+     * Navigates from an instance of MainActivity to another of NewUserActivity.
+     *
+     * @param mainActivity  context for the intent created during the operation
+     * @return              a reference to the intent created (useful for testing)
+     */
     public static Intent fromMainActivityToNewUserActivity(final MainActivity mainActivity) {
+
         Intent i = new Intent(mainActivity, NewUserActivity.class);
         mainActivity.startActivity(i);
+
+        return i;
+    }
+
+    public static Intent fromEventDetailActivityToEventPubsMapActivity(final EventDetailActivity eventDetailActivity,
+                                                                       @NonNull Event event,
+                                                                       boolean showUserLocation) {
+
+        Intent i = new Intent(eventDetailActivity, EventPubsMapActivity.class);
+        i.putExtra(EventPubsMapActivity.MODEL_KEY, event);
+        i.putExtra(EventPubsMapActivity.SHOW_USER_LOCATION_KEY, showUserLocation);
+        eventDetailActivity.startActivity(i);
 
         return i;
     }

@@ -28,6 +28,7 @@ public class PubSearchParams implements Serializable {
     private @Nullable Integer offset;
     private @Nullable Double latitude;
     private @Nullable Double longitude;
+    private @Nullable String eventId;   // Used only when filtering pubs by event id
 
 
     /**
@@ -52,6 +53,7 @@ public class PubSearchParams implements Serializable {
         this.limit = DEFAULT_LIMIT;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.eventId = null;
     }
 
     /**
@@ -96,6 +98,9 @@ public class PubSearchParams implements Serializable {
         return radiusKm;
     }
 
+    public @Nullable String getEventId() {
+        return eventId;
+    }
 
     // Setters
 
@@ -107,6 +112,11 @@ public class PubSearchParams implements Serializable {
     public PubSearchParams setCoordinates(@Nullable Double latitude, @Nullable Double longitude) {
         this.latitude = latitude;
         this.longitude = longitude;
+        return this;
+    }
+
+    public PubSearchParams setEventId(@Nullable String eventId) {
+        this.eventId = eventId;
         return this;
     }
 }

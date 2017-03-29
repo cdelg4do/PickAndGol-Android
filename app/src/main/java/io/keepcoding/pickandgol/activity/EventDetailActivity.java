@@ -26,6 +26,7 @@ import io.keepcoding.pickandgol.manager.image.ImageManager;
 import io.keepcoding.pickandgol.model.Category;
 import io.keepcoding.pickandgol.model.CategoryAggregate;
 import io.keepcoding.pickandgol.model.Event;
+import io.keepcoding.pickandgol.navigator.Navigator;
 import io.keepcoding.pickandgol.util.PermissionChecker;
 import io.keepcoding.pickandgol.util.Utils;
 
@@ -189,7 +190,9 @@ public class EventDetailActivity extends AppCompatActivity {
 
     // Launches the map activity to show the associated pubs
     private void showMap() {
-        //TODO: open map activity
+
+        boolean showUserLocation = GeoManager.isLocationAccessGranted(this);
+        Navigator.fromEventDetailActivityToEventPubsMapActivity(this, model, showUserLocation);
     }
 
 

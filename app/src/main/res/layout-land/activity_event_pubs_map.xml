@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_event_pubs_map"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="io.keepcoding.pickandgol.activity.EventPubsMapActivity">
+
+    <!-- Toolbar for the actvity -->
+    <include layout="@layout/toolbar_main"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <fragment
+            android:id="@+id/activity_event_pubs_map_fragment_map"
+            android:name="com.google.android.gms.maps.SupportMapFragment"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1">
+
+            <ImageView
+                android:id="@+id/activity_event_pubs_map_toggle_view"
+                android:layout_width="38dp"
+                android:layout_height="38dp"
+                android:layout_marginTop="50dp"
+                android:layout_marginRight="12dp"
+                android:padding="6dp"
+                android:background="@android:color/white"
+                android:layout_gravity="top|right"
+                android:contentDescription="@null"
+                android:src="@drawable/ic_satellite_view"
+                android:alpha="0.70"/>
+
+        </fragment>
+
+        <!-- This layout will be replaced by a fragment during runtime -->
+        <LinearLayout
+            android:id="@+id/activity_event_pubs_map_fragment_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:layout_weight="1"/>
+
+    </LinearLayout>
+
+</LinearLayout>
