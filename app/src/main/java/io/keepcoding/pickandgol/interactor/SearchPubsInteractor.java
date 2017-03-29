@@ -31,6 +31,7 @@ public class SearchPubsInteractor {
     public static final String REQUEST_PARAM_KEY_LATITUDE = "latitude";
     public static final String REQUEST_PARAM_KEY_LONGITUDE = "longitude";
     public static final String REQUEST_PARAM_KEY_RADIUS = "radius";
+    public static final String REQUEST_PARAM_KEY_EVENT = "event";
 
 
     // This interface describes the behavior of a listener waiting for the the async operation
@@ -57,6 +58,7 @@ public class SearchPubsInteractor {
         Double latitude = searchParams.getLatitude();
         Double longitude = searchParams.getLongitude();
         Integer radiusKm = searchParams.getRadiusKm();
+        String eventId = searchParams.getEventId();
 
 
         NetworkManager networkMgr = new NetworkManager(context);
@@ -80,6 +82,9 @@ public class SearchPubsInteractor {
             searchEventsParams.addParam(REQUEST_PARAM_KEY_LONGITUDE, longitude.toString());
             searchEventsParams.addParam(REQUEST_PARAM_KEY_RADIUS, radiusKm.toString());
         }
+
+        if (eventId != null)
+            searchEventsParams.addParam(REQUEST_PARAM_KEY_EVENT, eventId);
 
         String remoteUrl = getUrl();
 

@@ -10,28 +10,47 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import io.keepcoding.pickandgol.R;
-import io.keepcoding.pickandgol.fragment.PubListFragment;
 import io.keepcoding.pickandgol.manager.image.ImageManager;
 import io.keepcoding.pickandgol.model.Pub;
 import io.keepcoding.pickandgol.model.PubAggregate;
+import io.keepcoding.pickandgol.view.PubListListener;
+
+import static io.keepcoding.pickandgol.adapter.PubListAdapter.LayoutType.ROWS;
 
 
 /**
- * This is an adapter to manage a Pub list (by using a RecyclerView)
+ * This is an adapter to manage a Pub list (by using a RecyclerView).
+ * It supports two different layouts for the recycler: "classic" list and cell grid.
  */
 public class PubListAdapter extends RecyclerView.Adapter<PubListAdapter.PubViewHolder> {
 
+    // Available types of layout to represent the Pub list
+    public static enum LayoutType {
+        ROWS,
+        CELLS
+    }
+
+    // Layouts for the list elements (depending on the chosen layout type)
+    // (make sure they exist and that both have the same view names)
+    private static final int ROW_LAYOUT_ID = R.layout.row_pub;
+    private static final int CELL_LAYOUT_ID = R.layout.item_pub;
+
+
     private Context context;
     private PubAggregate pubs;
-    private PubListFragment.PubListListener listener;
+    private int layoutId;
+    private PubListListener listener;
     private ImageManager im;
     private LayoutInflater inflater;
 
 
-    public PubListAdapter(Context context, PubAggregate pubs) {
+    public PubListAdapter(Context context, PubAggregate pubs, LayoutType type) {
 
         this.context = context;
         this.pubs = pubs;
+
+        if (type == ROWS)   this.layoutId = ROW_LAYOUT_ID;
+        else                this.layoutId = CELL_LAYOUT_ID;
 
         this.im = ImageManager.getInstance(context);
         this.inflater = LayoutInflater.from(context);
@@ -40,7 +59,7 @@ public class PubListAdapter extends RecyclerView.Adapter<PubListAdapter.PubViewH
     @Override
     public PubViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
-        View layoutView = inflater.inflate(R.layout.item_pub, parent, false);
+        View layoutView = inflater.inflate(layoutId, parent, false);
         PubViewHolder holder = new PubViewHolder(layoutView);
 
         return holder;
@@ -67,7 +86,7 @@ public class PubListAdapter extends RecyclerView.Adapter<PubListAdapter.PubViewH
         return pubs.size();
     }
 
-    public void setOnPubClickListener(@NonNull final PubListFragment.PubListListener listener) {
+    public void setOnPubClickListener(@NonNull final PubListListener listener) {
         this.listener = listener;
     }
 
@@ -76,7 +95,7 @@ public class PubListAdapter extends RecyclerView.Adapter<PubListAdapter.PubViewH
     }
 
 
-    // Auxiliary class that represents the view holder for an event
+    // Auxiliary class that represents the view holder for a Pub
     class PubViewHolder extends RecyclerView.ViewHolder {
 
         private View view;
@@ -89,8 +108,8 @@ public class PubListAdapter extends RecyclerView.Adapter<PubListAdapter.PubViewH
 
             this.view = itemView;
 
-            pubName = (TextView) itemView.findViewById(R.id.item_pub_name);
-            pubImage = (ImageView) itemView.findViewById(R.id.item_pub_image);
+            pubName = (TextView) itemView.findViewById(R.id.pub_name);
+            pubImage = (ImageView) itemView.findViewById(R.id.pub_image);
         }
 
         public void bindData(Pub pub) {

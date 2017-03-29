@@ -34,7 +34,6 @@ import io.keepcoding.pickandgol.fragment.EventListFragment;
 import io.keepcoding.pickandgol.fragment.EventListFragment.EventListListener;
 import io.keepcoding.pickandgol.fragment.MainContentFragment;
 import io.keepcoding.pickandgol.fragment.PubListFragment;
-import io.keepcoding.pickandgol.fragment.PubListFragment.PubListListener;
 import io.keepcoding.pickandgol.interactor.LoginInteractor;
 import io.keepcoding.pickandgol.interactor.SearchEventsInteractor;
 import io.keepcoding.pickandgol.interactor.SearchEventsInteractor.SearchEventsInteractorListener;
@@ -54,6 +53,7 @@ import io.keepcoding.pickandgol.search.EventSearchParams;
 import io.keepcoding.pickandgol.search.PubSearchParams;
 import io.keepcoding.pickandgol.util.PermissionChecker;
 import io.keepcoding.pickandgol.util.Utils;
+import io.keepcoding.pickandgol.view.PubListListener;
 
 import static io.keepcoding.pickandgol.activity.MainActivity.ImagePurpose.UPLOAD_TO_CLOUD;
 import static io.keepcoding.pickandgol.activity.MainActivity.ShowingFragment.EVENT_LIST;
@@ -795,7 +795,7 @@ public class MainActivity extends AppCompatActivity implements EventListListener
 
                 lastPubSearchTotalResults = pubs.getTotalResults();
 
-                pubListFragment = PubListFragment.newInstance(pubs);
+                pubListFragment = PubListFragment.newInstance(pubs, 0, false);
 
                 getSupportFragmentManager()
                         .beginTransaction()
@@ -1110,7 +1110,7 @@ public class MainActivity extends AppCompatActivity implements EventListListener
     }
 
 
-    /*** Implementation of PubListFragment.PubListListener interface ***/
+    /*** Implementation of PubListListener interface ***/
 
     @Override
     public void onPubClicked(Pub pub, int position) {

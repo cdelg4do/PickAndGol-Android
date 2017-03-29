@@ -6,6 +6,9 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
+import android.support.v7.widget.DividerItemDecoration;
+import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
@@ -14,61 +17,74 @@ import android.view.ViewGroup;
 
 import io.keepcoding.pickandgol.R;
 import io.keepcoding.pickandgol.adapter.PubListAdapter;
-import io.keepcoding.pickandgol.model.Pub;
 import io.keepcoding.pickandgol.model.PubAggregate;
 import io.keepcoding.pickandgol.view.EndlessRecyclerViewScrollListener;
+import io.keepcoding.pickandgol.view.PubListListener;
 import io.keepcoding.pickandgol.view.SpaceItemDecoration;
 
 import static android.R.color.holo_blue_bright;
 import static android.R.color.holo_blue_dark;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
+import static io.keepcoding.pickandgol.adapter.PubListAdapter.LayoutType.CELLS;
+import static io.keepcoding.pickandgol.adapter.PubListAdapter.LayoutType.ROWS;
 
 
 /**
  * This fragment represents shows a pub list using a RecyclerView.
+ * It can represent the data in a "classic" list, or in the form of a cell grid.
  */
 public class PubListFragment extends Fragment {
 
-    public static final String FRAGMENT_PUBS_KEY = "FRAGMENT_PUBS_KEY";
-    public static final int COLUMNS_PORTRAIT = 2;
-    public static final int COLUMNS_LANDSCAPE = 3;
+    // Number of rows to show if using a grid layout (for portrait and landscape)
+    public static final int GRID_COLUMNS_PORTRAIT = 2;
+    public static final int GRID_COLUMNS_LANDSCAPE = 3;
 
-    // This must be implemented by the calling Activity to respond to actions on the RecyclerView
-    public interface PubListListener {
-
-        void onPubClicked(Pub pub, int position);
-        void onPubListSwipeRefresh(@Nullable SwipeRefreshLayout swipe);
-        void onPubListLoadNextPage();
-    }
+    // Key strings for arguments to initialize the fragment
+    public static final String FRAGMENT_INITIAL_PUBS_KEY = "FRAGMENT_INITIAL_PUBS_KEY";
+    public static final String FRAGMENT_INITIAL_POSITION_KEY = "FRAGMENT_INITIAL_POSITION_KEY";
+    public static final String USE_ROW_LAYOUT_KEY = "USE_ROW_LAYOUT_KEY";
 
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeContainer;
     private PubListAdapter adapter;
-    private PubAggregate pubs;
     private PubListListener listener;
+    private PubAggregate pubs;
+    private int initialScrollPosition;
+    private boolean useRowLayout;
 
-
-    public static PubListFragment newInstance(PubAggregate pubs) {
+    /**
+     * Call this to initialize a new fragment instance.
+     *
+     * @param initialPubs           the pubs that the fragment will show in the beginning
+     * @param initialScrollPosition the scroll position the list will be located at
+     * @param useRowLayout          true: a "classic" list will be used; false: use a grid layout
+     * @return                      a reference to the new fragment object
+     */
+    public static PubListFragment newInstance(PubAggregate initialPubs,
+                                              int initialScrollPosition,
+                                              boolean useRowLayout) {
 
         PubListFragment fragment = new PubListFragment();
 
         Bundle args = new Bundle();
-        args.putSerializable(FRAGMENT_PUBS_KEY, pubs);
+        args.putSerializable(FRAGMENT_INITIAL_PUBS_KEY, initialPubs);
+        args.putInt(FRAGMENT_INITIAL_POSITION_KEY, initialScrollPosition);
+        args.putBoolean(USE_ROW_LAYOUT_KEY, useRowLayout);
         fragment.setArguments(args);
 
         return fragment;
     }
 
-    // Required empty public constructor
-    //public PubListFragment() {}
-
+    // When the fragment is created, recover the initial arguments
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Try to recover the arguments passed from newInstance()
         if (getArguments() != null) {
-            pubs = (PubAggregate) getArguments().getSerializable(FRAGMENT_PUBS_KEY);
+
+            pubs = (PubAggregate) getArguments().getSerializable(FRAGMENT_INITIAL_PUBS_KEY);
+            initialScrollPosition = getArguments().getInt(FRAGMENT_INITIAL_POSITION_KEY);
+            useRowLayout = getArguments().getBoolean(USE_ROW_LAYOUT_KEY, false);
         }
     }
 
@@ -98,15 +114,15 @@ public class PubListFragment extends Fragment {
             throw new RuntimeException(getActivity().toString() +" must implement PubListListener");
     }
 
+    // When the fragment is no longer associated to the activity, remove references to the listener
     @Override
     public void onDetach() {
         super.onDetach();
 
-        // Remove the reference to the listener
         listener = null;
     }
 
-
+    // When the fragment's View hierarchy is created, configure the swipe control and the recycler
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
@@ -127,44 +143,88 @@ public class PubListFragment extends Fragment {
         return rootView;
     }
 
-
     // Configures the fragment RecyclerView
     private void setupRecyclerView(View rootView) {
 
         recyclerView = (RecyclerView) rootView.findViewById(R.id.fragment_pub_list_recycler);
 
-        int columns;
-        if (getResources().getConfiguration().orientation == ORIENTATION_LANDSCAPE)
-            columns = COLUMNS_LANDSCAPE;
-        else
-            columns = COLUMNS_PORTRAIT;
+        // If the list is represented in the form of a classic row list
+        if (useRowLayout) {
 
-        StaggeredGridLayoutManager layoutMgr = new StaggeredGridLayoutManager(columns, StaggeredGridLayoutManager.VERTICAL);
-        //GridLayoutManager layoutMgr = new GridLayoutManager(getActivity(), columns, GridLayoutManager.VERTICAL, false);
-        recyclerView.setLayoutManager(layoutMgr);
+            LinearLayoutManager layoutMgr = new LinearLayoutManager(getActivity());
+            recyclerView.setLayoutManager(layoutMgr);
 
-        SpaceItemDecoration spaceDecoration = new SpaceItemDecoration(48, columns);
-        recyclerView.addItemDecoration(spaceDecoration);
+            DividerItemDecoration dividerItemDecoration = new DividerItemDecoration(recyclerView.getContext(), layoutMgr.getOrientation());
+            recyclerView.addItemDecoration(dividerItemDecoration);
 
-        adapter = new PubListAdapter(getActivity(), pubs);
-        adapter.setOnPubClickListener(listener);
-        recyclerView.setAdapter(adapter);
+            recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(layoutMgr) {
+                @Override
+                public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+                    listener.onPubListLoadNextPage();
+                }
+            });
 
-        recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(layoutMgr) {
-            @Override
-            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
-                listener.onPubListLoadNextPage();
-            }
-        });
+            adapter = new PubListAdapter(getActivity(), pubs, ROWS);
+            adapter.setOnPubClickListener(listener);
+            recyclerView.setAdapter(adapter);
+
+            layoutMgr.scrollToPosition(initialScrollPosition);
+        }
+
+        // If the list is represented in the form of a cell grid
+        else {
+
+            int columns;
+            if (getResources().getConfiguration().orientation == ORIENTATION_LANDSCAPE)
+                columns = GRID_COLUMNS_LANDSCAPE;
+            else
+                columns = GRID_COLUMNS_PORTRAIT;
+
+            StaggeredGridLayoutManager layoutMgr = new StaggeredGridLayoutManager(columns, StaggeredGridLayoutManager.VERTICAL);
+            //GridLayoutManager layoutMgr = new GridLayoutManager(getActivity(), columns, GridLayoutManager.VERTICAL, false);
+            recyclerView.setLayoutManager(layoutMgr);
+
+            SpaceItemDecoration spaceDecoration = new SpaceItemDecoration(48, columns);
+            recyclerView.addItemDecoration(spaceDecoration);
+
+            recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(layoutMgr) {
+                @Override
+                public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+                    listener.onPubListLoadNextPage();
+                }
+            });
+
+            adapter = new PubListAdapter(getActivity(), pubs, CELLS);
+            adapter.setOnPubClickListener(listener);
+            recyclerView.setAdapter(adapter);
+        }
     }
 
-    // Refreshes the list view
-    private void syncView() {
-        adapter.notifyDataSetChanged();
+    // Gets the pubs shown so far
+    public PubAggregate getPubs() {
+        return pubs;
+    }
+
+    // Gets the current scroll position of the RecyclerView, useful to save the recycler state
+    // (Note: does not work in case of staggered grid layout, returns null)
+    public @Nullable Integer getLinearRecyclerScrollPosition() {
+
+        RecyclerView.LayoutManager layoutManager = recyclerView.getLayoutManager();
+
+        if (layoutManager instanceof GridLayoutManager)
+            return ((GridLayoutManager) layoutManager).findFirstVisibleItemPosition();
+
+        if (layoutManager instanceof LinearLayoutManager)
+            return ((LinearLayoutManager) layoutManager).findFirstVisibleItemPosition();
+
+        else
+            return null;
     }
 
     // Adds more pubs to the adapter data source, then refresh the list
     public void addMorePubs(PubAggregate morePubs) {
+
+        pubs.addElements(morePubs);
 
         adapter.addMoreItems(morePubs);
         adapter.notifyDataSetChanged();

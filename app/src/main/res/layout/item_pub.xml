@@ -8,7 +8,7 @@
     android:background="@android:color/white">
 
     <ImageView
-        android:id="@+id/item_pub_image"
+        android:id="@+id/pub_image"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:adjustViewBounds="true"
@@ -16,7 +16,7 @@
         android:src="@drawable/default_placeholder"/>
 
     <TextView
-        android:id="@+id/item_pub_name"
+        android:id="@+id/pub_name"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
