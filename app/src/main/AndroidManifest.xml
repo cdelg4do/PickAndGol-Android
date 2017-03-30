@@ -88,7 +88,7 @@
             android:windowSoftInputMode="adjustPan">
         </activity>
 
-        <activity android:name=".activity.NewUserActivity"
+        <activity android:name=".activity.RegisterUserActivity"
             android:windowSoftInputMode="adjustPan"
             android:configChanges="orientation|screenSize">
         </activity>
@@ -109,6 +109,7 @@
         <meta-data
             android:name="com.google.android.gms.version"
             android:value="@integer/google_play_services_version"/>
+
     </application>
 
 </manifest>

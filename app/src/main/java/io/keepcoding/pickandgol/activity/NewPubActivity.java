@@ -467,7 +467,7 @@ public class NewPubActivity extends AppCompatActivity {
 
     // Attempts to upload the given image files to Amazon S3 (one after each other)
     // In case one of them fails, the process stops and listener.onError() is called.
-    // If all the images are uploaded, then listener.onSuccess() is called.
+    // If all the images are uploaded, then listener.onGetCategoriesSuccess() is called.
     private void doUploadImages(final File[] imageFiles, final List<String> remoteFilenames, final ErrorSuccessListener listener) {
 
         if (remoteFilenames.size() == 0) {

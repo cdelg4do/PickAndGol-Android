@@ -10,10 +10,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import io.keepcoding.pickandgol.R;
-import io.keepcoding.pickandgol.fragment.EventListFragment;
 import io.keepcoding.pickandgol.manager.image.ImageManager;
 import io.keepcoding.pickandgol.model.Event;
 import io.keepcoding.pickandgol.model.EventAggregate;
+import io.keepcoding.pickandgol.view.EventListListener;
 
 
 /**
@@ -23,7 +23,7 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
 
     private Context context;
     private EventAggregate events;
-    private EventListFragment.EventListListener listener;
+    private EventListListener listener;
     private ImageManager im;
     private LayoutInflater inflater;
 
@@ -57,7 +57,7 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
             @Override
             public void onClick(View view) {
                 if (listener != null)
-                    listener.onItemClicked(event, position);
+                    listener.onEventClicked(event, position);
             }
         });
     }
@@ -67,7 +67,7 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
         return events.size();
     }
 
-    public void setOnEventClickListener(@NonNull final EventListFragment.EventListListener listener) {
+    public void setOnEventClickListener(@NonNull final EventListListener listener) {
         this.listener = listener;
     }
 
@@ -90,9 +90,9 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
 
             this.view = itemView;
 
-            eventTitle = (TextView) itemView.findViewById(R.id.item_event_title);
-            eventDate = (TextView) itemView.findViewById(R.id.item_event_date);
-            eventImage = (ImageView) itemView.findViewById(R.id.item_event_image);
+            eventTitle = (TextView) itemView.findViewById(R.id.event_name);
+            eventDate = (TextView) itemView.findViewById(R.id.event_date);
+            eventImage = (ImageView) itemView.findViewById(R.id.event_image);
         }
 
         public void bindData(Event event) {

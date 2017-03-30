@@ -13,7 +13,7 @@ import io.keepcoding.pickandgol.util.Utils;
 
 
 /**
- * This class represent a login dialog
+ * This class represents a login dialog
  */
 public class LoginDialog {
 

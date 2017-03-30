@@ -6,11 +6,18 @@ import io.realm.RealmObject;
 import io.realm.annotations.Index;
 import io.realm.annotations.PrimaryKey;
 
+
+/**
+ * This class is just a RealmPub Id container to use in RealmLists of other RealmObjects
+ */
 public class RealmPubId extends RealmObject {
+
     @PrimaryKey @Index
     private String id;
 
-    public RealmPubId() {}
+    // An empty public constructor is mandatory for Realm when using customized constructors
+    public RealmPubId() {
+    }
 
     public RealmPubId(@NonNull final String id) {
         this.id = id;
@@ -20,8 +27,9 @@ public class RealmPubId extends RealmObject {
         return id;
     }
 
-    public void setId(String id) {
+    public RealmPubId setId(String id) {
         this.id = id;
+        return this;
     }
 
     @Override

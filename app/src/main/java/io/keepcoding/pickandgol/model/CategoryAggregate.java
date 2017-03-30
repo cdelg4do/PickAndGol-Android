@@ -6,64 +6,72 @@ import android.support.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
+
+/**
+ * This class is an aggregate of Category objects.
+ */
 public class CategoryAggregate implements Iterable<Category>, Updatable<Category>, Searchable<Category> {
-    private List<Category> categories;
+
+    // The list of categories contained in this aggregate
+    private List<Category> categoryList;
+
 
     public CategoryAggregate() {
-        categories = new ArrayList<>();
+        categoryList = new ArrayList<>();
     }
 
     @Override
     public int size() {
-        return categories.size();
+        return categoryList.size();
     }
 
-    @Nullable
     @Override
-    public Category get(int index) {
-        return categories.get(index);
+    public @Nullable Category get(int index) {
+        if (index <0 || index >= categoryList.size())
+            return null;
+
+        return categoryList.get(index);
     }
 
-    @NonNull
     @Override
-    public List<Category> getAll() {
-        return categories;
+    public @NonNull List<Category> getAll() {
+        return categoryList;
     }
 
     @Override
     public void add(Category element) {
-        categories.add(element);
+        categoryList.add(element);
     }
 
     @Override
     public void delete(Category element) {
-        categories.remove(element);
+        categoryList.remove(element);
     }
 
     @Override
     public void update(Category element, int index) {
-        categories.set(index, element);
+        categoryList.set(index, element);
     }
 
     @Override
     public void setAll(List<Category> list) {
-        categories.addAll(list);
+        categoryList.addAll(list);
     }
 
     @Override
     public void addElements(Iterable<Category> moreElements) {
-        for (int i = 0; i < moreElements.size(); i++) {
-            categories.add(moreElements.get(i));
-        }
+
+        for (int i = 0; i < moreElements.size(); i++)
+            categoryList.add(moreElements.get(i));
     }
 
-    @Nullable
     @Override
-    public Category search(String id) {
-        for (Category category: categories) {
-            if (category.getId().equals(id)) {
+    public @Nullable Category search(String id) {
+
+        for (Category category: categoryList) {
+
+            if (category.getId().equals(id))
                 return category;
-            }
         }
 
         return null;

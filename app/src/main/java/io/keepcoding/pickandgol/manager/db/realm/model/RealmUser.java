@@ -11,7 +11,12 @@ import io.realm.RealmObject;
 import io.realm.annotations.Index;
 import io.realm.annotations.PrimaryKey;
 
+
+/**
+ * This class is the equivalent to the User class, managed by Realm
+ */
 public class RealmUser extends RealmObject {
+
     @PrimaryKey @Index
     private String id;
     private String name;
@@ -19,17 +24,35 @@ public class RealmUser extends RealmObject {
     private String photoUrl;
     private RealmList<RealmPubId> favorites;
 
+
+    // Getters:
+
     public String getId() {
         return id;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPhotoUrl() {
+        return photoUrl;
+    }
+
+    public RealmList<RealmPubId> getFavorites() {
+        return favorites;
+    }
+
+
+    // Setters:
+
     public RealmUser setId(String id) {
         this.id = id;
         return this;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public RealmUser setName(String name) {
@@ -37,26 +60,14 @@ public class RealmUser extends RealmObject {
         return this;
     }
 
-    public String getEmail() {
-        return email;
-    }
-
     public RealmUser setEmail(String email) {
         this.email = email;
         return this;
     }
 
-    public String getPhotoUrl() {
-        return photoUrl;
-    }
-
     public RealmUser setPhotoUrl(String photoUrl) {
         this.photoUrl = photoUrl;
         return this;
-    }
-
-    public RealmList<RealmPubId> getFavorites() {
-        return favorites;
     }
 
     public RealmUser setFavorites(RealmList<RealmPubId> favorites) {

@@ -319,7 +319,8 @@ public class NetworkManager {
         }
 
         if (parsedResponse != null)
-            Log.d(LOG_TAG, "Parsed response (expected type '"+ expectedType.toString() +"'): \n"+ parsedResponse.debugString());
+            Log.d(LOG_TAG, "Parsed response (expected type '"+ expectedType.toString() +"'): \n"
+                                                              + parsedResponse.debugString());
 
         return parsedResponse;
     }
@@ -453,6 +454,7 @@ public class NetworkManager {
         return categoryListResponse;
     }
 
+    // JsonResponseType: REGISTER
     @Nullable
     private UserRegisterResponse parseUserRegisterResponse(String responseString) {
 
