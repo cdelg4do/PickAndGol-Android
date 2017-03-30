@@ -56,7 +56,7 @@ public class LocationPickerActivity extends AppCompatActivity {
     // Map settings in case an initial location is provided in the intent
     private static final int STANDARD_MAP_WITH_LOCATION_ZOOM = 17;
 
-    // Reference to UI elements to be bind with Butterknife (not before the fragment is inflated)
+    // Reference to UI elements to be bound with Butterknife (not before the fragment is inflated)
     @BindView(R.id.activity_location_picker_button_cancel)  Button btnCancel;
     @BindView(R.id.activity_location_picker_button_select)  Button btnSelect;
     @BindView(R.id.activity_location_picker_toggle_view)    ImageView toggleMapView;

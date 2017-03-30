@@ -8,6 +8,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
 import android.widget.RelativeLayout;
@@ -29,8 +30,13 @@ import static android.view.View.VISIBLE;
 import static io.keepcoding.pickandgol.activity.MainActivity.CURRENT_EVENT_SEARCH_PARAMS_KEY;
 import static io.keepcoding.pickandgol.activity.MainActivity.SHOW_DISTANCE_SELECTOR_KEY;
 
+
+/**
+ * This class is the activity where the user can adjust the settings to perform an Event search.
+ */
 public class EventSearchSettingsActivity extends AppCompatActivity {
-    private static final String LOG_TAG = EventSearchSettingsActivity.class.getCanonicalName();
+
+    private static final String LOG_TAG = "EventSearchSettings";
 
     private EventSearchParams currentSearchParams;
     private boolean useLocation;
@@ -55,6 +61,13 @@ public class EventSearchSettingsActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        getMenuInflater().inflate(R.menu.event_search_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
         switch (item.getItemId()) {
@@ -66,14 +79,34 @@ public class EventSearchSettingsActivity extends AppCompatActivity {
 
                 return true;
 
+            case R.id.event_search_menu_reset:
+                resetForm();
+                return true;
+
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
-    // Set the layout toolbar as the activity action bar
-    // and show the home button
+
+    /** Auxiliary methods **/
+
+    // Reset all data in the form
+    private void resetForm() {
+
+        txtKeywords.setText("");
+
+        spnCategory.setSelection(0);
+
+        int defaultDistanceBarValue = 0;
+        distanceBar.setProgress(defaultDistanceBarValue);
+        txtDistance.setText( getDistanceText(defaultDistanceBarValue) );
+    }
+
+    // Set the layout toolbar as the activity action bar and show the home button
     private void setupActionBar() {
+
+        setTitle("Event Search Settings");
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -84,7 +117,7 @@ public class EventSearchSettingsActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
     }
 
-
+    // Sets the listener for the distance bar events
     private void setupDistanceBar() {
 
         distanceBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -102,24 +135,24 @@ public class EventSearchSettingsActivity extends AppCompatActivity {
         });
     }
 
-
+    // Populates the category spinner
     private void setupCategorySpinner() {
         GetCategoriesInteractor interactor = new GetCategoriesInteractor();
-        interactor.execute(this, new GetCategoriesInteractor.Listener() {
+        interactor.execute(this, new GetCategoriesInteractor.GetCategoriesInteractorListener() {
             @Override
-            public void onFail(String message) {
-                Log.e(LOG_TAG, message);
+            public void onGetCategoriesFail(Exception e) {
+                Log.e(LOG_TAG, e.getMessage());
             }
 
             @Override
-            public void onSuccess(CategoryAggregate categories) {
+            public void onGetCategoriesSuccess(CategoryAggregate categories) {
                 IntegerStringSpinnerAdapter adapter = IntegerStringSpinnerAdapter.createAdapterForCategoriesSpinner(EventSearchSettingsActivity.this, categories, getString(R.string.event_search_settings_activity_spinner_default_text));
                 spnCategory.setAdapter(adapter);
             }
         });
     }
 
-
+    // Loads the current search settings into the form
     private void loadCurrentSearchSettings() {
 
         Intent i = getIntent();
@@ -157,7 +190,7 @@ public class EventSearchSettingsActivity extends AppCompatActivity {
         txtDistance.setText( getDistanceText(distanceBarValue) );
     }
 
-
+    // Gets the text to show when a value in the distance bar is selected
     private String getDistanceText(int distanceValue) {
 
         String distanceText = "";
@@ -177,7 +210,7 @@ public class EventSearchSettingsActivity extends AppCompatActivity {
         return distanceText;
     }
 
-
+    // Gets the search radius (in km) corresponding to a selected value in the distance bar
     private int getRadiusKm(int distanceValue) {
 
         int radius = 1;
@@ -197,7 +230,8 @@ public class EventSearchSettingsActivity extends AppCompatActivity {
         return radius;
     }
 
-
+    // Validates the form data. If some input is invalid then shows a message and returns null.
+    // If all inputs are valid, returns a new EventSearchParams object with the data in the form.
     private @Nullable EventSearchParams validateForm() {
 
         String keyWords = txtKeywords.getText().toString();
@@ -217,7 +251,7 @@ public class EventSearchSettingsActivity extends AppCompatActivity {
         return new EventSearchParams(null, keyWords, selectedCategoryId, radius, 0, null, null);
     }
 
-
+    // Gets back to the previous activity, passing the new event search parameters
     private void finishActivity(@NonNull EventSearchParams newSearchParams) {
 
         Navigator.backFromEventSearchActivity(this, newSearchParams);

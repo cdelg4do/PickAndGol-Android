@@ -30,19 +30,19 @@ import static io.keepcoding.pickandgol.adapter.PubListAdapter.LayoutType.ROWS;
 
 
 /**
- * This fragment represents shows a pub list using a RecyclerView.
+ * This fragment shows a pub list using a RecyclerView.
  * It can represent the data in a "classic" list, or in the form of a cell grid.
  */
 public class PubListFragment extends Fragment {
 
     // Number of rows to show if using a grid layout (for portrait and landscape)
-    public static final int GRID_COLUMNS_PORTRAIT = 2;
-    public static final int GRID_COLUMNS_LANDSCAPE = 3;
+    private static final int GRID_COLUMNS_PORTRAIT = 2;
+    private static final int GRID_COLUMNS_LANDSCAPE = 3;
 
     // Key strings for arguments to initialize the fragment
-    public static final String FRAGMENT_INITIAL_PUBS_KEY = "FRAGMENT_INITIAL_PUBS_KEY";
-    public static final String FRAGMENT_INITIAL_POSITION_KEY = "FRAGMENT_INITIAL_POSITION_KEY";
-    public static final String USE_ROW_LAYOUT_KEY = "USE_ROW_LAYOUT_KEY";
+    private static final String FRAGMENT_INITIAL_PUBS_KEY = "FRAGMENT_INITIAL_PUBS_KEY";
+    private static final String FRAGMENT_INITIAL_POSITION_KEY = "FRAGMENT_INITIAL_POSITION_KEY";
+    private static final String USE_ROW_LAYOUT_KEY = "USE_ROW_LAYOUT_KEY";
 
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeContainer;

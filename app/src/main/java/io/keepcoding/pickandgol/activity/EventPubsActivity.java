@@ -79,7 +79,7 @@ public class EventPubsActivity extends AppCompatActivity implements PubListListe
     private GoogleMap map;
     private ArrayList<Marker> currentMapMarkers;
 
-    // Reference to UI elements to be bind with Butterknife (not before the map fragment is inflated)
+    // Reference to UI elements to be bound with Butterknife (not before the map fragment is inflated)
     @BindView(R.id.activity_event_pubs_map_toggle_view) ImageView toggleMapView;
 
     // Reference to last query and total results counter (necessary to load next pages)

@@ -57,9 +57,16 @@ public class PubInfoWindowAdapter implements GoogleMap.InfoWindowAdapter {
                             ? pub.getPhotos().get(0)
                             : null;
 
+        // If the pub has no images, show the default image
+        if (pubImageUrl == null) {
+            ImageManager.getInstance(context).loadImage(
+                    R.drawable.default_placeholder,
+                    markerImage);
+        }
+
         // If there is an image to show, it's necessary to re-show the info window after download it
         // (because the Info Window is not a live view, it is rendered as a whole image)
-        if (pubImageUrl != null) {
+        else {
 
             ImageManager.getInstance(context).loadImage(
                     pubImageUrl,

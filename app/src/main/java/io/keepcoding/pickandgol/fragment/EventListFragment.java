@@ -6,17 +6,17 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import io.keepcoding.pickandgol.R;
 import io.keepcoding.pickandgol.adapter.EventListAdapter;
-import io.keepcoding.pickandgol.model.Event;
 import io.keepcoding.pickandgol.model.EventAggregate;
 import io.keepcoding.pickandgol.view.EndlessRecyclerViewScrollListener;
+import io.keepcoding.pickandgol.view.EventListListener;
 import io.keepcoding.pickandgol.view.SpaceItemDecoration;
 
 import static android.R.color.holo_blue_bright;
@@ -25,21 +25,16 @@ import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 
 
 /**
- * This fragment represents shows an event list using a RecyclerView.
+ * This fragment shows an event list using a RecyclerView.
  */
 public class EventListFragment extends Fragment {
 
-    public static final String FRAGMENT_EVENTS_KEY = "FRAGMENT_EVENTS_KEY";
-    public static final int COLUMNS_PORTRAIT = 2;
-    public static final int COLUMNS_LANDSCAPE = 3;
+    // Number of rows to show if using a grid layout (for portrait and landscape)
+    private static final int COLUMNS_PORTRAIT = 2;
+    private static final int COLUMNS_LANDSCAPE = 3;
 
-    // This must be implemented by the calling Activity to respond to actions on the RecyclerView
-    public interface EventListListener {
-
-        void onItemClicked(Event event, int position);
-        void onSwipeRefresh(@Nullable SwipeRefreshLayout swipe);
-        void onLoadNextPage();
-    }
+    // Key strings for arguments to initialize the fragment
+    private static final String FRAGMENT_INITIAL_EVENTS_KEY = "FRAGMENT_INITIAL_EVENTS_KEY";
 
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeContainer;
@@ -47,28 +42,30 @@ public class EventListFragment extends Fragment {
     private EventAggregate events;
     private EventListListener listener;
 
-
-    public static EventListFragment newInstance(EventAggregate events) {
+    /**
+     * Call this to initialize a new fragment instance.
+     *
+     * @param initialEvents         the events that the fragment will show in the beginning
+     * @return                      a reference to the new fragment object
+     */
+    public static EventListFragment newInstance(EventAggregate initialEvents) {
 
         EventListFragment fragment = new EventListFragment();
 
         Bundle args = new Bundle();
-        args.putSerializable(FRAGMENT_EVENTS_KEY, events);
+        args.putSerializable(FRAGMENT_INITIAL_EVENTS_KEY, initialEvents);
         fragment.setArguments(args);
 
         return fragment;
     }
 
-    // Required empty public constructor
-    //public EventListFragment() {}
-
+    // When the fragment is created, recover the initial arguments
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Try to recover the arguments passed from newInstance()
         if (getArguments() != null) {
-            events = (EventAggregate) getArguments().getSerializable(FRAGMENT_EVENTS_KEY);
+            events = (EventAggregate) getArguments().getSerializable(FRAGMENT_INITIAL_EVENTS_KEY);
         }
     }
 
@@ -98,15 +95,15 @@ public class EventListFragment extends Fragment {
             throw new RuntimeException(getActivity().toString() +" must implement EventListListener");
     }
 
+    // When the fragment is no longer associated to the activity, remove references to the listener
     @Override
     public void onDetach() {
         super.onDetach();
 
-        // Remove the reference to the listener
         listener = null;
     }
 
-
+    // When the fragment's View hierarchy is created, configure the swipe control and the recycler
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
@@ -118,7 +115,7 @@ public class EventListFragment extends Fragment {
         swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                listener.onSwipeRefresh(swipeContainer);
+                listener.onEventListSwipeRefresh(swipeContainer);
             }
         });
 
@@ -126,7 +123,6 @@ public class EventListFragment extends Fragment {
 
         return rootView;
     }
-
 
     // Configures the fragment RecyclerView
     private void setupRecyclerView(View rootView) {
@@ -139,8 +135,8 @@ public class EventListFragment extends Fragment {
         else
             columns = COLUMNS_PORTRAIT;
 
-        //StaggeredGridLayoutManager layoutMgr = new StaggeredGridLayoutManager(columns, StaggeredGridLayoutManager.VERTICAL);
-        GridLayoutManager layoutMgr = new GridLayoutManager(getActivity(), columns, GridLayoutManager.VERTICAL, false);
+        StaggeredGridLayoutManager layoutMgr = new StaggeredGridLayoutManager(columns, StaggeredGridLayoutManager.VERTICAL);
+        //GridLayoutManager layoutMgr = new GridLayoutManager(getActivity(), columns, GridLayoutManager.VERTICAL, false);
         recyclerView.setLayoutManager(layoutMgr);
 
         SpaceItemDecoration spaceDecoration = new SpaceItemDecoration(48, columns);
@@ -153,27 +149,12 @@ public class EventListFragment extends Fragment {
         recyclerView.addOnScrollListener(new EndlessRecyclerViewScrollListener(layoutMgr) {
             @Override
             public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
-                listener.onLoadNextPage();
+                listener.onEventListLoadNextPage();
             }
         });
     }
 
-    // Refreshes the list view
-    private void syncView() {
-
-        adapter.notifyDataSetChanged();
-        //adapter = new EventListAdapter(getActivity(), events);
-        //recyclerView.setAdapter(adapter);
-    }
-
-
-    //
-    public void setEventsAndUpdateUI(EventAggregate events) {
-        this.events = events;
-        syncView();
-    }
-
-
+    // Adds more events to the adapter data source, then refresh the list
     public void addMoreEvents(EventAggregate moreEvents) {
 
         adapter.addMoreItems(moreEvents);

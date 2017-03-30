@@ -217,16 +217,17 @@ public class NewEventActivity extends AppCompatActivity {
     private void setupCategorySpinner() {
 
         GetCategoriesInteractor interactor = new GetCategoriesInteractor();
-        interactor.execute(this, new GetCategoriesInteractor.Listener() {
+        interactor.execute(this, new GetCategoriesInteractor.GetCategoriesInteractorListener() {
             @Override
-            public void onFail(String message) {
-                Log.e(LOG_TAG, message);
+            public void onGetCategoriesFail(Exception e) {
+                Log.e(LOG_TAG, e.getMessage());
             }
 
             @Override
-            public void onSuccess(CategoryAggregate categories) {
+            public void onGetCategoriesSuccess(CategoryAggregate categories) {
                 NewEventActivity.this.categories = categories;
-                IntegerStringSpinnerAdapter adapter = IntegerStringSpinnerAdapter.createAdapterForCategoriesSpinner(NewEventActivity.this, categories, getString(R.string.new_event_activity_spinner_default_text));
+                IntegerStringSpinnerAdapter adapter = IntegerStringSpinnerAdapter
+                        .createAdapterForCategoriesSpinner(NewEventActivity.this, categories, getString(R.string.new_event_activity_spinner_default_text));
                 spnCategory.setAdapter(adapter);
             }
         });

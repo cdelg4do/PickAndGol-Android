@@ -18,7 +18,8 @@
             android:isScrollContainer="true"
             android:layout_alignParentTop="true"
             android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true">
+            android:layout_alignParentStart="true"
+            android:layout_above="@+id/activity_new_user_buttons_layout">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -143,11 +144,12 @@
 
             <Button
                 android:id="@+id/activity_new_user_button_sign_in"
-                android:text="@string/new_user_sign_in_button"
+                android:text="@string/new_user_sign_up_button"
                 android:layout_width="100dp"
                 android:layout_height="50dp"/>
 
         </LinearLayout>
+
     </RelativeLayout>
 
 </LinearLayout>

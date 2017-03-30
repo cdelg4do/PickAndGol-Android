@@ -12,7 +12,7 @@ import io.keepcoding.pickandgol.activity.LocationPickerActivity;
 import io.keepcoding.pickandgol.activity.MainActivity;
 import io.keepcoding.pickandgol.activity.NewEventActivity;
 import io.keepcoding.pickandgol.activity.NewPubActivity;
-import io.keepcoding.pickandgol.activity.NewUserActivity;
+import io.keepcoding.pickandgol.activity.RegisterUserActivity;
 import io.keepcoding.pickandgol.activity.PubSearchSettingsActivity;
 import io.keepcoding.pickandgol.activity.SplashActivity;
 import io.keepcoding.pickandgol.model.Event;
@@ -32,6 +32,7 @@ import static io.keepcoding.pickandgol.activity.LocationPickerActivity.INITIAL_L
  */
 public class Navigator {
 
+    // Request codes to wait for, used when starting for result a new activity
     public static final int EVENT_SEARCH_ACTIVITY_REQUEST_CODE = 1001;
     private static final int NEW_EVENT_ACTIVITY_REQUEST_CODE = 1002;
     public static final int PUB_SEARCH_ACTIVITY_REQUEST_CODE = 1003;
@@ -330,14 +331,14 @@ public class Navigator {
     }
 
     /**
-     * Navigates from an instance of MainActivity to another of NewUserActivity.
+     * Navigates from an instance of MainActivity to another of RegisterUserActivity.
      *
      * @param mainActivity  context for the intent created during the operation
      * @return              a reference to the intent created (useful for testing)
      */
     public static Intent fromMainActivityToNewUserActivity(final MainActivity mainActivity) {
 
-        Intent i = new Intent(mainActivity, NewUserActivity.class);
+        Intent i = new Intent(mainActivity, RegisterUserActivity.class);
         mainActivity.startActivity(i);
 
         return i;

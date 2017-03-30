@@ -7,7 +7,7 @@ import io.realm.annotations.PrimaryKey;
 
 
 /**
- * This class is just an RealmEvent Id contanier to use in RealmLists of other RealmObjects
+ * This class is just a RealmEvent Id container to use in RealmLists of other RealmObjects
  */
 public class RealmEventId extends RealmObject {
 

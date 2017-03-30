@@ -5,6 +5,7 @@ import android.support.v4.widget.SwipeRefreshLayout;
 
 import io.keepcoding.pickandgol.model.Pub;
 
+
 /**
  * This interface defines the behavior of a list of Pub objects.
  */
