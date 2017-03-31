@@ -769,6 +769,10 @@ public class MainActivity extends AppCompatActivity implements EventListListener
 
         if ( sm.getUserName() == null || !sm.getUserName().equals(newUserInfo.getName()) )
             sm.updateUserName(newUserInfo.getName());
+
+        if (sm.getUserPhotoUrl() == null || !sm.getUserPhotoUrl().equals(newUserInfo.getPhotoUrl())) {
+            sm.updatePhotoUrl(newUserInfo.getPhotoUrl());
+        }
     }
 
 
