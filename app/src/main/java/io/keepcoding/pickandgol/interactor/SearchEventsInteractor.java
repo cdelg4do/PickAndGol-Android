@@ -24,7 +24,7 @@ import static io.keepcoding.pickandgol.manager.net.NetworkManagerSettings.URL_SE
 public class SearchEventsInteractor {
 
     // Param keynames for the events search operation
-    public static final String REQUEST_PARAM_KEY_OFFSET = "offset";
+    public static final String REQUEST_PARAM_KEY_OFFSET = "start";  // is NOT "offset"
     public static final String REQUEST_PARAM_KEY_LIMIT = "limit";
     public static final String REQUEST_PARAM_KEY_PUB = "pub";
     public static final String REQUEST_PARAM_KEY_TEXT = "text";
@@ -55,7 +55,7 @@ public class SearchEventsInteractor {
         Integer limit = searchParams.getLimit();
         String pubId = searchParams.getPubId();
         String keyWords = searchParams.getKeyWords();
-        Integer categoryId = searchParams.getCategoryId();
+        String categoryId = searchParams.getCategoryId();
         Double latitude = searchParams.getLatitude();
         Double longitude = searchParams.getLongitude();
         Integer radiusKm = searchParams.getRadiusKm();

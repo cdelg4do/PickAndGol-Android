@@ -12,8 +12,10 @@ import io.keepcoding.pickandgol.activity.LocationPickerActivity;
 import io.keepcoding.pickandgol.activity.MainActivity;
 import io.keepcoding.pickandgol.activity.NewEventActivity;
 import io.keepcoding.pickandgol.activity.NewPubActivity;
-import io.keepcoding.pickandgol.activity.RegisterUserActivity;
+import io.keepcoding.pickandgol.activity.PubDetailActivity;
+import io.keepcoding.pickandgol.activity.PubEventsActivity;
 import io.keepcoding.pickandgol.activity.PubSearchSettingsActivity;
+import io.keepcoding.pickandgol.activity.RegisterUserActivity;
 import io.keepcoding.pickandgol.activity.SplashActivity;
 import io.keepcoding.pickandgol.model.Event;
 import io.keepcoding.pickandgol.model.Pub;
@@ -34,11 +36,11 @@ public class Navigator {
 
     // Request codes to wait for, used when starting for result a new activity
     public static final int EVENT_SEARCH_ACTIVITY_REQUEST_CODE = 1001;
-    private static final int NEW_EVENT_ACTIVITY_REQUEST_CODE = 1002;
+    public static final int NEW_EVENT_ACTIVITY_REQUEST_CODE = 1002;
     public static final int PUB_SEARCH_ACTIVITY_REQUEST_CODE = 1003;
-    private static final int NEW_PUB_ACTIVITY_REQUEST_CODE = 1004;
+    public static final int NEW_PUB_ACTIVITY_REQUEST_CODE = 1004;
     public static final int LOCATION_PICKER_ACTIVITY_REQUEST_CODE = 1005;
-    private static final int EDIT_EVENT_ACTIVITY_REQUEST_CODE = 1006;
+    public static final int EDIT_EVENT_ACTIVITY_REQUEST_CODE = 1006;
     public static final int EDIT_USER_ACTIVITY_REQUEST_CODE = 1007;
 
     /**
@@ -92,26 +94,6 @@ public class Navigator {
         i.putExtra(MainActivity.NEW_EVENT_SEARCH_PARAMS_KEY, newSearchParams);
         eventSearchSettingsActivity.setResult(RESULT_OK, i);
         eventSearchSettingsActivity.finish();
-
-        return i;
-    }
-
-    /**
-     * Navigates from an instance of PubDetailActivity to another of NewEventActivity,
-     * passing a given Pub object under NewEventActivity.PUB_MODEL_KEY
-     * (the PubDetailActivity will wait for result NEW_EVENT_ACTIVITY_REQUEST_CODE)
-     *
-     * @param pubDetailActivity context for the intent created during the operation
-     * @param currentPub        the Pub to associate the new Event to (in case of Event creation)
-     * @return                  a reference to the intent created (useful for testing)
-     */
-    public static Intent fromPubDetailActivityToNewEventActivity(final MainActivity pubDetailActivity,
-  //public static Intent fromPubDetailActivityToNewEventActivity(final PubDetailActivity pubDetailActivity,
-                                                                 @NonNull Pub currentPub) {
-
-        Intent i = new Intent(pubDetailActivity, NewEventActivity.class);
-        i.putExtra(NewEventActivity.PUB_MODEL_KEY, currentPub);
-        pubDetailActivity.startActivityForResult(i, NEW_EVENT_ACTIVITY_REQUEST_CODE);
 
         return i;
     }
@@ -363,6 +345,99 @@ public class Navigator {
         i.putExtra(EventPubsActivity.MODEL_KEY, event);
         i.putExtra(EventPubsActivity.SHOW_USER_LOCATION_KEY, showUserLocation);
         eventDetailActivity.startActivity(i);
+
+        return i;
+    }
+
+    /**
+     * Navigates from an instance of MainActivity to another of PubDetailActivity,
+     * passing the Pub object to show under PubDetailActivity.PUB_MODEL_KEY.
+     *
+     * @param mainActivity  context for the intent created during the operation
+     * @param pub           pub to show in the new activity
+     * @return              a reference to the intent created (useful for testing)
+     */
+    public static Intent fromMainActivityToPubDetailActivity(final MainActivity mainActivity,
+                                                             @NonNull Pub pub) {
+
+        Intent i = new Intent(mainActivity, PubDetailActivity.class);
+        i.putExtra(PubDetailActivity.PUB_MODEL_KEY, pub);
+        mainActivity.startActivity(i);
+
+        return i;
+    }
+
+    /**
+     * Navigates from an instance of PubDetailActivity to another of PubEventsActivity,
+     * passing the Pub object to look events by under PubEventsActivity.MODEL_KEY.
+     *
+     * @param pubDetailActivity context for the intent created during the operation
+     * @param pub               pub to show in the new activity
+     * @return                  a reference to the intent created (useful for testing)
+     */
+    public static Intent fromPubDetailActivityToPubEventsActivity(final PubDetailActivity pubDetailActivity,
+                                                                  @NonNull Pub pub) {
+
+        Intent i = new Intent(pubDetailActivity, PubEventsActivity.class);
+        i.putExtra(PubEventsActivity.MODEL_KEY, pub);
+        pubDetailActivity.startActivity(i);
+
+        return i;
+    }
+
+    /**
+     * Navigates from an instance of PubDetailActivity to another of NewEventActivity,
+     * passing a given Pub object under NewEventActivity.PUB_MODEL_KEY
+     * (the PubDetailActivity will wait for result NEW_EVENT_ACTIVITY_REQUEST_CODE)
+     *
+     * @param pubDetailActivity context for the intent created during the operation
+     * @param currentPub        the Pub to associate the new Event to
+     * @return                  a reference to the intent created (useful for testing)
+     */
+    public static Intent fromPubDetailActivityToNewEventActivity(final PubDetailActivity pubDetailActivity,
+                                                                 @NonNull Pub currentPub) {
+
+        Intent i = new Intent(pubDetailActivity, NewEventActivity.class);
+        i.putExtra(NewEventActivity.PUB_MODEL_KEY, currentPub);
+        pubDetailActivity.startActivityForResult(i, NEW_EVENT_ACTIVITY_REQUEST_CODE);
+
+        return i;
+    }
+
+
+    /**
+     * Navigates from an instance of PubEventsActivity to another of EventDetailActivity,
+     * passing the Event object to show under EventDetailActivity.EVENT_MODEL_KEY.
+     *
+     * @param pubEventsActivity context for the intent created during the operation
+     * @param event             event to show in the new activity
+     * @return                  a reference to the intent created (useful for testing)
+     */
+    public static Intent fromPubEventsActivityToEventDetailActivity(final PubEventsActivity pubEventsActivity,
+                                                                    @NonNull Event event) {
+
+        Intent i = new Intent(pubEventsActivity, EventDetailActivity.class);
+        i.putExtra(EventDetailActivity.EVENT_MODEL_KEY, event);
+        pubEventsActivity.startActivity(i);
+
+        return i;
+    }
+
+    /**
+     * Navigates from an instance of PubEventsActivity to another of NewEventActivity,
+     * passing a given Pub object under NewEventActivity.PUB_MODEL_KEY
+     * (the PubDetailActivity will wait for result NEW_EVENT_ACTIVITY_REQUEST_CODE)
+     *
+     * @param pubEventsActivity context for the intent created during the operation
+     * @param currentPub        the Pub to associate the new Event to
+     * @return                  a reference to the intent created (useful for testing)
+     */
+    public static Intent fromPubEventsActivityToNewEventActivity(final PubEventsActivity pubEventsActivity,
+                                                                 @NonNull Pub currentPub) {
+
+        Intent i = new Intent(pubEventsActivity, NewEventActivity.class);
+        i.putExtra(NewEventActivity.PUB_MODEL_KEY, currentPub);
+        pubEventsActivity.startActivityForResult(i, NEW_EVENT_ACTIVITY_REQUEST_CODE);
 
         return i;
     }

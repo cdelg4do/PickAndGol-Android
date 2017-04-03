@@ -156,13 +156,13 @@ public class EventDetailActivity extends AppCompatActivity {
         if (cat != null)
             categoryName = cat.getName();
         else
-            categoryName = "< Unknown Category >";
+            categoryName = "Unspecified category.";
 
         txtCategory.setText(categoryName);
 
         String description = model.getDescription();
         if (description == null)
-            description = "< No description available >";
+            description = "No description available.";
 
         txtDescription.setText(description);
 

@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
+import android.location.Address;
 import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
@@ -148,7 +149,7 @@ public class Utils {
     }
 
     public static String encryptPassword(String password) {
-        //TODO: implement password encryption
+        // Implement password encryption if needed
         return password;
     }
 
@@ -180,6 +181,19 @@ public class Utils {
         }
 
         return extension;
+    }
+
+    // Converts a geographical address to a String
+    public static String getAddressString(Address address) {
+
+        StringBuilder fullAddress = new StringBuilder("");
+
+        for(int i = 0; i <= address.getMaxAddressLineIndex(); i++)
+            fullAddress.append(address.getAddressLine(i) +", ");
+
+        fullAddress.setLength(fullAddress.length() - 2);    // to remove the last ', '
+
+        return fullAddress.toString();
     }
 
     // Gets a date from a mongodb date string

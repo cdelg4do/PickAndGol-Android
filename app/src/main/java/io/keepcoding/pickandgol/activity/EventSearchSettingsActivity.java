@@ -19,8 +19,10 @@ import android.widget.TextView;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.keepcoding.pickandgol.R;
-import io.keepcoding.pickandgol.adapter.IntegerStringSpinnerAdapter;
+import io.keepcoding.pickandgol.adapter.StringStringSpinnerAdapter;
 import io.keepcoding.pickandgol.interactor.GetCategoriesInteractor;
+import io.keepcoding.pickandgol.interactor.GetCategoriesInteractor.GetCategoriesInteractorListener;
+import io.keepcoding.pickandgol.model.Category;
 import io.keepcoding.pickandgol.model.CategoryAggregate;
 import io.keepcoding.pickandgol.navigator.Navigator;
 import io.keepcoding.pickandgol.search.EventSearchParams;
@@ -57,7 +59,6 @@ public class EventSearchSettingsActivity extends AppCompatActivity {
         setupActionBar();
         setupDistanceBar();
         setupCategorySpinner();
-        loadCurrentSearchSettings();
     }
 
     @Override
@@ -135,10 +136,10 @@ public class EventSearchSettingsActivity extends AppCompatActivity {
         });
     }
 
-    // Populates the category spinner
+    // Populates the category spinner and then loads the current search settings
     private void setupCategorySpinner() {
-        GetCategoriesInteractor interactor = new GetCategoriesInteractor();
-        interactor.execute(this, new GetCategoriesInteractor.GetCategoriesInteractorListener() {
+
+        new GetCategoriesInteractor().execute(this, new GetCategoriesInteractorListener() {
             @Override
             public void onGetCategoriesFail(Exception e) {
                 Log.e(LOG_TAG, e.getMessage());
@@ -146,8 +147,26 @@ public class EventSearchSettingsActivity extends AppCompatActivity {
 
             @Override
             public void onGetCategoriesSuccess(CategoryAggregate categories) {
-                IntegerStringSpinnerAdapter adapter = IntegerStringSpinnerAdapter.createAdapterForCategoriesSpinner(EventSearchSettingsActivity.this, categories, getString(R.string.event_search_settings_activity_spinner_default_text));
+
+                String[] categoryIDs = new String[ categories.size() ];
+                String[] categoryNames = new String[ categories.size() ];
+
+                for (int i = 0; i < categories.size(); i++) {
+
+                    Category cat = categories.get(i);
+                    categoryIDs[i] = cat.getId();
+                    categoryNames[i] = cat.getName();
+                }
+
+                StringStringSpinnerAdapter adapter = new StringStringSpinnerAdapter(
+                        EventSearchSettingsActivity.this,
+                        categoryIDs,
+                        categoryNames,
+                        "< All >");
+
                 spnCategory.setAdapter(adapter);
+
+                loadCurrentSearchSettings();
             }
         });
     }
@@ -160,7 +179,7 @@ public class EventSearchSettingsActivity extends AppCompatActivity {
         useLocation = i.getBooleanExtra(SHOW_DISTANCE_SELECTOR_KEY, false);
 
         String currentKeyWords = currentSearchParams.getKeyWords();
-        Integer currentCategoryId = currentSearchParams.getCategoryId();
+        String currentCategoryId = currentSearchParams.getCategoryId();
         Integer currentRadiusKm = currentSearchParams.getRadiusKm();
 
         if (useLocation)
@@ -172,7 +191,7 @@ public class EventSearchSettingsActivity extends AppCompatActivity {
             txtKeywords.setText(currentKeyWords);
 
         if (currentCategoryId != null) {
-            IntegerStringSpinnerAdapter adapter = (IntegerStringSpinnerAdapter) spnCategory.getAdapter();
+            StringStringSpinnerAdapter adapter = (StringStringSpinnerAdapter) spnCategory.getAdapter();
 
             int pos = adapter.getKeyPosition(currentCategoryId);
             if (pos >= 0)
@@ -235,17 +254,17 @@ public class EventSearchSettingsActivity extends AppCompatActivity {
     private @Nullable EventSearchParams validateForm() {
 
         String keyWords = txtKeywords.getText().toString();
-        Integer selectedCategoryId = (int) spnCategory.getSelectedItemId();
-        Integer radius = null;
-
         if (keyWords.equals(""))
             keyWords = null;
 
+        StringStringSpinnerAdapter adapter = (StringStringSpinnerAdapter) spnCategory.getAdapter();
+        String selectedCategoryId = adapter.getKey( spnCategory.getSelectedItemPosition() );
+        if (selectedCategoryId.equals(StringStringSpinnerAdapter.DEFAULT_KEY))
+            selectedCategoryId = null;
+
+        Integer radius = null;
         if (useLocation)
             radius = getRadiusKm(distanceBar.getProgress());
-
-        if (selectedCategoryId == 0)
-            selectedCategoryId = null;
 
         // The returned object will not include location coordinates (they will be determined later)
         return new EventSearchParams(null, keyWords, selectedCategoryId, radius, 0, null, null);

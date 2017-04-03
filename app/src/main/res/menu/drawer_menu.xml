@@ -10,12 +10,6 @@
             android:title="@string/drawer_menu_event_search"/>
 
         <item
-            android:id="@+id/drawer_menu_create_event"
-            android:icon="@android:drawable/ic_menu_today"
-            android:checkable = "true"
-            android:title="@string/drawer_menu_create_event"/>
-
-        <item
             android:id="@+id/drawer_menu_pub_search"
             android:icon="@android:drawable/stat_sys_upload"
             android:checkable="false"

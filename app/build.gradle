@@ -83,4 +83,7 @@ dependencies {
 
     // Google Location and Activity Recognition (to get the device location)
     compile 'com.google.android.gms:play-services-location:10.0.0'
+
+    // To use CircleIndicator (in a ViewPager)
+    compile 'me.relex:circleindicator:1.2.2@aar'
 }

@@ -22,7 +22,7 @@ public class EventSearchParams implements Serializable {
     // General filtering params (set at object creation only)
     private @Nullable String pubId;
     private @Nullable String keyWords;
-    private @Nullable Integer categoryId;
+    private @Nullable String categoryId;
     private @Nullable Integer radiusKm;
 
     // Specific filtering params (can be set after the object is created)
@@ -44,7 +44,7 @@ public class EventSearchParams implements Serializable {
      * @param longitude     longitude of the location used as center for the search.
      */
     public EventSearchParams(@Nullable String pubId, @Nullable String keyWords,
-                             @Nullable Integer categoryId, @Nullable Integer radiusKm,
+                             @Nullable String categoryId, @Nullable Integer radiusKm,
                              @Nullable Integer offset, @Nullable Double latitude,
                              @Nullable Double longitude) {
 
@@ -88,7 +88,7 @@ public class EventSearchParams implements Serializable {
         return keyWords;
     }
 
-    public @Nullable Integer getCategoryId() {
+    public @Nullable String getCategoryId() {
         return categoryId;
     }
 
