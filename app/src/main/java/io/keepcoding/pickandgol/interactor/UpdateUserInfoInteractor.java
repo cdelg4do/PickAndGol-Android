@@ -30,6 +30,7 @@ public class UpdateUserInfoInteractor {
     private static final String PUT_USER_OLD_PASSWORD = "old_password";
     private static final String PUT_USER_NEW_PASSWORD = "new_password";
     private static final String PUT_USER_PHOTO_URL = "photo_url";
+    private static final String PUT_USER_REGISTRATION_TOKEN = "registration_token";
 
     // This interface describes the behavior of a listener waiting for the the async operation
     public interface UpdateUserInfoInteractorListener {
@@ -74,6 +75,10 @@ public class UpdateUserInfoInteractor {
 
         if (user.getPhotoUrl() != null) {
             userUpdateParams.addParam(PUT_USER_PHOTO_URL, user.getPhotoUrl());
+        }
+
+        if (user.getRegistrationToken() != null) {
+            userUpdateParams.addParam(PUT_USER_REGISTRATION_TOKEN, user.getRegistrationToken());
         }
 
         String remoteUrl = getUrl(user.getId());
