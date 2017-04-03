@@ -169,15 +169,7 @@ public class NewPubActivity extends AppCompatActivity {
 
                             @Override
                             public void onReverseLocationSuccess(@NonNull List<Address> addresses) {
-
-                                Address address = addresses.get(0);
-
-                                StringBuilder fullAddress = new StringBuilder("");
-                                for(int i = 0; i <= address.getMaxAddressLineIndex(); i++)
-                                    fullAddress.append(address.getAddressLine(i) +", ");
-
-                                fullAddress.setLength(fullAddress.length() - 2);    // to remove the last ', '
-                                txtLocation.setText(fullAddress.toString());
+                                txtLocation.setText( Utils.getAddressString(addresses.get(0)) );
                             }
                         });
             }
@@ -412,6 +404,12 @@ public class NewPubActivity extends AppCompatActivity {
     // If all fields in the form are valid, returns a Pub object with the form values.
     // (if there are invalid field values, then returns null)
     private @Nullable Pub validateFormData() {
+
+        if ( !sm.hasSessionStored() ) {
+
+            Utils.simpleDialog(this, "Pub Creation Error", "You are not logged in.");
+            return null;
+        }
 
         Pub tempPub = null;     // This object is just a container of some data from the form
 

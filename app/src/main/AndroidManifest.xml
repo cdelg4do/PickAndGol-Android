@@ -42,7 +42,6 @@
         <activity
             android:name=".activity.SplashActivity"
             android:theme="@style/SplashTheme">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
@@ -79,8 +78,8 @@
 
         <activity
             android:name=".activity.EditUserActivity"
-            android:windowSoftInputMode="adjustPan"
-            android:configChanges="orientation|screenSize">
+            android:configChanges="orientation|screenSize"
+            android:windowSoftInputMode="adjustPan">
         </activity>
 
         <activity
@@ -88,12 +87,23 @@
             android:windowSoftInputMode="adjustPan">
         </activity>
 
-        <activity android:name=".activity.RegisterUserActivity"
-            android:windowSoftInputMode="adjustPan"
-            android:configChanges="orientation|screenSize">
+        <activity
+            android:name=".activity.RegisterUserActivity"
+            android:configChanges="orientation|screenSize"
+            android:windowSoftInputMode="adjustPan">
         </activity>
 
         <activity android:name=".activity.EventPubsActivity">
+        </activity>
+
+        <activity
+            android:name=".activity.PubDetailActivity"
+            android:configChanges="orientation|screenSize">
+        </activity>
+
+        <activity
+            android:name=".activity.PubEventsActivity"
+            android:configChanges="orientation|screenSize">
         </activity>
 
         <!-- Amazon S3 Transfer Utility service -->

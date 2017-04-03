@@ -19,8 +19,6 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.keepcoding.pickandgol.R;
@@ -439,19 +437,6 @@ public class MainActivity extends AppCompatActivity implements EventListListener
 
                 break;
 
-            case R.id.drawer_menu_create_event:
-
-                Pub currentPub = new Pub("58c782770c0ef45dfc5875df", "La Biblioteca",
-                        43.558096, -5.923779,
-                        "https://www.facebook.com/Cafe.LaBiblioteca",
-                        "58b471ddd9f0163f6eee6375",
-                        new ArrayList<String>(), new ArrayList<String>()
-                );
-
-                Navigator.fromPubDetailActivityToNewEventActivity(this, currentPub);
-                mainDrawer.closeDrawers();
-                break;
-
             case R.id.drawer_menu_pub_search:
 
                 showingFragment = PUB_LIST;
@@ -550,7 +535,7 @@ public class MainActivity extends AppCompatActivity implements EventListListener
 
                 lastEventSearchTotalResults = events.getTotalResults();
 
-                eventListFragment = EventListFragment.newInstance(events);
+                eventListFragment = EventListFragment.newInstance(events, false);
 
                 getSupportFragmentManager()
                         .beginTransaction()
@@ -769,7 +754,7 @@ public class MainActivity extends AppCompatActivity implements EventListListener
 
         if ( sm.getUserName() == null || !sm.getUserName().equals(newUserInfo.getName()) )
             sm.updateUserName(newUserInfo.getName());
-
+	
         if (sm.getUserPhotoUrl() == null || !sm.getUserPhotoUrl().equals(newUserInfo.getPhotoUrl())) {
             sm.updatePhotoUrl(newUserInfo.getPhotoUrl());
         }
@@ -837,7 +822,8 @@ public class MainActivity extends AppCompatActivity implements EventListListener
 
     @Override
     public void onPubClicked(Pub pub, int position) {
-        Utils.shortSnack(MainActivity.this, "'"+ pub.getName() +"' clicked.");
+
+        Navigator.fromMainActivityToPubDetailActivity(this, pub);
     }
 
     @Override

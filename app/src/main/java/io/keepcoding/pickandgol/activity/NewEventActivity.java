@@ -29,16 +29,18 @@ import java.util.UUID;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.keepcoding.pickandgol.R;
-import io.keepcoding.pickandgol.adapter.IntegerStringSpinnerAdapter;
+import io.keepcoding.pickandgol.adapter.StringStringSpinnerAdapter;
 import io.keepcoding.pickandgol.fragment.DatePickerFragment;
 import io.keepcoding.pickandgol.fragment.TimePickerFragment;
 import io.keepcoding.pickandgol.interactor.CreateEventInteractor;
 import io.keepcoding.pickandgol.interactor.CreateEventInteractor.CreateEventInteractorListener;
 import io.keepcoding.pickandgol.interactor.GetCategoriesInteractor;
+import io.keepcoding.pickandgol.interactor.GetCategoriesInteractor.GetCategoriesInteractorListener;
 import io.keepcoding.pickandgol.manager.image.ImageManager;
 import io.keepcoding.pickandgol.manager.image.ImageManager.ImagePickingListener;
 import io.keepcoding.pickandgol.manager.image.ImageManager.ImageProcessingListener;
 import io.keepcoding.pickandgol.manager.session.SessionManager;
+import io.keepcoding.pickandgol.model.Category;
 import io.keepcoding.pickandgol.model.CategoryAggregate;
 import io.keepcoding.pickandgol.model.Event;
 import io.keepcoding.pickandgol.model.Pub;
@@ -216,8 +218,7 @@ public class NewEventActivity extends AppCompatActivity {
     // Populates the spinner with the categories from the server
     private void setupCategorySpinner() {
 
-        GetCategoriesInteractor interactor = new GetCategoriesInteractor();
-        interactor.execute(this, new GetCategoriesInteractor.GetCategoriesInteractorListener() {
+        new GetCategoriesInteractor().execute(this, new GetCategoriesInteractorListener() {
             @Override
             public void onGetCategoriesFail(Exception e) {
                 Log.e(LOG_TAG, e.getMessage());
@@ -225,9 +226,23 @@ public class NewEventActivity extends AppCompatActivity {
 
             @Override
             public void onGetCategoriesSuccess(CategoryAggregate categories) {
-                NewEventActivity.this.categories = categories;
-                IntegerStringSpinnerAdapter adapter = IntegerStringSpinnerAdapter
-                        .createAdapterForCategoriesSpinner(NewEventActivity.this, categories, getString(R.string.new_event_activity_spinner_default_text));
+
+                String[] categoryIDs = new String[ categories.size() ];
+                String[] categoryNames = new String[ categories.size() ];
+
+                for (int i = 0; i < categories.size(); i++) {
+
+                    Category cat = categories.get(i);
+                    categoryIDs[i] = cat.getId();
+                    categoryNames[i] = cat.getName();
+                }
+
+                StringStringSpinnerAdapter adapter = new StringStringSpinnerAdapter(
+                        NewEventActivity.this,
+                        categoryIDs,
+                        categoryNames,
+                        "< Choose one >");
+
                 spnCategory.setAdapter(adapter);
             }
         });
@@ -387,18 +402,26 @@ public class NewEventActivity extends AppCompatActivity {
     // (if there are invalid field values, then returns null)
     private Event validateFormData() {
 
+        if ( !sm.hasSessionStored() ) {
+
+            Utils.simpleDialog(this, "Event Creation Error", "You are not logged in.");
+            return null;
+        }
+
         Event tempEvent = null;     // This object is just a container of some data from the form
 
         String eventName = txtName.getText().toString();
-        Integer selectedCategoryIndex = (int) spnCategory.getSelectedItemId();
         String eventDescription = txtDescription.getText().toString();
+
+        StringStringSpinnerAdapter adapter = (StringStringSpinnerAdapter) spnCategory.getAdapter();
+        int selectedCategoryIndex = spnCategory.getSelectedItemPosition();
 
         if (eventName.equals("")) {
             Utils.simpleDialog(this, "Invalid data", "You must specify a name for the event.");
             txtName.requestFocus();
         }
 
-        else if (selectedCategoryIndex < 0) {
+        else if (selectedCategoryIndex == 0) {
             Utils.simpleDialog(this, "Invalid data", "You must select a category for the event.");
             spnCategory.requestFocus();
         }
@@ -411,10 +434,8 @@ public class NewEventActivity extends AppCompatActivity {
         // All data are correct, prepare the temp Event
         else {
             Date eventDate = Utils.getDateFromIntegers(yyyy, mm, dd, hh, mins);
-            String eventCategory = null;
-            if (categories.get(selectedCategoryIndex) != null) {
-                eventCategory = categories.get(selectedCategoryIndex).getId();
-            }
+
+            String eventCategory = adapter.getKey( selectedCategoryIndex );
 
             if (eventDescription.equals(""))
                 eventDescription = null;

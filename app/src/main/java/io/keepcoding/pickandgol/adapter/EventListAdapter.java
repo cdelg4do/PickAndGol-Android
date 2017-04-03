@@ -15,23 +15,41 @@ import io.keepcoding.pickandgol.model.Event;
 import io.keepcoding.pickandgol.model.EventAggregate;
 import io.keepcoding.pickandgol.view.EventListListener;
 
+import static io.keepcoding.pickandgol.adapter.EventListAdapter.LayoutType.ROWS;
+
 
 /**
- * This is an adapter to manage an Event list (by using a RecyclerView)
+ * This is an adapter to manage an Event list (by using a RecyclerView).
+ * It supports two different layouts for the recycler: "classic" list and cell grid.
  */
 public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.EventViewHolder> {
 
+    // Available types of layout to represent the Event list
+    public static enum LayoutType {
+        ROWS,
+        CELLS
+    }
+
+    // Layouts for the list elements (depending on the chosen layout type)
+    // (make sure they exist and that both have the same view names)
+    private static final int ROW_LAYOUT_ID = R.layout.row_event;
+    private static final int CELL_LAYOUT_ID = R.layout.item_event;
+
     private Context context;
     private EventAggregate events;
+    private int layoutId;
     private EventListListener listener;
     private ImageManager im;
     private LayoutInflater inflater;
 
 
-    public EventListAdapter(Context context, EventAggregate events) {
+    public EventListAdapter(Context context, EventAggregate events, LayoutType type) {
 
         this.context = context;
         this.events = events;
+
+        if (type == ROWS)   this.layoutId = ROW_LAYOUT_ID;
+        else                this.layoutId = CELL_LAYOUT_ID;
 
         this.im = ImageManager.getInstance(context);
         this.inflater = LayoutInflater.from(context);
@@ -40,7 +58,7 @@ public class EventListAdapter extends RecyclerView.Adapter<EventListAdapter.Even
     @Override
     public EventViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
 
-        View layoutView = inflater.inflate(R.layout.item_event, parent, false);
+        View layoutView = inflater.inflate(layoutId, parent, false);
         EventViewHolder holder = new EventViewHolder(layoutView);
 
         return holder;
