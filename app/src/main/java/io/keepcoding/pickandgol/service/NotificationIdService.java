@@ -27,7 +27,7 @@ public class NotificationIdService extends FirebaseInstanceIdService {
 
     private void sendRegistrationToServer(String refreshedToken) {
         SessionManager sm = SessionManager.getInstance(this);
-        User user = new User(null);
+        User user = new User(sm.getUserId());
         user.setRegistrationToken(refreshedToken);
 
         UpdateUserInfoInteractor interactor = new UpdateUserInfoInteractor();
@@ -42,11 +42,5 @@ public class NotificationIdService extends FirebaseInstanceIdService {
 
             }
         });
-
-        // get the users who have the pub as favorite
-
-        // get the registration token of every user
-
-        // send the notification
     }
 }

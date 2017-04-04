@@ -49,3 +49,5 @@ obj/
 *.ipr
 *~
 *.swp
+
+google-services.json
