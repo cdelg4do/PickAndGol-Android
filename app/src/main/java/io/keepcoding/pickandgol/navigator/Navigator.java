@@ -8,6 +8,7 @@ import io.keepcoding.pickandgol.activity.EditUserActivity;
 import io.keepcoding.pickandgol.activity.EventDetailActivity;
 import io.keepcoding.pickandgol.activity.EventPubsActivity;
 import io.keepcoding.pickandgol.activity.EventSearchSettingsActivity;
+import io.keepcoding.pickandgol.activity.FavoritesActivity;
 import io.keepcoding.pickandgol.activity.LocationPickerActivity;
 import io.keepcoding.pickandgol.activity.MainActivity;
 import io.keepcoding.pickandgol.activity.NewEventActivity;
@@ -438,6 +439,56 @@ public class Navigator {
         Intent i = new Intent(pubEventsActivity, NewEventActivity.class);
         i.putExtra(NewEventActivity.PUB_MODEL_KEY, currentPub);
         pubEventsActivity.startActivityForResult(i, NEW_EVENT_ACTIVITY_REQUEST_CODE);
+
+        return i;
+    }
+
+    /**
+     * Navigates from an instance of MainActivity to another of FavoritesActivity
+     *
+     * @param mainActivity  context for the intent created during the operation
+     * @return              a reference to the intent created (useful for testing)
+     */
+    public static Intent fromMainActivityToFavoritesActivity(final MainActivity mainActivity) {
+
+        final Intent i = new Intent(mainActivity, FavoritesActivity.class);
+        mainActivity.startActivity(i);
+
+        return i;
+    }
+
+    /**
+     * Navigates from an instance of EventPubsActivity to another of PubDetailActivity,
+     * passing the Pub object to show under PubDetailActivity.PUB_MODEL_KEY.
+     *
+     * @param eventPubsActivity context for the intent created during the operation
+     * @param pub               pub to show in the new activity
+     * @return                  a reference to the intent created (useful for testing)
+     */
+    public static Intent fromEventPubsActivityToPubDetailActivity(final EventPubsActivity eventPubsActivity,
+                                                                  @NonNull Pub pub) {
+
+        Intent i = new Intent(eventPubsActivity, PubDetailActivity.class);
+        i.putExtra(PubDetailActivity.PUB_MODEL_KEY, pub);
+        eventPubsActivity.startActivity(i);
+
+        return i;
+    }
+
+    /**
+     * Navigates from an instance of MainActivity to another of PubDetailActivity,
+     * passing the Pub object to show under PubDetailActivity.PUB_MODEL_KEY.
+     *
+     * @param favoritesActivity context for the intent created during the operation
+     * @param pub               pub to show in the new activity
+     * @return                  a reference to the intent created (useful for testing)
+     */
+    public static Intent fromFavoritesActivityToPubDetailActivity(final FavoritesActivity favoritesActivity,
+                                                                  @NonNull Pub pub) {
+
+        Intent i = new Intent(favoritesActivity, PubDetailActivity.class);
+        i.putExtra(PubDetailActivity.PUB_MODEL_KEY, pub);
+        favoritesActivity.startActivity(i);
 
         return i;
     }

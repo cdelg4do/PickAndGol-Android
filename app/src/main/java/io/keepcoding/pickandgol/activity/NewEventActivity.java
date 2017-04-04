@@ -339,11 +339,6 @@ public class NewEventActivity extends AppCompatActivity {
                 // If no image chosen, show the image picker
                 if (imageFileToUpload == null)
                     showImagePicker();
-
-                    // If an image is already chosen
-                else {
-                    // TODO: show selected image in full screen
-                }
             }
         });
     }

@@ -470,6 +470,12 @@ public class MainActivity extends AppCompatActivity implements EventListListener
                 mainDrawer.closeDrawers();
                 break;
 
+            case R.id.drawer_menu_my_favorites:
+
+                Navigator.fromMainActivityToFavoritesActivity(this);
+                mainDrawer.closeDrawers();
+                break;
+
             case R.id.drawer_menu_log_in:
 
                 new LoginDialog(this, new LoginDialog.LoginDialogListener() {

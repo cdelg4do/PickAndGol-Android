@@ -100,7 +100,7 @@ public class ToggleFavoriteInteractor {
 
         // If we are removing the pub from favorites, send a DELETE request
         else {
-            // TODO: implement DELETE requests
+            // TODO: implement DELETE requests (in both the network manager and the backend)
             //networkMgr.launchDELETEStringRequest(remoteUrl, toggleFavoriteParams, USER, networkListener);
 
             listener.onToggleFavoriteFail(new Exception("Removing a pub from favorites is not (yet) supported."));

@@ -35,6 +35,7 @@ import io.keepcoding.pickandgol.manager.geo.GeoManager;
 import io.keepcoding.pickandgol.model.Event;
 import io.keepcoding.pickandgol.model.Pub;
 import io.keepcoding.pickandgol.model.PubAggregate;
+import io.keepcoding.pickandgol.navigator.Navigator;
 import io.keepcoding.pickandgol.search.PubSearchParams;
 import io.keepcoding.pickandgol.util.Utils;
 import io.keepcoding.pickandgol.view.PubListListener;
@@ -300,9 +301,7 @@ public class EventPubsActivity extends AppCompatActivity implements PubListListe
             public void onInfoWindowClick(Marker marker) {
                 Pub pub = (Pub) marker.getTag();
 
-                // TODO: navigator method
-                //Navigator.fromEventPubsMapActivityToPubDetailActivity(EventPubsActivity.this, pub);
-                Utils.shortSnack(EventPubsActivity.this, "'"+ pub.getName() +"' clicked.");
+                Navigator.fromEventPubsActivityToPubDetailActivity(EventPubsActivity.this, pub);
             }
         });
 
@@ -506,8 +505,7 @@ public class EventPubsActivity extends AppCompatActivity implements PubListListe
     @Override
     public void onPubClicked(Pub pub, int position) {
 
-        // TODO: go to the Pub detail activity
-        Utils.shortSnack(EventPubsActivity.this, "'"+ pub.getName() +"' clicked.");
+        Navigator.fromEventPubsActivityToPubDetailActivity(this, pub);
     }
 
     @Override
