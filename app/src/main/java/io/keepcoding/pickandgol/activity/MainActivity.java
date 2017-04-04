@@ -19,6 +19,8 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.firebase.iid.FirebaseInstanceId;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.keepcoding.pickandgol.R;
@@ -30,6 +32,7 @@ import io.keepcoding.pickandgol.interactor.SearchEventsInteractor;
 import io.keepcoding.pickandgol.interactor.SearchEventsInteractor.SearchEventsInteractorListener;
 import io.keepcoding.pickandgol.interactor.SearchPubsInteractor;
 import io.keepcoding.pickandgol.interactor.SearchPubsInteractor.SearchPubsInteractorListener;
+import io.keepcoding.pickandgol.interactor.UpdateUserInfoInteractor;
 import io.keepcoding.pickandgol.manager.geo.GeoManager;
 import io.keepcoding.pickandgol.manager.image.ImageManager;
 import io.keepcoding.pickandgol.manager.session.SessionManager;
@@ -735,6 +738,9 @@ public class MainActivity extends AppCompatActivity implements EventListListener
                 Utils.simpleDialog(MainActivity.this,
                                    "Login successful",
                                    "Now you are logged as '"+ sm.getUserName() +"'.");
+
+                final String refreshedToken = FirebaseInstanceId.getInstance().getToken();
+                sendRegistrationToServer(refreshedToken);
             }
         });
     }
@@ -855,5 +861,24 @@ public class MainActivity extends AppCompatActivity implements EventListListener
     @Override
     public void onPubListLoadNextPage() {
         searchPubsNextPage(lastPubSearchParams);
+    }
+
+    // TODO: this is a copy and paste of the same method in NotificationIdService
+    private void sendRegistrationToServer(String refreshedToken) {
+        User user = new User(sm.getUserId());
+        user.setRegistrationToken(refreshedToken);
+
+        UpdateUserInfoInteractor interactor = new UpdateUserInfoInteractor();
+        interactor.execute(this, sm.getSessionToken(), user, new UpdateUserInfoInteractor.UpdateUserInfoInteractorListener() {
+            @Override
+            public void onUpdateUserSuccess(User user) {
+
+            }
+
+            @Override
+            public void onUpdateUserFail(Exception e) {
+
+            }
+        });
     }
 }

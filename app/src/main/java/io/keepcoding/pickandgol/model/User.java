@@ -20,6 +20,7 @@ public class User implements Serializable, Collectible {
     private @Nullable String photoUrl;
     private @Nullable String oldPassword;
     private @Nullable String newPassword;
+    private @Nullable String registrationToken;
 
     private User() {
     }
@@ -126,5 +127,14 @@ public class User implements Serializable, Collectible {
                 && ((email == null && user.getEmail() == null) || (email != null && user.getEmail() != null &&  email.equals(user.getEmail())))
                 && ((photoUrl == null && user.getPhotoUrl() == null) || (photoUrl != null && user.getPhotoUrl() != null && photoUrl.equals(user.getPhotoUrl())))
                 && ((favorites == null && user.getFavorites() == null) || (favorites != null && user.getFavorites() != null && favorites.equals(user.getFavorites()))));
+    }
+
+    @Nullable
+    public String getRegistrationToken() {
+        return registrationToken;
+    }
+
+    public void setRegistrationToken(@Nullable String registrationToken) {
+        this.registrationToken = registrationToken;
     }
 }
