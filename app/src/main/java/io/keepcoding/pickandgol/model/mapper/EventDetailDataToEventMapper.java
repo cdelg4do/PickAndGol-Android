@@ -16,7 +16,7 @@ public class EventDetailDataToEventMapper {
                 data.getDate(),
                 data.getDescription(),
                 data.getPhotoUrl(),
-                data.getCategories().get(0),
+                data.getCategories() == null ? null : data.getCategories().get(0),
                 data.getPubs()
         );
 

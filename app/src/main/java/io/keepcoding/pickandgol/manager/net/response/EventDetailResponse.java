@@ -73,14 +73,14 @@ public class EventDetailResponse implements ParsedResponse {
         }
 
         public @Nullable String getDescription() {
-            if (description.equals(""))
+            if (description == null || description.equals(""))
                 return null;
 
             return description;
         }
 
         public @Nullable String getPhotoUrl() {
-            if (photoUrl.equals(""))
+            if (photoUrl == null || photoUrl.equals(""))
                 return null;
 
             return photoUrl;
@@ -112,7 +112,7 @@ public class EventDetailResponse implements ParsedResponse {
             str.append("id: "+ Utils.safeString(data.getId()) +"\n");
             str.append("name: "+ Utils.safeString(data.getName()) +"\n");
             str.append("description: "+ Utils.safeString(data.description) +"\n");
-            str.append("dateString: "+ data.getDate().toString() +"\n");
+            str.append("dateString: "+ (data.getDate() != null ? data.getDate().toString() : "empty date") +"\n");
             str.append("photoUrl: "+ Utils.safeString(data.getPhotoUrl()) +"\n");
 
             if (data.pubs == null || data.pubs.size() == 0)
