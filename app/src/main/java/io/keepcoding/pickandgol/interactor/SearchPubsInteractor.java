@@ -30,7 +30,7 @@ public class SearchPubsInteractor {
     public static final String REQUEST_PARAM_KEY_TEXT = "text";
     public static final String REQUEST_PARAM_KEY_LATITUDE = "latitude";
     public static final String REQUEST_PARAM_KEY_LONGITUDE = "longitude";
-    public static final String REQUEST_PARAM_KEY_RADIUS = "radius";
+    public static final String REQUEST_PARAM_KEY_RADIUS = "radius"; // radius in meters
     public static final String REQUEST_PARAM_KEY_EVENT = "event";
 
 
@@ -57,7 +57,7 @@ public class SearchPubsInteractor {
         String keyWords = searchParams.getKeyWords();
         Double latitude = searchParams.getLatitude();
         Double longitude = searchParams.getLongitude();
-        Integer radiusKm = searchParams.getRadiusKm();
+        Integer radius = (searchParams.getRadiusKm() != null) ? 1000 * searchParams.getRadiusKm() : null;
         String eventId = searchParams.getEventId();
 
 
@@ -76,11 +76,11 @@ public class SearchPubsInteractor {
         if (keyWords != null)
             searchEventsParams.addParam(REQUEST_PARAM_KEY_TEXT, keyWords);
 
-        if (latitude != null && longitude != null && radiusKm != null && radiusKm > 0) {
+        if (latitude != null && longitude != null && radius != null && radius > 0) {
 
             searchEventsParams.addParam(REQUEST_PARAM_KEY_LATITUDE, latitude.toString());
             searchEventsParams.addParam(REQUEST_PARAM_KEY_LONGITUDE, longitude.toString());
-            searchEventsParams.addParam(REQUEST_PARAM_KEY_RADIUS, radiusKm.toString());
+            searchEventsParams.addParam(REQUEST_PARAM_KEY_RADIUS, radius.toString());
         }
 
         if (eventId != null)

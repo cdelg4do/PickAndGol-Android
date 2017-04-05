@@ -149,9 +149,7 @@ public class PubEventsActivity extends AppCompatActivity implements EventListLis
         if (model == null || model.getId() == null)
             return;
 
-        // TODO: search events by pub ID
-        //String pubId = model.getId();
-        String pubId = null;
+        String pubId = model.getId();
 
         lastEventSearchTotalResults = 0;
         lastEventSearchParams = new EventSearchParams(pubId, null, null, null, null, null, null);

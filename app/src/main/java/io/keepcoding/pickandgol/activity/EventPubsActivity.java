@@ -29,6 +29,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.keepcoding.pickandgol.R;
 import io.keepcoding.pickandgol.adapter.PubInfoWindowAdapter;
+import io.keepcoding.pickandgol.adapter.PubListAdapter;
 import io.keepcoding.pickandgol.fragment.PubListFragment;
 import io.keepcoding.pickandgol.interactor.SearchPubsInteractor;
 import io.keepcoding.pickandgol.manager.geo.GeoManager;
@@ -55,6 +56,9 @@ public class EventPubsActivity extends AppCompatActivity implements PubListListe
     // Key strings for arguments passed in the intent
     public static final String MODEL_KEY = "MODEL_KEY";
     public static final String SHOW_USER_LOCATION_KEY = "SHOW_USER_LOCATION_KEY";
+
+    // Use this not to filter results by distance when sending the location in the queries
+    private static final int MAX_DISTANCE_EARTH_KM = 20100;
 
     // Key strings to save/recover the activity state
     private static final String SAVED_STATE_PUB_LIST_KEY = "SAVED_STATE_PUB_LIST_KEY";
@@ -219,7 +223,7 @@ public class EventPubsActivity extends AppCompatActivity implements PubListListe
         // Set list content and position
         scrollPosition = (scrollPosition != null && scrollPosition >= 0) ? scrollPosition : 0;
 
-        pubListFragment = PubListFragment.newInstance(pubs, scrollPosition, true);
+        pubListFragment = PubListFragment.newInstance(pubs, scrollPosition, PubListAdapter.LayoutType.ROWS);
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.activity_event_pubs_map_fragment_list, pubListFragment)
@@ -372,7 +376,7 @@ public class EventPubsActivity extends AppCompatActivity implements PubListListe
             return;
 
         lastPubSearchTotalResults = 0;
-        lastPubSearchParams = PubSearchParams.buildEmptyParams();
+        lastPubSearchParams = new PubSearchParams(null,null,MAX_DISTANCE_EARTH_KM,0,null,null);
         lastPubSearchParams.setEventId( model.getId() );
 
         searchPubsFirstPage(lastPubSearchParams, null);

@@ -17,8 +17,8 @@ public class PubDetailDataToPubMapper {
                 data.getLocation().getCoordinates() != null &&
                 data.getLocation().getCoordinates().size() == 2 ) {
 
-            latitude = data.getLocation().getCoordinates().get(0);
-            longitude = data.getLocation().getCoordinates().get(1);
+            longitude = data.getLocation().getCoordinates().get(0);
+            latitude = data.getLocation().getCoordinates().get(1);
 
             hasLocation = true;
         }

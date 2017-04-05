@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context=".EventDetailActivity">
+
+    <item
+        android:id="@+id/event_detail_menu_link_to_pub"
+        android:title="Link to a pub"
+        app:showAsAction="never"/>
+
+</menu>

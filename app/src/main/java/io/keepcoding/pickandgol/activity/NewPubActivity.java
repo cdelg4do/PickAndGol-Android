@@ -543,7 +543,6 @@ public class NewPubActivity extends AppCompatActivity {
         String name = pub.getName();
         double latitude = pub.getLatitude();
         double longitude = pub.getLongitude();
-        String userId = sm.getUserId();
         String token = sm.getSessionToken();
         String url = pub.getUrl();
 
@@ -556,7 +555,7 @@ public class NewPubActivity extends AppCompatActivity {
         final ProgressDialog pDialog = Utils.newProgressDialog(this, "Registering pub...");
         pDialog.show();
 
-        new CreatePubInteractor().execute(this, name, latitude, longitude, userId, url, photoUrls, token, new CreatePubInteractorListener() {
+        new CreatePubInteractor().execute(this, name, latitude, longitude, url, photoUrls, token, new CreatePubInteractorListener() {
 
                     @Override
                     public void onCreatePubFail(Exception e) {

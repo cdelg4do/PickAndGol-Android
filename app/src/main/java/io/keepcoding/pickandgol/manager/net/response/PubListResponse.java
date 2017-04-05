@@ -92,8 +92,8 @@ public class PubListResponse implements ParsedResponse {
                 str.append("\tname: "+ Utils.safeString(pub.getName()) +"\n");
 
                 if (hasLocation) {
-                    str.append("\tlatitude: "+ pub.getLocation().getCoordinates().get(0) +"\n");
-                    str.append("\tlongitude: "+ pub.getLocation().getCoordinates().get(1) +"\n");
+                    str.append("\tlatitude: "+ pub.getLocation().getCoordinates().get(1) +"\n");
+                    str.append("\tlongitude: "+ pub.getLocation().getCoordinates().get(0) +"\n");
                 }
                 else {
                     str.append("\tlatitude: <INVALID_DATA>\n");

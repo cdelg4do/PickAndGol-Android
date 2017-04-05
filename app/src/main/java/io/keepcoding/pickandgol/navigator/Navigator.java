@@ -16,6 +16,7 @@ import io.keepcoding.pickandgol.activity.NewPubActivity;
 import io.keepcoding.pickandgol.activity.PubDetailActivity;
 import io.keepcoding.pickandgol.activity.PubEventsActivity;
 import io.keepcoding.pickandgol.activity.PubSearchSettingsActivity;
+import io.keepcoding.pickandgol.activity.PubSelectorActivity;
 import io.keepcoding.pickandgol.activity.RegisterUserActivity;
 import io.keepcoding.pickandgol.activity.SplashActivity;
 import io.keepcoding.pickandgol.model.Event;
@@ -41,7 +42,7 @@ public class Navigator {
     public static final int PUB_SEARCH_ACTIVITY_REQUEST_CODE = 1003;
     public static final int NEW_PUB_ACTIVITY_REQUEST_CODE = 1004;
     public static final int LOCATION_PICKER_ACTIVITY_REQUEST_CODE = 1005;
-    public static final int EDIT_EVENT_ACTIVITY_REQUEST_CODE = 1006;
+    public static final int PUB_SELECTOR_ACTIVITY_REQUEST_CODE = 1006;
     public static final int EDIT_USER_ACTIVITY_REQUEST_CODE = 1007;
 
     /**
@@ -490,6 +491,63 @@ public class Navigator {
         i.putExtra(PubDetailActivity.PUB_MODEL_KEY, pub);
         favoritesActivity.startActivity(i);
 
+        return i;
+    }
+
+    /**
+     * Navigates from an instance of EventDetailActivity to another of PubSelectorActivity
+     * (the PubDetailActivity will wait for result PUB_SELECTOR_ACTIVITY_REQUEST_CODE)
+     *
+     * @param eventDetailActivity   context for the intent created during the operation
+     * @return                      a reference to the intent created (useful for testing)
+     */
+    public static Intent fromEventDetailActivityToPubSelectorActivity(final EventDetailActivity eventDetailActivity) {
+
+        Intent i = new Intent(eventDetailActivity, PubSelectorActivity.class);
+        eventDetailActivity.startActivityForResult(i, PUB_SELECTOR_ACTIVITY_REQUEST_CODE);
+
+        return i;
+    }
+
+    /**
+     * Navigates from an instance of PubSelectorActivity to another of PubDetailActivity
+     * passing the Pub object to show under PubDetailActivity.PUB_MODEL_KEY.
+     *
+     * @param pubSelectorActivity   context for the intent created during the operation
+     * @return                      a reference to the intent created (useful for testing)
+     */
+    public static Intent fromPubSelectorActivityToPubDetailActivity(final PubSelectorActivity pubSelectorActivity,
+                                                                    @NonNull Pub pub) {
+
+        Intent i = new Intent(pubSelectorActivity, PubDetailActivity.class);
+        i.putExtra(PubDetailActivity.PUB_MODEL_KEY, pub);
+        pubSelectorActivity.startActivity(i);
+
+        return i;
+    }
+
+    /**
+     * Returns from an instance of PubSelectorActivity to the previous activity,
+     * sending back a Pub object, if selected in the activity.
+     *
+     * @param pubSelectorActivity   context for the intent created during the operation
+     * @param selectedPub           the new pub created in the activity (if not null)
+     * @return                      a reference to the intent created (useful for testing)
+     */
+    public static Intent backFromPubSelectorActivity(final PubSelectorActivity pubSelectorActivity,
+                                                     @Nullable Pub selectedPub) {
+
+        Intent i = new Intent();
+
+        if (selectedPub != null) {
+
+            i.putExtra(PubSelectorActivity.SELECTED_PUB_KEY, selectedPub);
+            pubSelectorActivity.setResult(RESULT_OK, i);
+        }
+        else
+            pubSelectorActivity.setResult(RESULT_CANCELED, i); // The operation was canceled
+
+        pubSelectorActivity.finish();
         return i;
     }
 }

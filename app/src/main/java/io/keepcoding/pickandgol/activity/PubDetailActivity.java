@@ -273,9 +273,7 @@ public class PubDetailActivity extends AppCompatActivity {
         txtEventCounter.setText("< Fetching events... >");
         btnEvents.setVisibility(INVISIBLE);
 
-        // TODO: search events by pub ID
-        //final String pubId = model.getId();
-        final String pubId = null;
+        final String pubId = model.getId();
         EventSearchParams searchParams = new EventSearchParams(pubId, null, null, null, null, null, null);
 
         new SearchEventsInteractor().execute(this, searchParams, new SearchEventsInteractorListener() {

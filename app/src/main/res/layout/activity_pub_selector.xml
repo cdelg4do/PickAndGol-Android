@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/activity_event_pubs_map"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="io.keepcoding.pickandgol.activity.PubSelectorActivity">
+
+    <!-- Toolbar for the actvity -->
+    <include layout="@layout/toolbar_main"/>
+
+    <!-- This layout will be replaced by a fragment during runtime -->
+    <LinearLayout
+        android:id="@+id/activity_pub_selector_fragment_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"/>
+
+</LinearLayout>

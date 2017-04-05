@@ -50,7 +50,6 @@ public class CreatePubInteractor {
      * @param name          name for the new pub.
      * @param latitude      latitude for the new pub.
      * @param longitude     longitude for the new pub.
-     * @param userId        id of the user the new pub belongs to.
      * @param url           url for the new pub.
      * @param photoUrls     list of picture urls the new pub.
      * @param token         session token to send to the server
@@ -60,7 +59,6 @@ public class CreatePubInteractor {
                         final @NonNull String name,
                         final @NonNull double latitude,
                         final @NonNull double longitude,
-                        final @NonNull String userId,
                         final @Nullable String url,
                         final @Nullable List<String> photoUrls,
                         final @NonNull String token,
@@ -79,11 +77,6 @@ public class CreatePubInteractor {
             return;
         }
 
-        if (userId == null) {
-            listener.onCreatePubFail(new Exception("This operation requires a user id."));
-            return;
-        }
-
 
         NetworkManager networkMgr = new NetworkManager(context);
         RequestParams createPubParams = new RequestParams();
@@ -92,7 +85,6 @@ public class CreatePubInteractor {
                 .addParam(REQUEST_PARAM_KEY_NAME, name)
                 .addParam(REQUEST_PARAM_KEY_LATITUDE, ""+latitude)
                 .addParam(REQUEST_PARAM_KEY_LONGITUDE, ""+longitude)
-                .addParam(REQUEST_PARAM_KEY_USER_ID, userId)
                 .addParam(REQUEST_PARAM_KEY_TOKEN, token);
 
         if (url != null)

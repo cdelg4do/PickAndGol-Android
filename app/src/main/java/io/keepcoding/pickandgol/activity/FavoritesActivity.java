@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.MenuItem;
 
 import io.keepcoding.pickandgol.R;
+import io.keepcoding.pickandgol.adapter.PubListAdapter;
 import io.keepcoding.pickandgol.fragment.PubListFragment;
 import io.keepcoding.pickandgol.interactor.GetFavoritesInteractor;
 import io.keepcoding.pickandgol.interactor.GetFavoritesInteractor.GetFavoritesInteractorListener;
@@ -25,6 +26,9 @@ import io.keepcoding.pickandgol.util.Utils;
 import io.keepcoding.pickandgol.view.PubListListener;
 
 
+/**
+ * This activity shows the list of favorite pubs of the user.
+ */
 public class FavoritesActivity extends AppCompatActivity implements PubListListener {
 
     private final static String LOG_TAG = "FavoritesActivity";
@@ -102,7 +106,7 @@ public class FavoritesActivity extends AppCompatActivity implements PubListListe
         scrollPosition = (scrollPosition != null && scrollPosition >= 0) ? scrollPosition : 0;
 
         // Set list content
-        pubListFragment = PubListFragment.newInstance(pubs, scrollPosition, true);
+        pubListFragment = PubListFragment.newInstance(pubs, scrollPosition, PubListAdapter.LayoutType.ROWS);
         getSupportFragmentManager()
                 .beginTransaction()
                 .replace(R.id.activity_favorites_fragment_list, pubListFragment)

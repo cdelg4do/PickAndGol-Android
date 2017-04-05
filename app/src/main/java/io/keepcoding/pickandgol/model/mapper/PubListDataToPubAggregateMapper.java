@@ -31,8 +31,8 @@ public class PubListDataToPubAggregateMapper {
                      pubData.getLocation().getCoordinates() != null &&
                      pubData.getLocation().getCoordinates().size() == 2 ) {
 
-                    latitude = pubData.getLocation().getCoordinates().get(0);
-                    longitude = pubData.getLocation().getCoordinates().get(1);
+                    longitude = pubData.getLocation().getCoordinates().get(0);
+                    latitude = pubData.getLocation().getCoordinates().get(1);
 
                     hasLocation = true;
                 }

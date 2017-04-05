@@ -1,13 +1,16 @@
 package io.keepcoding.pickandgol.activity;
 
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -21,13 +24,20 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.keepcoding.pickandgol.R;
 import io.keepcoding.pickandgol.interactor.GetCategoriesInteractor;
+import io.keepcoding.pickandgol.interactor.LinkEventToPubInteractor;
+import io.keepcoding.pickandgol.interactor.LinkEventToPubInteractor.LinkEventToPubInteractorListener;
 import io.keepcoding.pickandgol.manager.geo.GeoManager;
 import io.keepcoding.pickandgol.manager.image.ImageManager;
+import io.keepcoding.pickandgol.manager.session.SessionManager;
 import io.keepcoding.pickandgol.model.Category;
 import io.keepcoding.pickandgol.model.CategoryAggregate;
 import io.keepcoding.pickandgol.model.Event;
+import io.keepcoding.pickandgol.model.Pub;
 import io.keepcoding.pickandgol.navigator.Navigator;
 import io.keepcoding.pickandgol.util.Utils;
+
+import static io.keepcoding.pickandgol.activity.PubSelectorActivity.SELECTED_PUB_KEY;
+import static io.keepcoding.pickandgol.navigator.Navigator.PUB_SELECTOR_ACTIVITY_REQUEST_CODE;
 
 
 /**
@@ -42,6 +52,8 @@ public class EventDetailActivity extends AppCompatActivity {
 
     private Event model;
     private CategoryAggregate categories;
+
+    private SessionManager sm;
     private ImageManager im;
 
     // Reference to UI elements to be bound with Butterknife
@@ -61,12 +73,20 @@ public class EventDetailActivity extends AppCompatActivity {
         setContentView(R.layout.activity_event_detail);
         ButterKnife.bind(this);
 
+        sm = SessionManager.getInstance(this);
         im = ImageManager.getInstance(this);
 
         setupActionBar();
         setupButtons();
 
         loadCategoriesThenLoadModel();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        getMenuInflater().inflate(R.menu.event_detail_menu, menu);
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
@@ -78,8 +98,44 @@ public class EventDetailActivity extends AppCompatActivity {
                 finishActivity(null);
                 return true;
 
+            case R.id.event_detail_menu_link_to_pub:
+                Navigator.fromEventDetailActivityToPubSelectorActivity(EventDetailActivity.this);
+                return true;
+
             default:
                 return super.onOptionsItemSelected(item);
+        }
+    }
+
+
+    /*** Handlers for activity requests (permissions, intents) ***/
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // If we are coming from the pub selector activity
+        if (requestCode == PUB_SELECTOR_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK) {
+
+            final Pub selectedPub = (Pub) data.getSerializableExtra(SELECTED_PUB_KEY);
+
+            if (selectedPub != null) {
+
+                Utils.questionDialog(
+                        EventDetailActivity.this,
+                        "Link to Pub",
+                        "You are about to link this event to the pub '"
+                            + selectedPub.getName() + "'\n\nDo you want to proceed?",
+                        new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                linkToPub(selectedPub);
+                            }
+                        }
+                );
+
+
+            }
         }
     }
 
@@ -121,7 +177,7 @@ public class EventDetailActivity extends AppCompatActivity {
             @Override
             public void onGetCategoriesFail(Exception e) {
                 pDialog.dismiss();
-                finishActivity(new Exception(e.getMessage()));
+                finishActivity(new Error(e.getMessage()));
             }
 
             @Override
@@ -142,7 +198,7 @@ public class EventDetailActivity extends AppCompatActivity {
         model = (Event) i.getSerializableExtra(EVENT_MODEL_KEY);
 
         if (model == null)
-            finishActivity(new Exception("No event to show was provided"));
+            finishActivity(new Error("No event to show was provided"));
 
         txtName.setText( model.getName() );
 
@@ -189,8 +245,52 @@ public class EventDetailActivity extends AppCompatActivity {
         Navigator.fromEventDetailActivityToEventPubsMapActivity(this, model, showUserLocation);
     }
 
+    // Associates the given pub to the model
+    private void linkToPub(final @NonNull Pub pub) {
+
+        if (!sm.hasSessionStored()) {
+
+            Utils.simpleDialog(this,
+                    "You are not logged in",
+                    "First you must log in to the system.",
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            finishActivity(new Error("The user is not logged in"));
+                        }
+                    });
+
+            return;
+        }
+
+        final ProgressDialog pDialog = Utils.newProgressDialog(this, "Linking Event...");
+        pDialog.show();
+
+        String eventId = model.getId();
+        final String pubId = pub.getId();
+        String token = sm.getSessionToken();
+
+        new LinkEventToPubInteractor().execute(this, eventId, pubId, token,
+                                               new LinkEventToPubInteractorListener() {
+            @Override
+            public void onEventLinkFail(Exception e) {
+                pDialog.dismiss();
+
+                Log.e(LOG_TAG, "Failed to link event to pub '" + pubId + "': " + e.getMessage() );
+                Utils.simpleDialog(EventDetailActivity.this, "Link Event error", e.getMessage());
+            }
+
+            @Override
+            public void onEventLinkSuccess(Event event) {
+                pDialog.dismiss();
+
+                Utils.simpleDialog(EventDetailActivity.this, "Link Event", "This event has been linked to '"+ pub.getName() +"'");
+            }
+        });
+    }
+
     // Finishes this activity, logging the passed error (if not null)
-    private void finishActivity(@Nullable Exception error) {
+    private void finishActivity(@Nullable Error error) {
 
         if (error != null)
             Log.e(LOG_TAG, "Error: "+ error.toString());

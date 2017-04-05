@@ -155,7 +155,7 @@
                         android:id="@+id/activity_pub_detail_events_label"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Events associated to this pub:"
+                        android:text="Future events in this pub:"
                         android:textSize="17sp"
                         android:textStyle="normal|bold"/>
 

@@ -27,6 +27,7 @@ import static android.R.color.holo_blue_dark;
 import static android.content.res.Configuration.ORIENTATION_LANDSCAPE;
 import static io.keepcoding.pickandgol.adapter.PubListAdapter.LayoutType.CELLS;
 import static io.keepcoding.pickandgol.adapter.PubListAdapter.LayoutType.ROWS;
+import static io.keepcoding.pickandgol.adapter.PubListAdapter.LayoutType.ROWS_WITH_DETAIL_BUTTON;
 
 
 /**
@@ -43,6 +44,7 @@ public class PubListFragment extends Fragment {
     private static final String FRAGMENT_INITIAL_PUBS_KEY = "FRAGMENT_INITIAL_PUBS_KEY";
     private static final String FRAGMENT_INITIAL_POSITION_KEY = "FRAGMENT_INITIAL_POSITION_KEY";
     private static final String USE_ROW_LAYOUT_KEY = "USE_ROW_LAYOUT_KEY";
+    private static final String LAYOUT_TYPE_KEY = "LAYOUT_TYPE_KEY";
 
     private RecyclerView recyclerView;
     private SwipeRefreshLayout swipeContainer;
@@ -51,25 +53,26 @@ public class PubListFragment extends Fragment {
     private PubAggregate pubs;
     private int initialScrollPosition;
     private boolean useRowLayout;
+    private PubListAdapter.LayoutType layoutType;
 
     /**
      * Call this to initialize a new fragment instance.
      *
      * @param initialPubs           the pubs that the fragment will show in the beginning
      * @param initialScrollPosition the scroll position the list will be located at
-     * @param useRowLayout          true: a "classic" list will be used; false: use a grid layout
+     * @param layoutType            the type of layout that will be used to represent the pub list
      * @return                      a reference to the new fragment object
      */
     public static PubListFragment newInstance(PubAggregate initialPubs,
                                               int initialScrollPosition,
-                                              boolean useRowLayout) {
+                                              PubListAdapter.LayoutType layoutType) {
 
         PubListFragment fragment = new PubListFragment();
 
         Bundle args = new Bundle();
         args.putSerializable(FRAGMENT_INITIAL_PUBS_KEY, initialPubs);
         args.putInt(FRAGMENT_INITIAL_POSITION_KEY, initialScrollPosition);
-        args.putBoolean(USE_ROW_LAYOUT_KEY, useRowLayout);
+        args.putSerializable(LAYOUT_TYPE_KEY, layoutType);
         fragment.setArguments(args);
 
         return fragment;
@@ -85,6 +88,7 @@ public class PubListFragment extends Fragment {
             pubs = (PubAggregate) getArguments().getSerializable(FRAGMENT_INITIAL_PUBS_KEY);
             initialScrollPosition = getArguments().getInt(FRAGMENT_INITIAL_POSITION_KEY);
             useRowLayout = getArguments().getBoolean(USE_ROW_LAYOUT_KEY, false);
+            layoutType = (PubListAdapter.LayoutType) getArguments().getSerializable(LAYOUT_TYPE_KEY);
         }
     }
 
@@ -149,7 +153,7 @@ public class PubListFragment extends Fragment {
         recyclerView = (RecyclerView) rootView.findViewById(R.id.fragment_pub_list_recycler);
 
         // If the list is represented in the form of a classic row list
-        if (useRowLayout) {
+        if (layoutType == ROWS || layoutType == ROWS_WITH_DETAIL_BUTTON) {
 
             LinearLayoutManager layoutMgr = new LinearLayoutManager(getActivity());
             recyclerView.setLayoutManager(layoutMgr);
@@ -164,7 +168,7 @@ public class PubListFragment extends Fragment {
                 }
             });
 
-            adapter = new PubListAdapter(getActivity(), pubs, ROWS);
+            adapter = new PubListAdapter(getActivity(), pubs, layoutType);
             adapter.setOnPubClickListener(listener);
             recyclerView.setAdapter(adapter);
 
@@ -172,7 +176,7 @@ public class PubListFragment extends Fragment {
         }
 
         // If the list is represented in the form of a cell grid
-        else {
+        else if (layoutType == CELLS) {
 
             int columns;
             if (getResources().getConfiguration().orientation == ORIENTATION_LANDSCAPE)
@@ -194,7 +198,7 @@ public class PubListFragment extends Fragment {
                 }
             });
 
-            adapter = new PubListAdapter(getActivity(), pubs, CELLS);
+            adapter = new PubListAdapter(getActivity(), pubs, layoutType);
             adapter.setOnPubClickListener(listener);
             recyclerView.setAdapter(adapter);
         }

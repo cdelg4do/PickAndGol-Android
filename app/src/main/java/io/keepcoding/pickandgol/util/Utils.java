@@ -120,6 +120,22 @@ public class Utils {
         simpleDialog(ctx, title, msg, null);
     }
 
+    // Shows the user a dialog with a title, a message and two buttons: Cancel & Accept
+    // (the Accept button will use the given listener)
+    public static void questionDialog(Context ctx, String title, String question, OnClickListener acceptListener) {
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(ctx);
+
+        builder.setTitle(title)
+                .setMessage(question)
+                .setCancelable(false)
+                .setPositiveButton(ctx.getString(android.R.string.ok), acceptListener)
+                .setNegativeButton(ctx.getString(android.R.string.cancel), null);
+
+        AlertDialog alert = builder.create();
+        alert.show();
+    }
+
 
     /*
         String operations and validators

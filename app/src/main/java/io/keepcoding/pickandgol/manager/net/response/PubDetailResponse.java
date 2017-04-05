@@ -130,8 +130,8 @@ public class PubDetailResponse implements ParsedResponse {
                  data.getLocation().getCoordinates() != null &&
                  data.getLocation().getCoordinates().size() == 2 ) {
 
-                Double latitude = data.getLocation().getCoordinates().get(0);
-                Double longitude = data.getLocation().getCoordinates().get(1);
+                Double longitude = data.getLocation().getCoordinates().get(0);
+                Double latitude = data.getLocation().getCoordinates().get(1);
 
                 str.append("latitude: "+ latitude +"\n");
                 str.append("longitude: "+ longitude +"\n");

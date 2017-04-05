@@ -24,6 +24,7 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.keepcoding.pickandgol.R;
+import io.keepcoding.pickandgol.adapter.PubListAdapter;
 import io.keepcoding.pickandgol.dialog.LoginDialog;
 import io.keepcoding.pickandgol.fragment.EventListFragment;
 import io.keepcoding.pickandgol.fragment.PubListFragment;
@@ -645,7 +646,7 @@ public class MainActivity extends AppCompatActivity implements EventListListener
 
                 lastPubSearchTotalResults = pubs.getTotalResults();
 
-                pubListFragment = PubListFragment.newInstance(pubs, 0, false);
+                pubListFragment = PubListFragment.newInstance(pubs, 0, PubListAdapter.LayoutType.CELLS);
 
                 getSupportFragmentManager()
                         .beginTransaction()
