@@ -24,6 +24,7 @@ import java.util.Map;
 import io.keepcoding.pickandgol.manager.net.response.CategoryListResponse;
 import io.keepcoding.pickandgol.manager.net.response.EventDetailResponse;
 import io.keepcoding.pickandgol.manager.net.response.EventListResponse;
+import io.keepcoding.pickandgol.manager.net.response.LinkEventPubResponse;
 import io.keepcoding.pickandgol.manager.net.response.LoginResponse;
 import io.keepcoding.pickandgol.manager.net.response.PubDetailResponse;
 import io.keepcoding.pickandgol.manager.net.response.PubListResponse;
@@ -313,6 +314,10 @@ public class NetworkManager {
                 parsedResponse = parseUserRegisterResponse(response);
                 break;
 
+            case LINK_EVENT_PUB:
+                parsedResponse = parseLinkEventPubResponse(response);
+                break;
+
             default:
                 parsedResponse = null;
                 break;
@@ -470,5 +475,23 @@ public class NetworkManager {
         }
 
         return userResponse;
+    }
+
+    // JsonResponseType: LINK_EVENT_PUB
+    @Nullable
+    private LinkEventPubResponse parseLinkEventPubResponse(String responseString) {
+
+        LinkEventPubResponse linkEventPubResponse = null;
+
+        try {
+            Reader reader = new StringReader(responseString);
+            Gson gson = new GsonBuilder().create();
+            linkEventPubResponse = gson.fromJson(reader, LinkEventPubResponse.class);
+        }
+        catch (RuntimeException e) {
+            e.printStackTrace();
+        }
+
+        return linkEventPubResponse;
     }
 }

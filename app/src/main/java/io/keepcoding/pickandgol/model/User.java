@@ -46,8 +46,7 @@ public class User implements Serializable, Collectible {
     // Getters:
 
     @Override
-    @NonNull
-    public String getId() {
+    public @NonNull String getId() {
         return id;
     }
 
@@ -55,25 +54,41 @@ public class User implements Serializable, Collectible {
         return email;
     }
 
-    @NonNull
-    public User setEmail(final String email) {
-        this.email = email;
-        return this;
-    }
-
     public String getName() {
         return name;
     }
 
-    @NonNull
-    public User setName(final String name) {
-        this.name = name;
+    public @NonNull List<String> getFavorites() {
+        return favorites;
+    }
+
+    public @Nullable String getPhotoUrl() {
+        return photoUrl;
+    }
+
+    public @NonNull String getOldPassword() {
+        return oldPassword;
+    }
+
+    public @NonNull String getNewPassword() {
+        return newPassword;
+    }
+
+    public @NonNull String getRegistrationToken() {
+        return registrationToken;
+    }
+
+
+    // Setters:
+
+    public @NonNull User setEmail(final String email) {
+        this.email = email;
         return this;
     }
 
-    @NonNull
-    public List<String> getFavorites() {
-        return favorites;
+    public @NonNull User setName(final String name) {
+        this.name = name;
+        return this;
     }
 
     public User setFavorites(final List<String> favorites) {
@@ -81,34 +96,25 @@ public class User implements Serializable, Collectible {
         return this;
     }
 
-    @Nullable
-    public String getPhotoUrl() {
-        return photoUrl;
-    }
-
-    @NonNull
-    public User setPhotoUrl(final String photoUrl) {
+    public @NonNull User setPhotoUrl(final String photoUrl) {
         this.photoUrl = photoUrl;
         return this;
-    }
-
-    @Nullable
-    public String getOldPassword() {
-        return oldPassword;
     }
 
     public void setOldPassword(@Nullable String oldPassword) {
         this.oldPassword = oldPassword;
     }
 
-    @Nullable
-    public String getNewPassword() {
-        return newPassword;
-    }
-
     public void setNewPassword(@Nullable String newPassword) {
         this.newPassword = newPassword;
     }
+
+    public void setRegistrationToken(@Nullable String registrationToken) {
+        this.registrationToken = registrationToken;
+    }
+
+
+    // Comparator method
 
     @Override
     public boolean equals(Object obj) {
@@ -127,14 +133,5 @@ public class User implements Serializable, Collectible {
                 && ((email == null && user.getEmail() == null) || (email != null && user.getEmail() != null &&  email.equals(user.getEmail())))
                 && ((photoUrl == null && user.getPhotoUrl() == null) || (photoUrl != null && user.getPhotoUrl() != null && photoUrl.equals(user.getPhotoUrl())))
                 && ((favorites == null && user.getFavorites() == null) || (favorites != null && user.getFavorites() != null && favorites.equals(user.getFavorites()))));
-    }
-
-    @Nullable
-    public String getRegistrationToken() {
-        return registrationToken;
-    }
-
-    public void setRegistrationToken(@Nullable String registrationToken) {
-        this.registrationToken = registrationToken;
     }
 }

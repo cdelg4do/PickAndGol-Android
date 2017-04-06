@@ -27,13 +27,14 @@ public class NetworkManagerSettings {
     // Available JSON response types expected from the server
     public static enum JsonResponseType {
 
-        LOGIN,           // LoginResponse
-        USER,            // UserResponse
-        EVENT_LIST,      // EventListResponse
-        EVENT_DETAIL,    // EventDetailResponse
-        PUB_LIST, 	      // PubListResponse
-        PUB_DETAIL,      // PubDetailResponse
+        LOGIN,             // LoginResponse
+        USER,              // UserResponse
+        EVENT_LIST,       // EventListResponse
+        EVENT_DETAIL,     // EventDetailResponse
+        PUB_LIST, 	       // PubListResponse
+        PUB_DETAIL,       // PubDetailResponse
         CATEGORY_LIST,   // CategoryListResponse
-        REGISTER         // UserRegisterResponse
+        REGISTER,         // UserRegisterResponse
+        LINK_EVENT_PUB   // LinkEventPubResponse
     }
 }

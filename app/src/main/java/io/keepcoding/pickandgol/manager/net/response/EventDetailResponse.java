@@ -128,9 +128,9 @@ public class EventDetailResponse implements ParsedResponse {
             }
 
             if (data.categories == null || data.categories.size() == 0)
-                str.append("categories: [ ] \n");
+                str.append("category: [ ] \n");
             else {
-                str.append("categories: [ ");
+                str.append("category: [ ");
 
                 for (String cat : data.categories)
                     str.append(cat + ", ");

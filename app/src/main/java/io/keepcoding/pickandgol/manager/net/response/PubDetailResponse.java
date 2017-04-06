@@ -46,7 +46,7 @@ public class PubDetailResponse implements ParsedResponse {
         @SerializedName("name")         private String name;
         @SerializedName("location")     private Location location;
         @SerializedName("url")          private String url;    // Optional field (may come as "")
-        @SerializedName("owner")        private String owner;
+        @SerializedName("owner_id")     private String owner;
         @SerializedName("events")       private List<String> events;
         @SerializedName("photos")       private List<String> photos;
 

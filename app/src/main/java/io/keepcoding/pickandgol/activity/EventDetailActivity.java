@@ -273,7 +273,7 @@ public class EventDetailActivity extends AppCompatActivity {
         new LinkEventToPubInteractor().execute(this, eventId, pubId, token,
                                                new LinkEventToPubInteractorListener() {
             @Override
-            public void onEventLinkFail(Exception e) {
+            public void onLinkEventPubFail(Exception e) {
                 pDialog.dismiss();
 
                 Log.e(LOG_TAG, "Failed to link event to pub '" + pubId + "': " + e.getMessage() );
@@ -281,10 +281,10 @@ public class EventDetailActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onEventLinkSuccess(Event event) {
+            public void onLinkEventPubSuccess(Pub updatedPub, Event updatedEvent) {
                 pDialog.dismiss();
 
-                Utils.simpleDialog(EventDetailActivity.this, "Link Event", "This event has been linked to '"+ pub.getName() +"'");
+                Utils.simpleDialog(EventDetailActivity.this, "Link Event", "This event has been linked to '"+ updatedPub.getName() +"'");
             }
         });
     }
