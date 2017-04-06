@@ -7,10 +7,24 @@
     <!-- Toolbar for the actvity -->
     <include layout="@layout/toolbar_main"/>
 
-    <!-- This layout will be replaced by a fragment during runtime -->
-    <LinearLayout
-        android:id="@+id/mainContentFragment_placeholder"
+    <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent">
+
+        <!-- This layout will be replaced by a fragment during runtime -->
+        <LinearLayout
+            android:id="@+id/mainContentFragment_placeholder"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"/>
+
+        <android.support.design.widget.FloatingActionButton
+            android:id="@+id/activity_main_button_new"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|center_horizontal"
+            android:layout_margin="55dp"
+            android:src="@drawable/ic_plus"/>
+
+    </android.support.design.widget.CoordinatorLayout>
 
 </LinearLayout>

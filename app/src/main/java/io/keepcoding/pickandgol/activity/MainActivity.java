@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -34,6 +35,7 @@ import io.keepcoding.pickandgol.interactor.SearchEventsInteractor.SearchEventsIn
 import io.keepcoding.pickandgol.interactor.SearchPubsInteractor;
 import io.keepcoding.pickandgol.interactor.SearchPubsInteractor.SearchPubsInteractorListener;
 import io.keepcoding.pickandgol.interactor.UpdateUserInfoInteractor;
+import io.keepcoding.pickandgol.interactor.UpdateUserInfoInteractor.UpdateUserInfoInteractorListener;
 import io.keepcoding.pickandgol.manager.geo.GeoManager;
 import io.keepcoding.pickandgol.manager.image.ImageManager;
 import io.keepcoding.pickandgol.manager.session.SessionManager;
@@ -128,6 +130,9 @@ public class MainActivity extends AppCompatActivity implements EventListListener
     @BindView(R.id.drawer_profile_username) TextView profileNameText;
     @BindView(R.id.drawer_profile_email) TextView profileEmailText;
     @BindView(R.id.drawer_profile_image) ImageView profileImage;
+
+    // Reference to the activity UI elements
+    private FloatingActionButton btnNew;   // only for Pub list
 
 
     /*** Activity life cycle and setup methods ***/
@@ -238,11 +243,15 @@ public class MainActivity extends AppCompatActivity implements EventListListener
 
         showingFragment = (ShowingFragment) savedInstanceState.getSerializable(SHOWING_FRAGMENT_SAVED_STATE);
 
-        if (showingFragment == EVENT_LIST)
+        if (showingFragment == EVENT_LIST) {
             eventListFragment = (EventListFragment) getSupportFragmentManager().findFragmentById(R.id.mainContentFragment_placeholder);
+            hideFloatingButton();
+        }
 
-        else if (showingFragment == PUB_LIST)
+        else if (showingFragment == PUB_LIST) {
             pubListFragment = (PubListFragment) getSupportFragmentManager().findFragmentById(R.id.mainContentFragment_placeholder);
+            showNewPubButton();
+        }
     }
 
     // Set the layout toolbar as the activity action bar
@@ -420,6 +429,7 @@ public class MainActivity extends AppCompatActivity implements EventListListener
 
                 actionBarTitle = menuItem.getTitle().toString();
                 setTitle(actionBarTitle);
+                hideFloatingButton();
 
                 // Check if we have permission to access the device location, before performing a search
                 locationChecker.checkBeforeAsking(new CheckPermissionListener() {
@@ -447,6 +457,7 @@ public class MainActivity extends AppCompatActivity implements EventListListener
 
                 actionBarTitle = menuItem.getTitle().toString();
                 setTitle(actionBarTitle);
+                showNewPubButton();
 
                 // Check if we have permission to access the device location, before performing a search
                 locationChecker.checkBeforeAsking(new CheckPermissionListener() {
@@ -466,12 +477,6 @@ public class MainActivity extends AppCompatActivity implements EventListListener
                     }
                 });
 
-                break;
-
-            case R.id.drawer_menu_create_pub:
-
-                Navigator.fromMainActivityToNewPubActivity(this);
-                mainDrawer.closeDrawers();
                 break;
 
             case R.id.drawer_menu_my_favorites:
@@ -746,6 +751,24 @@ public class MainActivity extends AppCompatActivity implements EventListListener
         });
     }
 
+    // Stores the given registration token in the server
+    private void sendRegistrationToServer(String refreshedToken) {
+
+        User user = new User(sm.getUserId());
+        user.setRegistrationToken(refreshedToken);
+
+        new UpdateUserInfoInteractor().execute(this, sm.getSessionToken(), user,
+                                               new UpdateUserInfoInteractorListener() {
+            @Override
+            public void onUpdateUserSuccess(User user) {
+            }
+
+            @Override
+            public void onUpdateUserFail(Exception e) {
+            }
+        });
+    }
+
     // Destroys the stored session and updates the header views
     private void doLogOutOperation() {
 
@@ -775,6 +798,29 @@ public class MainActivity extends AppCompatActivity implements EventListListener
 
 
     /*** Auxiliary recurrent methods ***/
+
+    private void showNewPubButton() {
+
+        if (btnNew == null)
+            btnNew = (FloatingActionButton) findViewById(R.id.activity_main_button_new);
+
+        btnNew.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Navigator.fromMainActivityToNewPubActivity(MainActivity.this);
+            }
+        });
+
+        btnNew.setVisibility(View.VISIBLE);
+    }
+
+    private void hideFloatingButton() {
+
+        if (btnNew == null)
+            btnNew = (FloatingActionButton) findViewById(R.id.activity_main_button_new);
+
+        btnNew.setVisibility(View.GONE);
+    }
 
     // Updates the header views with the information in the device's session
     // (if there is no session stored, just update the views with the default values)
@@ -862,24 +908,5 @@ public class MainActivity extends AppCompatActivity implements EventListListener
     @Override
     public void onPubListLoadNextPage() {
         searchPubsNextPage(lastPubSearchParams);
-    }
-
-    // TODO: this is a copy and paste of the same method in NotificationIdService
-    private void sendRegistrationToServer(String refreshedToken) {
-        User user = new User(sm.getUserId());
-        user.setRegistrationToken(refreshedToken);
-
-        UpdateUserInfoInteractor interactor = new UpdateUserInfoInteractor();
-        interactor.execute(this, sm.getSessionToken(), user, new UpdateUserInfoInteractor.UpdateUserInfoInteractorListener() {
-            @Override
-            public void onUpdateUserSuccess(User user) {
-
-            }
-
-            @Override
-            public void onUpdateUserFail(Exception e) {
-
-            }
-        });
     }
 }

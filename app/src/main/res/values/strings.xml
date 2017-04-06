@@ -40,7 +40,6 @@
     <string name="drawer_menu_register">Sign up</string>
     <string name="drawer_menu_event_search">Event Search</string>
     <string name="drawer_menu_pub_search">Pub Search</string>
-    <string name="drawer_menu_create_pub">Create Pub</string>
     <string name="drawer_menu_my_favorites">My Favorite Pubs</string>
     <string name="drawer_menu_your_account">Your account</string>
     <string name="new_user_name">Name:</string>

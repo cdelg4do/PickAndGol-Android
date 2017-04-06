@@ -16,12 +16,6 @@
             android:title="@string/drawer_menu_pub_search"/>
 
         <item
-            android:id="@+id/drawer_menu_create_pub"
-            android:icon="@android:drawable/stat_sys_download"
-            android:checkable = "false"
-            android:title="@string/drawer_menu_create_pub"/>
-
-        <item
             android:id="@+id/drawer_menu_my_favorites"
             android:icon="@android:drawable/stat_sys_download"
             android:checkable = "false"
