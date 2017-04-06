@@ -109,7 +109,7 @@ public class PubDetailActivity extends AppCompatActivity {
                 return true;
 
             case R.id.pub_detail_menu_new_event:
-                Navigator.fromPubDetailActivityToNewEventActivity(PubDetailActivity.this, model);
+                attemptToCreateEvent();
                 return true;
 
             default:
@@ -133,6 +133,18 @@ public class PubDetailActivity extends AppCompatActivity {
 
 
     /*** Auxiliary methods: ***/
+
+    // From the Create Event menu option, attempts to create a new event
+    private void attemptToCreateEvent() {
+
+        if ( !sm.hasSessionStored() ) {
+            Utils.simpleDialog(this, "You are not logged in",
+                               "Only registered users can create new events.");
+            return;
+        }
+
+        Navigator.fromPubDetailActivityToNewEventActivity(this, model);
+    }
 
     // Set the layout toolbar as the activity action bar and show the home button
     private void setupActionBar() {

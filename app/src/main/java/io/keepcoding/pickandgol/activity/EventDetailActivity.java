@@ -99,7 +99,7 @@ public class EventDetailActivity extends AppCompatActivity {
                 return true;
 
             case R.id.event_detail_menu_link_to_pub:
-                Navigator.fromEventDetailActivityToPubSelectorActivity(EventDetailActivity.this);
+                attemptToLinkEvent();
                 return true;
 
             default:
@@ -141,6 +141,18 @@ public class EventDetailActivity extends AppCompatActivity {
 
 
     /*** Auxiliary methods: ***/
+
+    // From the Link Event menu option, attempts to link the event to a pub
+    private void attemptToLinkEvent() {
+
+        if ( !sm.hasSessionStored() ) {
+            Utils.simpleDialog(this, "You are not logged in",
+                               "Only registered users can link events to pubs.");
+            return;
+        }
+
+        Navigator.fromEventDetailActivityToPubSelectorActivity(this);
+    }
 
     // Set the layout toolbar as the activity action bar and show the home button
     private void setupActionBar() {
@@ -247,21 +259,6 @@ public class EventDetailActivity extends AppCompatActivity {
 
     // Associates the given pub to the model
     private void linkToPub(final @NonNull Pub pub) {
-
-        if (!sm.hasSessionStored()) {
-
-            Utils.simpleDialog(this,
-                    "You are not logged in",
-                    "First you must log in to the system.",
-                    new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialogInterface, int i) {
-                            finishActivity(new Error("The user is not logged in"));
-                        }
-                    });
-
-            return;
-        }
 
         final ProgressDialog pDialog = Utils.newProgressDialog(this, "Linking Event...");
         pDialog.show();

@@ -487,25 +487,19 @@ public class MainActivity extends AppCompatActivity implements EventListListener
 
             case R.id.drawer_menu_log_in:
 
-                new LoginDialog(this, new LoginDialog.LoginDialogListener() {
-                    @Override
-                    public void onLoginClick(String email, String password) {
-                        doLoginOperation(email,password);
-                    }
-                }).show();
-
+                attemptToLogIn();
                 mainDrawer.closeDrawers();
                 break;
 
             case R.id.drawer_menu_log_out:
 
-                doLogOutOperation();
+                attemptToLogOut();
                 mainDrawer.closeDrawers();
                 break;
 
             case R.id.drawer_menu_register:
 
-                Navigator.fromMainActivityToNewUserActivity(this);
+                attemptToRegister();
                 mainDrawer.closeDrawers();
                 break;
 
@@ -741,9 +735,7 @@ public class MainActivity extends AppCompatActivity implements EventListListener
                 pDialog.dismiss();
 
                 updateHeaderFromSessionInfo();
-                Utils.simpleDialog(MainActivity.this,
-                                   "Login successful",
-                                   "Now you are logged as '"+ sm.getUserName() +"'.");
+                Utils.shortSnack(MainActivity.this, "Now you are logged as '"+ sm.getUserName() +"'.");
 
                 final String refreshedToken = FirebaseInstanceId.getInstance().getToken();
                 sendRegistrationToServer(refreshedToken);
@@ -769,19 +761,6 @@ public class MainActivity extends AppCompatActivity implements EventListListener
         });
     }
 
-    // Destroys the stored session and updates the header views
-    private void doLogOutOperation() {
-
-        if ( sm.hasSessionStored() ) {
-            sm.destroySession();
-            updateHeaderFromSessionInfo();
-            Utils.simpleDialog(this, "Log out", "You just finished your session.");
-        }
-        else {
-            Utils.simpleDialog(this, "Log out", "You are already logged out.");
-        }
-    }
-
     // Updates the local session info, after the user profile has been changed
     private void updateSessionInfo(final User newUserInfo) {
 
@@ -799,6 +778,7 @@ public class MainActivity extends AppCompatActivity implements EventListListener
 
     /*** Auxiliary recurrent methods ***/
 
+    // Shows the floating button and configures it to redirect to NewPubActivity
     private void showNewPubButton() {
 
         if (btnNew == null)
@@ -807,19 +787,71 @@ public class MainActivity extends AppCompatActivity implements EventListListener
         btnNew.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Navigator.fromMainActivityToNewPubActivity(MainActivity.this);
+                attemptToCreatePub();
             }
         });
 
         btnNew.setVisibility(View.VISIBLE);
     }
 
+    // Hides the floating button
     private void hideFloatingButton() {
 
         if (btnNew == null)
             btnNew = (FloatingActionButton) findViewById(R.id.activity_main_button_new);
 
         btnNew.setVisibility(View.GONE);
+    }
+
+    // From the log in drawer option, attempts to log in to the system
+    private void attemptToLogIn() {
+
+        if ( sm.hasSessionStored() ) {
+            Utils.shortSnack(this, "You are already logged in.");
+            return;
+        }
+
+        new LoginDialog(this, new LoginDialog.LoginDialogListener() {
+            @Override
+            public void onLoginClick(String email, String password) {
+                doLoginOperation(email,password);
+            }
+        }).show();
+    }
+
+    // From the log out drawer option, attempts to log out the current session (if any)
+    private void attemptToLogOut() {
+
+        if ( !sm.hasSessionStored() ) {
+            Utils.shortSnack(this, "You are already logged out.");
+            return;
+        }
+
+        sm.destroySession();
+        updateHeaderFromSessionInfo();
+        Utils.simpleDialog(this, "Log out", "You just finished your session.");
+    }
+
+    // From the sign in drawer option, attempts to register a new user account
+    private void attemptToRegister() {
+
+        if ( sm.hasSessionStored() ) {
+            Utils.shortSnack(this, "You cannot create a new account while logged in.");
+            return;
+        }
+
+        Navigator.fromMainActivityToNewUserActivity(this);
+    }
+
+    // From the create pub floating button, attempts to redirect to NewPubActivity
+    private void attemptToCreatePub() {
+
+        if ( !sm.hasSessionStored() ) {
+            Utils.simpleDialog(this, "You are not logged in", "Only registered users can create new pubs.");
+            return;
+        }
+
+        Navigator.fromMainActivityToNewPubActivity(MainActivity.this);
     }
 
     // Updates the header views with the information in the device's session
