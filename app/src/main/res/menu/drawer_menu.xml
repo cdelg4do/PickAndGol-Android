@@ -5,19 +5,19 @@
 
         <item
             android:id="@+id/drawer_menu_event_search"
-            android:icon="@android:drawable/ic_menu_gallery"
+            android:icon="@drawable/ic_search_events"
             android:checked = "true"
             android:title="@string/drawer_menu_event_search"/>
 
         <item
             android:id="@+id/drawer_menu_pub_search"
-            android:icon="@android:drawable/stat_sys_upload"
+            android:icon="@drawable/ic_search_pubs"
             android:checkable="true"
             android:title="@string/drawer_menu_pub_search"/>
 
         <item
             android:id="@+id/drawer_menu_my_favorites"
-            android:icon="@android:drawable/stat_sys_download"
+            android:icon="@drawable/ic_my_favorites"
             android:checkable = "false"
             android:title="@string/drawer_menu_my_favorites"/>
 
@@ -28,20 +28,20 @@
 
                 <item
                     android:id="@+id/drawer_menu_log_in"
-                    android:icon="@android:drawable/ic_input_add"
+                    android:icon="@drawable/ic_log_in"
                     android:checkable = "false"
-                    android:title="@string/drawer_menu_login" />
+                    android:title="@string/drawer_menu_login"/>
 
                 <item
                     android:id="@+id/drawer_menu_log_out"
-                    android:icon="@android:drawable/stat_notify_more"
+                    android:icon="@drawable/ic_log_out"
                     android:checkable = "false"
-                    android:title="@string/drawer_menu_logout" />
+                    android:title="@string/drawer_menu_logout"/>
                 <item
                     android:id="@+id/drawer_menu_register"
-                    android:icon="@android:drawable/ic_input_add"
+                    android:icon="@drawable/ic_sign_in"
                     android:checkable = "false"
-                    android:title="@string/drawer_menu_register" />
+                    android:title="@string/drawer_menu_register"/>
             </menu>
         </item>
 
