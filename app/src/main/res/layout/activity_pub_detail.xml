@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/activity_shop_detail"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="io.keepcoding.pickandgol.activity.PubDetailActivity">
+
+    <!-- Toolbar for the activity -->
+    <include layout="@layout/toolbar_main"/>
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:isScrollContainer="true"
+            android:layout_height="match_parent"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+            android:id="@+id/scrollView">
+
+            <LinearLayout
+                android:id="@+id/contentOfScrollView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <RelativeLayout
+                    android:id="@+id/activity_pub_detail_title_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <TextView
+                        android:id="@+id/activity_pub_detail_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="15dp"
+                        android:textColor="@android:color/black"
+                        android:textStyle="normal|bold"
+                        android:textSize="22sp"
+                        android:gravity="center_vertical|center_horizontal"
+                        android:layout_toLeftOf="@+id/activity_pub_detail_favorite"
+                        tools:text="Example of Pub Name"/>
+
+                    <ImageView
+                        android:id="@+id/activity_pub_detail_favorite"
+                        android:layout_width="56dp"
+                        android:layout_height="56dp"
+                        android:layout_alignParentRight="true"
+                        android:padding="16dp"
+                        tools:src="@drawable/empty_star"/>
+
+                </RelativeLayout>
+
+                <LinearLayout
+                    android:id="@+id/activity_pub_detail_image_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="10dp"
+                    android:gravity="center_horizontal">
+
+                    <FrameLayout
+                        android:id="@+id/activity_pub_detail_image_frame"
+                        android:layout_width="match_parent"
+                        android:layout_height="250dp">
+
+                        <android.support.v4.view.ViewPager
+                            android:id="@+id/activity_pub_detail_image_pager"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:scrollbars="none"
+                            tools:background="@drawable/default_placeholder"/>
+
+                        <me.relex.circleindicator.CircleIndicator
+                            android:id="@+id/activity_pub_detail_image_indicator"
+                            android:layout_width="match_parent"
+                            android:layout_height="25dp"
+                            android:layout_gravity="center_horizontal|bottom"
+                            app:ci_drawable="@drawable/circle_indicator_selected"
+                            app:ci_drawable_unselected="@drawable/circle_indicator_unselected"/>
+
+                    </FrameLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/activity_pub_detail_address_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:id="@+id/activity_pub_detail_address_label"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Address:"
+                        android:textSize="17sp"
+                        android:textStyle="normal|bold"/>
+
+                    <TextView
+                        android:id="@+id/activity_pub_detail_address_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:gravity="start"
+                        android:textSize="18sp"
+                        tools:text="Gran Via, 25, Madrid."/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/activity_pub_detail_url_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:id="@+id/activity_pub_detail_url_label"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Website:"
+                        android:textSize="17sp"
+                        android:textStyle="normal|bold"/>
+
+                    <TextView
+                        android:id="@+id/activity_pub_detail_url_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:gravity="start"
+                        android:textSize="18sp"
+                        android:autoLink="web"
+                        tools:text="www.google.com"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/activity_pub_detail_events_layout"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="10dp">
+
+                    <TextView
+                        android:id="@+id/activity_pub_detail_events_label"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="Future events in this pub:"
+                        android:textSize="17sp"
+                        android:textStyle="normal|bold"/>
+
+                    <TextView
+                        android:id="@+id/activity_pub_detail_events_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:textSize="18sp"
+                        tools:text="15 event(s)"/>
+
+                    <Button
+                        android:id="@+id/activity_pub_detail_events_button"
+                        android:layout_width="match_parent"
+                        android:layout_height="60dp"
+                        android:text="Show future events in this pub"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </ScrollView>
+
+    </RelativeLayout>
+
+</LinearLayout>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+
+        <item
+            android:id="@+id/drawer_menu_event_search"
+            android:icon="@drawable/ic_search_events"
+            android:checked = "true"
+            android:title="@string/drawer_menu_event_search"/>
+
+        <item
+            android:id="@+id/drawer_menu_pub_search"
+            android:icon="@drawable/ic_search_pubs"
+            android:checkable="true"
+            android:title="@string/drawer_menu_pub_search"/>
+
+        <item
+            android:id="@+id/drawer_menu_my_favorites"
+            android:icon="@drawable/ic_my_favorites"
+            android:checkable = "false"
+            android:title="@string/drawer_menu_my_favorites"/>
+
+        <item
+            android:id="@+id/account_section"
+            android:title="@string/drawer_menu_your_account">
+            <menu>
+
+                <item
+                    android:id="@+id/drawer_menu_log_in"
+                    android:icon="@drawable/ic_log_in"
+                    android:checkable = "false"
+                    android:title="@string/drawer_menu_login"/>
+
+                <item
+                    android:id="@+id/drawer_menu_log_out"
+                    android:icon="@drawable/ic_log_out"
+                    android:checkable = "false"
+                    android:title="@string/drawer_menu_logout"/>
+                <item
+                    android:id="@+id/drawer_menu_register"
+                    android:icon="@drawable/ic_sign_in"
+                    android:checkable = "false"
+                    android:title="@string/drawer_menu_register"/>
+            </menu>
+        </item>
+
+    </group>
+
+</menu>

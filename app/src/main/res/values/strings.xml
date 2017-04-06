@@ -1,3 +1,62 @@
 <resources>
-    <string name="app_name">pickandgol</string>
+    <string name="app_name">Pick And Gol</string>
+
+    <string name="edit_user_name">Name</string>
+    <string name="edit_user_email">Email</string>
+    <string name="edit_user_save_button_text">Save</string>
+    <string name="user_edit_change_password">Change password</string>
+    <string name="edit_user_old_password">Old password</string>
+    <string name="edit_user_new_password">New password</string>
+
+    <string name="new_event_name">Name:</string>
+    <string name="new_event_category">Category:</string>
+    <string name="new_event_date">Date:</string>
+    <string name="new_event_time">Time:</string>
+    <string name="new_event_description">Description (optional):</string>
+    <string name="new_event_image">Image (optional):</string>
+    <string name="new_event_activity_create_event">Create an Event</string>
+    <string name="new_event_activity_spinner_default_text"><![CDATA[<Choose One>]]></string>
+    <string name="event_search_settings_activity_spinner_default_text">All</string>
+
+    <string name="new_pub_name">Name:</string>
+    <string name="new_pub_location">Location:</string>
+    <string name="new_pub_date">Date:</string>
+    <string name="new_pub_time">Time:</string>
+    <string name="new_pub_web">Web site (optional):</string>
+    <string name="new_pub_images">Images, max. 4 (optional):</string>
+
+    <string name="event_activity_event">Event</string>
+    <string name="event_activity_title_camera_access">Camera access denied</string>
+    <string name="event_activity_message_camera_access">Pick And Gol will not be able to take images from your device camera.</string>
+    <string name="event_activity_image_process_error">Unable to process image</string>
+    <string name="event_activity_validate_error_title">Invalid data</string>
+    <string name="event_activity_error_name_event">You must specify a name for the event.</string>
+    <string name="event_activity_error_category_event">You must select a category for the event.</string>
+    <string name="event_activity_error_date_event"><![CDATA[You must specify date & hour for the event.]]></string>
+    <string name="event_activity_image_upload_error_title">Image Upload error</string>
+    <string name="event_activity_image_upload_error_message">The selected image could not be uploaded. Please try again.</string>
+    <string name="drawer_menu_login">Log in</string>
+    <string name="drawer_menu_logout">Log out</string>
+    <string name="drawer_menu_register">Sign up</string>
+    <string name="drawer_menu_event_search">Event Search</string>
+    <string name="drawer_menu_pub_search">Pub Search</string>
+    <string name="drawer_menu_my_favorites">My Favorite Pubs</string>
+    <string name="drawer_menu_your_account">Your account</string>
+    <string name="new_user_name">Name:</string>
+    <string name="new_user_name_hint">Enter a name for the new user</string>
+    <string name="new_user_email">Email</string>
+    <string name="new_user_email_hint">Enter an email address</string>
+    <string name="new_user_password">Password</string>
+    <string name="new_user_cancel_button">Cancel</string>
+    <string name="new_user_sign_up_button">Sign up</string>
+    <string name="new_user_password_hint">Enter a password</string>
+    <string name="activity_new_user_title">Sign up</string>
+    <string name="new_user_activity_validate_error_title">Invalid data</string>
+    <string name="new_user_activity_validate_error_name">You must specify a name for the new user.</string>
+    <string name="new_user_activity_validate_error_email">You must specify an email for the new user.</string>
+    <string name="new_user_activity_validate_error_password">You must specify a password for the new user</string>
+    <string name="activity_edit_user_title">Edit user</string>
+    <string name="activity_edit_user_load_error">User detail error</string>
+    <string name="activity_edit_user_modify_error">User modify error</string>
+    <string name="activity_edit_user_validate_password_error">Password entries cannot be empty.</string>
 </resources>
