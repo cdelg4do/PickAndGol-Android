@@ -12,6 +12,8 @@ import android.util.Log;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
+import java.util.Map;
+
 import io.keepcoding.pickandgol.R;
 import io.keepcoding.pickandgol.activity.MainActivity;
 
@@ -24,11 +26,17 @@ public class NotificationReceiverService extends FirebaseMessagingService {
         // Check if message contains a notification payload.
         if (remoteMessage.getNotification() != null) {
             Log.d(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
-            sendNotification(remoteMessage.getNotification());
+            sendNotification(remoteMessage);
         }
     }
 
-    private void sendNotification(RemoteMessage.Notification notification) {
+    private void sendNotification(RemoteMessage remoteMessage) {
+        final RemoteMessage.Notification notification = remoteMessage.getNotification();
+        final Map<String, String> data = remoteMessage.getData();
+        final String pubId = data.get("pub");
+
+
+
         Intent intent = new Intent(this, MainActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent,
