@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Pick And Gol</string>
+
+    <string name="edit_user_name">Nombre</string>
+    <string name="edit_user_email">Correo electrónico</string>
+    <string name="edit_user_save_button_text">Guardar</string>
+    <string name="user_edit_change_password">Cambiar contraseña</string>
+    <string name="edit_user_old_password">Contraseña antigua</string>
+    <string name="edit_user_new_password">Nueva contraseña</string>
+
+    <string name="new_event_name">Nombre:</string>
+    <string name="new_event_category">Categoría:</string>
+    <string name="new_event_date">Fecha:</string>
+    <string name="new_event_time">Hora:</string>
+    <string name="new_event_description">Descripción (opcional):</string>
+    <string name="new_event_image">Imagen (opcional):</string>
+    <string name="new_event_activity_create_event">Crear un evento</string>
+    <string name="new_event_activity_spinner_default_text"><![CDATA[<Elije uno>]]></string>
+    <string name="event_search_settings_activity_spinner_default_text">Todos</string>
+
+    <string name="new_pub_name">Nombre:</string>
+    <string name="new_pub_location">Lugar:</string>
+    <string name="new_pub_date">Fecha:</string>
+    <string name="new_pub_time">Hora:</string>
+    <string name="new_pub_web">Página web (opcional):</string>
+    <string name="new_pub_images">Imágenes, max. 4 (opcional):</string>
+
+    <string name="event_activity_event">Evento</string>
+    <string name="event_activity_title_camera_access">Acceso a la cámara denegado</string>
+    <string name="event_activity_message_camera_access">Pick And Gol no podrá tomar fotos de tu cámara.</string>
+    <string name="event_activity_image_process_error">No se puede procesar la imagen</string>
+    <string name="event_activity_validate_error_title">Fecha no válida</string>
+    <string name="event_activity_error_name_event">Debe especificar un nombre para el evento.</string>
+    <string name="event_activity_error_category_event">Debe seleccionar una categoría para el evento.</string>
+    <string name="event_activity_error_date_event"><![CDATA[Debe especificar una fecha y hora para el evento.]]></string>
+    <string name="event_activity_image_upload_error_title">Error al subir imagen</string>
+    <string name="event_activity_image_upload_error_message">La imagen seleccionada no se pudo subir. Por favor intente de nuevo.</string>
+    <string name="drawer_menu_login">Iniciar sesión</string>
+    <string name="drawer_menu_logout">Finalizar sesión</string>
+    <string name="drawer_menu_register">Registro</string>
+    <string name="drawer_menu_event_search">Búsqueda de eventos</string>
+    <string name="drawer_menu_pub_search">Búsqueda de bares</string>
+    <string name="drawer_menu_my_favorites">Mis bares favoritos</string>
+    <string name="drawer_menu_your_account">Su cuenta</string>
+    <string name="new_user_name">Nombre:</string>
+    <string name="new_user_name_hint">Introduzca un nombre para el nuevo usuario</string>
+    <string name="new_user_email">Correo electrónico</string>
+    <string name="new_user_email_hint">Introduzca una dirección de correo electrónico</string>
+    <string name="new_user_password">Contraseño</string>
+    <string name="new_user_cancel_button">Cancelar</string>
+    <string name="new_user_sign_up_button">Registro</string>
+    <string name="new_user_password_hint">Introduzca una contraseña</string>
+    <string name="activity_new_user_title">Registro</string>
+    <string name="new_user_activity_validate_error_title">Datos incorrectos</string>
+    <string name="new_user_activity_validate_error_name">Debe especificar un nombre para el nuevo usuario.</string>
+    <string name="new_user_activity_validate_error_email">Debe especificar el correo electrónico para el nuevo usuario.</string>
+    <string name="new_user_activity_validate_error_password">Debe especificar la contraseña para el nuevo usuario</string>
+    <string name="activity_edit_user_title">Editar usuario</string>
+    <string name="activity_edit_user_load_error">Error en detalle de usuario</string>
+    <string name="activity_edit_user_modify_error">Error en modificación de usuario</string>
+    <string name="activity_edit_user_validate_password_error">La contraseña no puede estar vacía.</string>
+</resources>
