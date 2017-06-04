@@ -123,9 +123,9 @@ public class EventDetailActivity extends AppCompatActivity {
 
                 Utils.questionDialog(
                         EventDetailActivity.this,
-                        "Link to Pub",
-                        "You are about to link this event to the pub '"
-                            + selectedPub.getName() + "'\n\nDo you want to proceed?",
+                        getString(R.string.event_detail_activity_link_pub_title),
+                        getString(R.string.event_detail_activity_message_1)
+                            + selectedPub.getName() + getString(R.string.event_detail_activity_message_2),
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
@@ -146,8 +146,8 @@ public class EventDetailActivity extends AppCompatActivity {
     private void attemptToLinkEvent() {
 
         if ( !sm.hasSessionStored() ) {
-            Utils.simpleDialog(this, "You are not logged in",
-                               "Only registered users can link events to pubs.");
+            Utils.simpleDialog(this, getString(R.string.not_logged_in),
+                               getString(R.string.event_detail_activity_session_error_message));
             return;
         }
 
@@ -157,7 +157,7 @@ public class EventDetailActivity extends AppCompatActivity {
     // Set the layout toolbar as the activity action bar and show the home button
     private void setupActionBar() {
 
-        setTitle("Event Detail");
+        setTitle(getString(R.string.event_detail_activity_title));
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -181,7 +181,7 @@ public class EventDetailActivity extends AppCompatActivity {
     // Loads the categories from the server, if succeeds then loads the model
     private void loadCategoriesThenLoadModel() {
 
-        final ProgressDialog pDialog = Utils.newProgressDialog(this, "Loading categories...");
+        final ProgressDialog pDialog = Utils.newProgressDialog(this, getString(R.string.event_detail_activity_load_categories));
         pDialog.show();
 
         new GetCategoriesInteractor().execute(this, new GetCategoriesInteractor.GetCategoriesInteractorListener() {
@@ -224,13 +224,13 @@ public class EventDetailActivity extends AppCompatActivity {
         if (cat != null)
             categoryName = cat.getName();
         else
-            categoryName = "Unspecified category.";
+            categoryName = getString(R.string.event_detail_activity_unspecified_category);
 
         txtCategory.setText(categoryName);
 
         String description = model.getDescription();
         if (description == null)
-            description = "No description available.";
+            description = getString(R.string.event_detail_activity_no_description);
 
         txtDescription.setText(description);
 
@@ -241,9 +241,9 @@ public class EventDetailActivity extends AppCompatActivity {
         String strPubCount;
         int pubCount = model.getPubs().size();
         if (pubCount > 0)
-            strPubCount = pubCount +" pub(s)";
+            strPubCount = pubCount + " " + getString(R.string.event_detail_activity_pub);
         else {
-            strPubCount = "No pubs are showing this event yet.";
+            strPubCount = getString(R.string.event_detail_activity_no_pubs);
             btnMap.setVisibility(View.GONE);
         }
 
@@ -260,7 +260,7 @@ public class EventDetailActivity extends AppCompatActivity {
     // Associates the given pub to the model
     private void linkToPub(final @NonNull Pub pub) {
 
-        final ProgressDialog pDialog = Utils.newProgressDialog(this, "Linking Event...");
+        final ProgressDialog pDialog = Utils.newProgressDialog(this, getString(R.string.event_detail_activity_linking_event));
         pDialog.show();
 
         String eventId = model.getId();
@@ -274,14 +274,16 @@ public class EventDetailActivity extends AppCompatActivity {
                 pDialog.dismiss();
 
                 Log.e(LOG_TAG, "Failed to link event to pub '" + pubId + "': " + e.getMessage() );
-                Utils.simpleDialog(EventDetailActivity.this, "Link Event error", e.getMessage());
+                Utils.simpleDialog(EventDetailActivity.this, getString(R.string.event_detail_activity_link_event_fail_title), e.getMessage());
             }
 
             @Override
             public void onLinkEventPubSuccess(Pub updatedPub, Event updatedEvent) {
                 pDialog.dismiss();
 
-                Utils.simpleDialog(EventDetailActivity.this, "Link Event", "This event has been linked to '"+ updatedPub.getName() +"'");
+                Utils.simpleDialog(EventDetailActivity.this,
+                        getString(R.string.event_detail_activity_link_event_success_title),
+                        getString(R.string.event_detail_activity_link_event_success_message) + updatedPub.getName() +"'");
             }
         });
     }

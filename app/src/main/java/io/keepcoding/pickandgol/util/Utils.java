@@ -22,6 +22,8 @@ import java.util.Date;
 import java.util.TimeZone;
 import java.util.regex.Pattern;
 
+import io.keepcoding.pickandgol.R;
+
 
 /**
  * This class provides useful common auxiliary functions.
@@ -68,7 +70,7 @@ public class Utils {
     public static ProgressDialog newProgressDialog(Context ctx, String msg) {
 
         final ProgressDialog pDialog = new ProgressDialog(ctx);
-        pDialog.setTitle("Please wait");
+        pDialog.setTitle(ctx.getString(R.string.utils_please_wait));
         pDialog.setMessage(msg);
         pDialog.setIndeterminate(true);
         pDialog.setCancelable(false);
@@ -81,7 +83,7 @@ public class Utils {
     public static ProgressDialog newProgressBarDialog(Context ctx, int max, String msg) {
 
         final ProgressDialog pDialog = new ProgressDialog(ctx);
-        pDialog.setTitle("Please wait");
+        pDialog.setTitle(ctx.getString(R.string.utils_please_wait));
         pDialog.setMessage(msg);
         pDialog.setIndeterminate(false);
         pDialog.setCancelable(false);

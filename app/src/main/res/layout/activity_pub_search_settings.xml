@@ -42,7 +42,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
-                    android:text="Search by text:"
+                    android:text="@string/activity_pub_search_keywords_title"
                     android:textStyle="normal|bold"
                     android:textSize="16sp"/>
 
@@ -52,7 +52,7 @@
                     android:layout_height="wrap_content"
                     android:padding="10dp"
                     android:layout_below="@+id/activity_pub_search_keywords_title"
-                    android:hint="What are you looking for?"
+                    android:hint="@string/activity_pub_search_keywords_text"
                     android:background="@android:color/white"/>
 
             </RelativeLayout>
@@ -71,7 +71,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
-                    android:text="Sort by:"
+                    android:text="@string/activity_pub_search_sort"
                     android:textStyle="normal|bold"
                     android:textSize="16sp"/>
 
@@ -100,7 +100,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
-                    android:text="Distance from me:"
+                    android:text="@string/activity_pub_search_distance"
                     android:textStyle="normal|bold"
                     android:textSize="16sp"/>
 

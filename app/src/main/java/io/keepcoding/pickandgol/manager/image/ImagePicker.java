@@ -17,6 +17,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.keepcoding.pickandgol.R;
 import io.keepcoding.pickandgol.manager.image.ImageManager.ImagePickingListener;
 
 import static android.Manifest.permission.CAMERA;
@@ -172,7 +173,7 @@ abstract class ImagePicker {
         Intent mainIntent = allIntents.get(allIntents.size() - 1);
         allIntents.remove(mainIntent);
 
-        Intent chooserIntent = Intent.createChooser(mainIntent, "Select a source for the image");
+        Intent chooserIntent = Intent.createChooser(mainIntent, activity.getString(R.string.image_picker_chooser_title));
         chooserIntent.putExtra(Intent.EXTRA_INITIAL_INTENTS,
                 allIntents.toArray( new Parcelable[allIntents.size()] ));
 

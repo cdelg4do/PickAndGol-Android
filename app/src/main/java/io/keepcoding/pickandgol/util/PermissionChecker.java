@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.keepcoding.pickandgol.R;
+
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.Manifest.permission.CAMERA;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
@@ -82,21 +84,18 @@ public class PermissionChecker {
         switch (tag) {
 
             case RW_STORAGE_SET:
-                explanationTitle = "Storage access required";
-                explanationMsg = "Pick And Gol will request access to your device storage " +
-                        "in order to store temporary files.";
+                explanationTitle = activity.getString(R.string.permission_checker_storage_title);
+                explanationMsg = activity.getString(R.string.permission_checker_storage_message);
                 break;
 
             case PICTURES_SET:
-                explanationTitle = "Pictures permissions required";
-                explanationMsg = "Pick And Gol will request access to your device camera " +
-                        "and/or gallery in order to take pictures.";
+                explanationTitle = activity.getString(R.string.permission_checker_pictures_title);
+                explanationMsg = activity.getString(R.string.permission_checker_pictures_message);
                 break;
 
             case LOCATION_SET:
-                explanationTitle = "Access to device's location";
-                explanationMsg = "In order to perform searches based on your location, " +
-                        "Pick And Gol will ask you for access to the device location.";
+                explanationTitle = activity.getString(R.string.permission_checker_location_title);
+                explanationMsg = activity.getString(R.string.permission_checker_location_message);
                 break;
 
             default:

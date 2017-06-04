@@ -58,7 +58,7 @@
 
             <Button
                 android:id="@+id/activity_location_picker_button_cancel"
-                android:text="Cancel"
+                android:text="@string/activity_location_picker_cancel"
                 android:layout_width="100dp"
                 android:layout_height="50dp"/>
 
@@ -70,7 +70,7 @@
 
             <Button
                 android:id="@+id/activity_location_picker_button_select"
-                android:text="Select"
+                android:text="@string/activity_location_picker_select"
                 android:layout_width="100dp"
                 android:layout_height="50dp"/>
 

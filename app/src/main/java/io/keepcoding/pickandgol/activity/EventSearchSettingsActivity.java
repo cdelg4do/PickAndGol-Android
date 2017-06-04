@@ -107,7 +107,7 @@ public class EventSearchSettingsActivity extends AppCompatActivity {
     // Set the layout toolbar as the activity action bar and show the home button
     private void setupActionBar() {
 
-        setTitle("Event Search Settings");
+        setTitle(getString(R.string.event_search_settings_activity_title));
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -162,7 +162,7 @@ public class EventSearchSettingsActivity extends AppCompatActivity {
                         EventSearchSettingsActivity.this,
                         categoryIDs,
                         categoryNames,
-                        "< All >");
+                        getString(R.string.event_search_settings_activity_all));
 
                 spnCategory.setAdapter(adapter);
 
@@ -215,16 +215,16 @@ public class EventSearchSettingsActivity extends AppCompatActivity {
         String distanceText = "";
 
         if (distanceValue == 0)
-            distanceText = "Very close (1 km)";
+            distanceText = getString(R.string.event_search_settings_activity_very_close);
 
         else if (distanceValue == 1)
-            distanceText = "In my area (5 km)";
+            distanceText = getString(R.string.event_search_settings_activity_my_area);
 
         else if (distanceValue == 2)
-            distanceText = "In my city (10 km)";
+            distanceText = getString(R.string.event_search_settings_activity_my_city);
 
         else if (distanceValue == 3)
-            distanceText = "Far away (50 km)";
+            distanceText = getString(R.string.event_search_settings_activity_far_away);
 
         return distanceText;
     }

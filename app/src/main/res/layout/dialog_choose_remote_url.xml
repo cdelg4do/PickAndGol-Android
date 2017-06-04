@@ -12,7 +12,7 @@
         android:layout_height="90dp"
         android:gravity="top"
         android:inputType="textUri|textMultiLine"
-        android:hint="Remote image url">
+        android:hint="@string/dialog_choose_remote_url_text_hint">
 
         <requestFocus/>
 

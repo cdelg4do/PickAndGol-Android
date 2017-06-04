@@ -103,7 +103,7 @@ public class PubSearchSettingsActivity extends AppCompatActivity {
     // Set the layout toolbar as the activity action bar and show the home button
     private void setupActionBar() {
 
-        setTitle("Pub Search Settings");
+        setTitle(getString(R.string.pub_search_settings_activity_title));
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -136,9 +136,15 @@ public class PubSearchSettingsActivity extends AppCompatActivity {
     private void setupSortSpinner() {
 
         String[] fieldNames = {"name", "owner", "distance"}; // this strings will be used as url parameters
-        String[] fieldNamesToShow = {"Pub name", "Pub owner", "Distance from me"};
+        String[] fieldNamesToShow = {
+                getString(R.string.pub_search_settings_activity_field_names_name),
+                getString(R.string.pub_search_settings_activity_field_names_owner),
+                getString(R.string.pub_search_settings_activity_field_names_distance)
+        };
 
-        StringStringSpinnerAdapter adapter = new StringStringSpinnerAdapter(this, fieldNames, fieldNamesToShow, "<Any order>");
+        StringStringSpinnerAdapter adapter = new StringStringSpinnerAdapter(this,
+                fieldNames, fieldNamesToShow,
+                getString(R.string.pub_search_settings_activity_field_names_any_order));
 
         spnSort.setAdapter(adapter);
     }
@@ -187,16 +193,16 @@ public class PubSearchSettingsActivity extends AppCompatActivity {
         String distanceText = "";
 
         if (distanceValue == 0)
-            distanceText = "Very close (1 km)";
+            distanceText = getString(R.string.pub_search_settings_activity_distance_close);
 
         else if (distanceValue == 1)
-            distanceText = "In my area (5 km)";
+            distanceText = getString(R.string.pub_search_settings_activity_distance_area);
 
         else if (distanceValue == 2)
-            distanceText = "In my city (10 km)";
+            distanceText = getString(R.string.pub_search_settings_activity_distance_city);
 
         else if (distanceValue == 3)
-            distanceText = "Far away (50 km)";
+            distanceText = getString(R.string.pub_search_settings_activity_distance_far);
 
         return distanceText;
     }

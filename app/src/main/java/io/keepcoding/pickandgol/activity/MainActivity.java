@@ -349,7 +349,7 @@ public class MainActivity extends AppCompatActivity implements EventListListener
             locationChecker.checkBeforeAsking(new CheckPermissionListener() {
                 @Override
                 public void onPermissionDenied() {
-                    String msg = "Pick And Gol will not be able to search based on your location.";
+                    String msg = getString(R.string.main_activity_location_denied);
                     Utils.shortToast(MainActivity.this, msg);
 
                     searchEventsFirstPage(newSearchParams, null);
@@ -375,7 +375,7 @@ public class MainActivity extends AppCompatActivity implements EventListListener
             locationChecker.checkBeforeAsking(new CheckPermissionListener() {
                 @Override
                 public void onPermissionDenied() {
-                    String msg = "Pick And Gol will not be able to search based on your location.";
+                    String msg = getString(R.string.main_activity_location_denied);
                     Utils.shortToast(MainActivity.this, msg);
 
                     searchPubsFirstPage(newSearchParams, null);
@@ -413,7 +413,8 @@ public class MainActivity extends AppCompatActivity implements EventListListener
             Navigator.fromMainActivityToEditUserActivity(this);
 
         else
-            Utils.simpleDialog(this, "User profile", "You are not logged in.");
+            Utils.simpleDialog(this, getString(R.string.main_activity_not_in_session_title),
+                    getString(R.string.main_activity_not_in_session_message));
 
         mainDrawer.closeDrawers();
     }
@@ -435,7 +436,7 @@ public class MainActivity extends AppCompatActivity implements EventListListener
                 locationChecker.checkBeforeAsking(new CheckPermissionListener() {
                     @Override
                     public void onPermissionDenied() {
-                        String msg = "Pick And Gol will not be able to search based on your location.";
+                        String msg = getString(R.string.main_activity_location_denied);
                         Utils.shortToast(MainActivity.this, msg);
 
                         searchEventsFirstPage(lastEventSearchParams, null);
@@ -463,7 +464,7 @@ public class MainActivity extends AppCompatActivity implements EventListListener
                 locationChecker.checkBeforeAsking(new CheckPermissionListener() {
                     @Override
                     public void onPermissionDenied() {
-                        String msg = "Pick And Gol will not be able to search based on your location.";
+                        String msg = getString(R.string.main_activity_location_denied);
                         Utils.shortToast(MainActivity.this, msg);
 
                         searchPubsFirstPage(lastPubSearchParams, null);
@@ -519,7 +520,7 @@ public class MainActivity extends AppCompatActivity implements EventListListener
         searchParams.setOffset(0);
 
         // If we didn't come from a swipe gesture, show a progress dialog
-        final ProgressDialog pDialog = Utils.newProgressDialog(this, "Searching events...");
+        final ProgressDialog pDialog = Utils.newProgressDialog(this, getString(R.string.main_activity_searching_events));
         if ( swipeCaller == null )
             pDialog.show();
 
@@ -533,7 +534,7 @@ public class MainActivity extends AppCompatActivity implements EventListListener
                 else                        pDialog.dismiss();
 
                 Log.e(LOG_TAG, "Failed to search events: "+ e.toString() );
-                Utils.simpleDialog(MainActivity.this, "Event search error", e.getMessage());
+                Utils.simpleDialog(MainActivity.this, getString(R.string.main_activity_event_search_error), e.getMessage());
             }
 
             @Override
@@ -551,7 +552,7 @@ public class MainActivity extends AppCompatActivity implements EventListListener
                         .replace(R.id.mainContentFragment_placeholder, eventListFragment)
                         .commit();
 
-                Utils.shortSnack(MainActivity.this, events.getTotalResults() +" event(s) found");
+                Utils.shortSnack(MainActivity.this, events.getTotalResults() + " " + getString(R.string.main_activity_events_found));
             }
         };
 
@@ -602,7 +603,7 @@ public class MainActivity extends AppCompatActivity implements EventListListener
             public void onSearchEventsFail(Exception e) {
 
                 Log.e(LOG_TAG, "Failed to search more events: "+ e.toString() );
-                Utils.shortSnack(MainActivity.this, "Error: "+ e.getMessage());
+                Utils.shortSnack(MainActivity.this, getString(R.string.main_activity_error) + e.getMessage());
             }
 
             @Override
@@ -620,7 +621,7 @@ public class MainActivity extends AppCompatActivity implements EventListListener
         searchParams.setOffset(0);
 
         // If we didn't come from a swipe gesture, show a progress dialog
-        final ProgressDialog pDialog = Utils.newProgressDialog(this, "Searching pubs...");
+        final ProgressDialog pDialog = Utils.newProgressDialog(this, getString(R.string.searching_pubs));
         if ( swipeCaller == null )
             pDialog.show();
 
@@ -634,7 +635,7 @@ public class MainActivity extends AppCompatActivity implements EventListListener
                 else                        pDialog.dismiss();
 
                 Log.e(LOG_TAG, "Failed to search pubs: "+ e.toString() );
-                Utils.simpleDialog(MainActivity.this, "Pub search error", e.getMessage());
+                Utils.simpleDialog(MainActivity.this, getString(R.string.pub_search_error), e.getMessage());
             }
 
             @Override
@@ -652,7 +653,7 @@ public class MainActivity extends AppCompatActivity implements EventListListener
                         .replace(R.id.mainContentFragment_placeholder, pubListFragment)
                         .commit();
 
-                Utils.shortSnack(MainActivity.this, pubs.getTotalResults() +" pub(s) found");
+                Utils.shortSnack(MainActivity.this, pubs.getTotalResults() + " " + getString(R.string.pubs_found));
             }
         };
 
@@ -703,7 +704,7 @@ public class MainActivity extends AppCompatActivity implements EventListListener
             public void onSearchPubsFail(Exception e) {
 
                 Log.e(LOG_TAG, "Failed to search more pubs: "+ e.toString() );
-                Utils.shortSnack(MainActivity.this, "Error: "+ e.getMessage());
+                Utils.shortSnack(MainActivity.this, getString(R.string.main_activity_error) + e.getMessage());
             }
 
             @Override
@@ -717,7 +718,7 @@ public class MainActivity extends AppCompatActivity implements EventListListener
     // Attempts to authenticate against the server, with an user email and password
     private void doLoginOperation(final @NonNull String email, final @NonNull String password) {
 
-        final ProgressDialog pDialog = Utils.newProgressDialog(this, "Login in progress...");
+        final ProgressDialog pDialog = Utils.newProgressDialog(this, getString(R.string.main_activity_login_in_progress));
         pDialog.show();
 
         new LoginInteractor().execute(this, email, password, new LoginInteractorListener() {
@@ -727,7 +728,7 @@ public class MainActivity extends AppCompatActivity implements EventListListener
                 pDialog.dismiss();
                 Log.e(LOG_TAG, "Failed to login: "+ e.toString() );
 
-                Utils.simpleDialog(MainActivity.this, "Login error", e.getMessage());
+                Utils.simpleDialog(MainActivity.this, getString(R.string.main_activity_login_error), e.getMessage());
             }
 
             @Override
@@ -735,7 +736,7 @@ public class MainActivity extends AppCompatActivity implements EventListListener
                 pDialog.dismiss();
 
                 updateHeaderFromSessionInfo();
-                Utils.shortSnack(MainActivity.this, "Now you are logged as '"+ sm.getUserName() +"'.");
+                Utils.shortSnack(MainActivity.this, getString(R.string.main_activity_login_as)+ sm.getUserName() +"'.");
 
                 final String refreshedToken = FirebaseInstanceId.getInstance().getToken();
                 sendRegistrationToServer(refreshedToken);
@@ -807,7 +808,7 @@ public class MainActivity extends AppCompatActivity implements EventListListener
     private void attemptToLogIn() {
 
         if ( sm.hasSessionStored() ) {
-            Utils.shortSnack(this, "You are already logged in.");
+            Utils.shortSnack(this, getString(R.string.main_activity_already_logged_in));
             return;
         }
 
@@ -823,20 +824,21 @@ public class MainActivity extends AppCompatActivity implements EventListListener
     private void attemptToLogOut() {
 
         if ( !sm.hasSessionStored() ) {
-            Utils.shortSnack(this, "You are already logged out.");
+            Utils.shortSnack(this, getString(R.string.main_activity_already_logged_out));
             return;
         }
 
         sm.destroySession();
         updateHeaderFromSessionInfo();
-        Utils.simpleDialog(this, "Log out", "You just finished your session.");
+        Utils.simpleDialog(this, getString(R.string.main_activity_log_out_title),
+                getString(R.string.main_activity_log_out_message));
     }
 
     // From the sign in drawer option, attempts to register a new user account
     private void attemptToRegister() {
 
         if ( sm.hasSessionStored() ) {
-            Utils.shortSnack(this, "You cannot create a new account while logged in.");
+            Utils.shortSnack(this, getString(R.string.main_activity_no_new_account_while_logged_in));
             return;
         }
 
@@ -847,7 +849,8 @@ public class MainActivity extends AppCompatActivity implements EventListListener
     private void attemptToCreatePub() {
 
         if ( !sm.hasSessionStored() ) {
-            Utils.simpleDialog(this, "You are not logged in", "Only registered users can create new pubs.");
+            Utils.simpleDialog(this, getString(R.string.main_activity_not_logged_in_title),
+                    getString(R.string.main_activity_not_logged_in_message));
             return;
         }
 
@@ -868,8 +871,8 @@ public class MainActivity extends AppCompatActivity implements EventListListener
         }
 
         else {
-            profileNameText.setText("Please register or log in");
-            profileEmailText.setText("to Pick And Gol");
+            profileNameText.setText(R.string.main_activity_profile_name);
+            profileEmailText.setText(R.string.main_activity_to_pick_and_gol);
             im.loadImage(R.drawable.default_avatar, profileImage);
         }
     }
@@ -890,7 +893,7 @@ public class MainActivity extends AppCompatActivity implements EventListListener
         locationChecker.checkBeforeAsking(new CheckPermissionListener() {
             @Override
             public void onPermissionDenied() {
-                String msg = "Pick And Gol will not be able to search based on your location.";
+                String msg = getString(R.string.main_activity_location_denied);
                 Utils.shortToast(MainActivity.this, msg);
 
                 searchEventsFirstPage(lastEventSearchParams, swipeCaller);
@@ -924,7 +927,7 @@ public class MainActivity extends AppCompatActivity implements EventListListener
         locationChecker.checkBeforeAsking(new CheckPermissionListener() {
             @Override
             public void onPermissionDenied() {
-                String msg = "Pick And Gol will not be able to search based on your location.";
+                String msg = getString(R.string.main_activity_location_denied);
                 Utils.shortToast(MainActivity.this, msg);
 
                 searchPubsFirstPage(lastPubSearchParams, swipeCaller);

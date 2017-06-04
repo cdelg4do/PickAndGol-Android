@@ -71,7 +71,7 @@
                         android:id="@+id/activity_event_detail_category_label"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Category:"
+                        android:text="@string/activity_event_detail_category"
                         android:textSize="17sp"
                         android:textStyle="normal|bold"/>
 
@@ -95,7 +95,7 @@
 
                     <TextView
                         android:id="@+id/activity_event_detail_description_label"
-                        android:text="Description:"
+                        android:text="@string/activity_event_detail_description"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:textSize="17sp"
@@ -197,7 +197,7 @@
                         android:id="@+id/activity_event_detail_pubs_label"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Pubs showing this event:"
+                        android:text="@string/activity_event_detail_pubs"
                         android:textSize="17sp"
                         android:textStyle="normal|bold"/>
 
@@ -213,7 +213,7 @@
                         android:id="@+id/activity_event_detail_pubs_button"
                         android:layout_width="match_parent"
                         android:layout_height="60dp"
-                        android:text="Show pubs in map"/>
+                        android:text="@string/activity_event_detail_show_pubs"/>
 
                 </LinearLayout>
 

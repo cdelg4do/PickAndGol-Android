@@ -132,7 +132,7 @@ public class EditUserActivity extends AppCompatActivity {
 
             @Override
             public void onProcessError(Exception error) {
-                Utils.simpleDialog(EditUserActivity.this, "Unable to process image", error.toString());
+                Utils.simpleDialog(EditUserActivity.this, getString(R.string.edit_user_activity_process_image_error_title), error.toString());
 
                 imageFileToUpload = null;
                 imageManager.loadImage(R.drawable.add_image_placeholder, userImage);
@@ -151,8 +151,8 @@ public class EditUserActivity extends AppCompatActivity {
         picturesChecker.checkBeforeAsking(new PermissionChecker.CheckPermissionListener() {
             @Override
             public void onPermissionDenied() {
-                String title = "Pictures access denied";
-                String msg = "Pick And Gol might not be able to take pictures from your camera or gallery.";
+                String title = getString(R.string.edit_user_activity_image_picked_permission_denied_title);
+                String msg = getString(R.string.image_picked_permission_denied_message);
                 Utils.simpleDialog(EditUserActivity.this, title, msg, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
@@ -284,8 +284,8 @@ public class EditUserActivity extends AppCompatActivity {
         doUploadImage(sourcePath, remoteFileName, new ErrorSuccessListener() {
             @Override
             public void onError(@Nullable Object result) {
-                Utils.simpleDialog(EditUserActivity.this, "Image Upload error",
-                        "The selected image could not be uploaded. Please try again.");
+                Utils.simpleDialog(EditUserActivity.this, getString(R.string.edit_user_activity_upload_image_error_title),
+                        getString(R.string.edit_user_activity_upload_image_error_message));
             }
 
             @Override
@@ -385,8 +385,8 @@ public class EditUserActivity extends AppCompatActivity {
     private void doUploadImage(final String filePath, final String remoteFileName, final ErrorSuccessListener listener) {
         if( ! new File(filePath).isFile() ) {
             Log.e(LOG_TAG, "An error occurred: '"+ filePath +"' does not exist or is not a file");
-            Utils.simpleDialog(EditUserActivity.this, "Image Upload error",
-                    "The selected image could not be uploaded. Please try again.");
+            Utils.simpleDialog(EditUserActivity.this, getString(R.string.edit_user_activity_upload_image_error_title),
+                    getString(R.string.edit_user_activity_upload_image_error_message));
             return;
         }
 
@@ -397,7 +397,7 @@ public class EditUserActivity extends AppCompatActivity {
 
         Log.d(LOG_TAG, "Uploading file '"+ filePath +"' ("+ fileSize +")...");
         final ProgressDialog pDialog =
-                Utils.newProgressBarDialog(this, kbTotal, "Uploading image ("+ fileSize +")...");
+                Utils.newProgressBarDialog(this, kbTotal, getString(R.string.edit_user_activity_upload_image_message)+ fileSize +")...");
         pDialog.show();
 
 

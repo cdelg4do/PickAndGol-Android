@@ -155,7 +155,7 @@ public class LocationPickerActivity extends AppCompatActivity {
     // Set the layout toolbar as the activity action bar and show the home button
     private void setupActionBar() {
 
-        setTitle("Select a location on the map");
+        setTitle(getString(R.string.location_picker_activity_location_on_the_map));
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -190,7 +190,7 @@ public class LocationPickerActivity extends AppCompatActivity {
             initialZoom = STANDARD_MAP_ZOOM;
 
             if (savedInstanceState == null)
-                Utils.shortToast(this, "Unable to determine your location");
+                Utils.shortToast(this, getString(R.string.location_picker_activity_unable_determine_location));
         }
 
         // Set the map type, user cannot rotate it, and show the zoom buttons and the my-location button

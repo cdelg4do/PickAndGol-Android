@@ -133,15 +133,15 @@ public class RegisterUserActivity extends AppCompatActivity {
 
             @Override
             public void onRegistrationFail(Exception e) {
-                Utils.simpleDialog(RegisterUserActivity.this, "Error", e.getMessage());
+                Utils.simpleDialog(RegisterUserActivity.this, getString(R.string.new_user_activity_registration_error_title), e.getMessage());
             }
 
             @Override
             public void onRegistrationSuccess() {
 
                 Utils.simpleDialog(RegisterUserActivity.this,
-                                   "User registration",
-                                   "The new user has been registered",
+                                   getString(R.string.new_user_activity_registration_title),
+                                   getString(R.string.new_user_activity_registration_message),
                                    new DialogInterface.OnClickListener() {
 
                                         @Override
