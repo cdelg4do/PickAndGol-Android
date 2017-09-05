@@ -85,14 +85,42 @@ public class RealmDBManager implements DBManager {
 
     // Gets the category from the database for a given category id
     @Override
-    public @Nullable Category getCategory(@NonNull final String categoryId) {
+    public void getCategory(@NonNull final String categoryId, final DBManagerListener listener) {
 
-        RealmCategory realmCategory = realm.where(RealmCategory.class).equalTo("id", categoryId).findFirst();
+        // Use a list to store the item instead of a Category (must be declared final)
+        final ArrayList<Category> categoryList = new ArrayList<>();
 
-        if (realmCategory == null)
-            return null;
+        realm.executeTransactionAsync(
+                new Realm.Transaction() {
+                    @Override
+                    public void execute(Realm realm) {
 
-        return realmCategory.mapToModel();
+                        RealmCategory realmCategory = realm.where(RealmCategory.class)
+                                                           .equalTo("id", categoryId)
+                                                           .findFirst();
+
+                        if (realmCategory != null)
+                            categoryList.add( realmCategory.mapToModel() );
+                    }
+                },
+                new Realm.Transaction.OnSuccess() {
+                    @Override
+                    public void onSuccess() {
+                        if (listener != null) {
+                            if (categoryList.size() == 0)   listener.onSuccess(null);
+                            else                            listener.onSuccess(categoryList.get(0));
+                        }
+                    }
+                },
+                new Realm.Transaction.OnError() {
+                    @Override
+                    public void onError(Throwable error) {
+                        if (listener != null) {
+                            listener.onError(error);
+                        }
+                    }
+                }
+        );
     }
 
 

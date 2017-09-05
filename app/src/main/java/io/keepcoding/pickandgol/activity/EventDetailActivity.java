@@ -23,15 +23,14 @@ import java.util.Date;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.keepcoding.pickandgol.R;
-import io.keepcoding.pickandgol.interactor.GetCategoriesInteractor;
-import io.keepcoding.pickandgol.interactor.GetCategoriesInteractor.GetCategoriesInteractorListener;
+import io.keepcoding.pickandgol.interactor.GetCategoryInteractor;
+import io.keepcoding.pickandgol.interactor.GetCategoryInteractor.GetCategoryInteractorListener;
 import io.keepcoding.pickandgol.interactor.LinkEventToPubInteractor;
 import io.keepcoding.pickandgol.interactor.LinkEventToPubInteractor.LinkEventToPubInteractorListener;
 import io.keepcoding.pickandgol.manager.geo.GeoManager;
 import io.keepcoding.pickandgol.manager.image.ImageManager;
 import io.keepcoding.pickandgol.manager.session.SessionManager;
 import io.keepcoding.pickandgol.model.Category;
-import io.keepcoding.pickandgol.model.CategoryAggregate;
 import io.keepcoding.pickandgol.model.Event;
 import io.keepcoding.pickandgol.model.Pub;
 import io.keepcoding.pickandgol.navigator.Navigator;
@@ -52,7 +51,6 @@ public class EventDetailActivity extends AppCompatActivity {
     public final static String EVENT_MODEL_KEY = "EVENT_MODEL_KEY";
 
     private Event model;
-    private CategoryAggregate categories;
 
     private SessionManager sm;
     private ImageManager im;
@@ -80,7 +78,7 @@ public class EventDetailActivity extends AppCompatActivity {
         setupActionBar();
         setupButtons();
 
-        loadCategoriesThenLoadModel();
+        loadModel();
     }
 
     @Override
@@ -179,32 +177,8 @@ public class EventDetailActivity extends AppCompatActivity {
         });
     }
 
-    // Loads the categories from the server, if succeeds then loads the model
-    private void loadCategoriesThenLoadModel() {
-
-        final ProgressDialog pDialog = Utils.newProgressDialog(this, getString(R.string.event_detail_activity_load_categories));
-        pDialog.show();
-
-        new GetCategoriesInteractor().execute(new GetCategoriesInteractorListener() {
-
-            @Override
-            public void onGetCategoriesFail(Throwable e) {
-                pDialog.dismiss();
-                finishActivity(new Error(e.getMessage()));
-            }
-
-            @Override
-            public void onGetCategoriesSuccess(CategoryAggregate categories) {
-                pDialog.dismiss();
-
-                EventDetailActivity.this.categories = categories;
-                loadModel();
-            }
-        });
-    }
-
     // Gets the event passed from the intent and shows its data on screen
-    // (first make sure categories is not null)
+    // (image, category name, description, date, time and num. of pubs where it is shown)
     private void loadModel() {
 
         Intent i = getIntent();
@@ -220,14 +194,19 @@ public class EventDetailActivity extends AppCompatActivity {
         else
             im.loadImage(model.getPhotoUrl(), imgPhoto, R.drawable.error_placeholder);
 
-        String categoryName;
-        Category cat = categories.search(model.getCategory());
-        if (cat != null)
-            categoryName = cat.getName();
-        else
-            categoryName = getString(R.string.event_detail_activity_unspecified_category);
+        new GetCategoryInteractor().execute(model.getCategory(), new GetCategoryInteractorListener() {
+            @Override
+            public void onGetCategoryFail(Throwable e) {
+                txtCategory.setText(R.string.event_detail_activity_unspecified_category);
+            }
 
-        txtCategory.setText(categoryName);
+            @Override
+            public void onGetCategorySuccess(Category category) {
+
+                if (category == null)   txtCategory.setText(R.string.event_detail_activity_unspecified_category);
+                else                    txtCategory.setText( category.getName() );
+            }
+        });
 
         String description = model.getDescription();
         if (description == null)

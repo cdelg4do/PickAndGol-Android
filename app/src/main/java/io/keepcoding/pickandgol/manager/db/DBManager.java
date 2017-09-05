@@ -20,7 +20,7 @@ public interface DBManager {
     @Nullable Event getEvent(@NonNull final String eventId);
     @Nullable Pub getPub(@NonNull final String pubId);
     @Nullable User getUser(@NonNull final String userId);
-    @Nullable Category getCategory(@NonNull final String categoryId);
+    void getCategory(@NonNull final String categoryId, final DBManagerListener listener);
 
     void saveEvent(@NonNull final Event event, final DBManagerListener listener);
     void savePub(@NonNull final Pub pub, final DBManagerListener listener);
