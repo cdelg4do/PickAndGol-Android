@@ -76,4 +76,41 @@ public class CategoryAggregate implements Iterable<Category>, Updatable<Category
 
         return null;
     }
+
+
+    // Static builders (create aggregates from other source objects):
+
+    public static CategoryAggregate buildEmpty() {
+        return new CategoryAggregate();
+    }
+
+    public static CategoryAggregate buildFromList(List<Category> list) {
+
+        CategoryAggregate categoryAggregate = new CategoryAggregate();
+        categoryAggregate.setAll(list);
+
+        return categoryAggregate;
+    }
+
+
+    // Auxiliary methods:
+
+    // Outputs the contents as a String (for debugging purposes)
+    public String debugString() {
+
+        if (size() == 0)
+            return "< The aggregate contains 0 categories >";
+
+        StringBuilder str = new StringBuilder();
+
+        for (Category category: categoryList) {
+
+            String id = category.getId();
+            String name = category.getName();
+
+            str.append("["+ id +"] "+ name +"\n");
+        }
+
+        return str.toString();
+    }
 }

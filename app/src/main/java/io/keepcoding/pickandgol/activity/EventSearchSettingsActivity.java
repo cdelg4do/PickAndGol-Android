@@ -139,15 +139,15 @@ public class EventSearchSettingsActivity extends AppCompatActivity {
     // Populates the category spinner and then loads the current search settings
     private void setupCategorySpinner() {
 
-        new GetCategoriesInteractor().execute(this, new GetCategoriesInteractorListener() {
+        new GetCategoriesInteractor().execute(new GetCategoriesInteractorListener() {
+
             @Override
-            public void onGetCategoriesFail(Exception e) {
+            public void onGetCategoriesFail(Throwable e) {
                 Log.e(LOG_TAG, e.getMessage());
             }
 
             @Override
             public void onGetCategoriesSuccess(CategoryAggregate categories) {
-
                 String[] categoryIDs = new String[ categories.size() ];
                 String[] categoryNames = new String[ categories.size() ];
 

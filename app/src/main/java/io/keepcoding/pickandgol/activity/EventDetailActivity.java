@@ -24,6 +24,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.keepcoding.pickandgol.R;
 import io.keepcoding.pickandgol.interactor.GetCategoriesInteractor;
+import io.keepcoding.pickandgol.interactor.GetCategoriesInteractor.GetCategoriesInteractorListener;
 import io.keepcoding.pickandgol.interactor.LinkEventToPubInteractor;
 import io.keepcoding.pickandgol.interactor.LinkEventToPubInteractor.LinkEventToPubInteractorListener;
 import io.keepcoding.pickandgol.manager.geo.GeoManager;
@@ -184,10 +185,10 @@ public class EventDetailActivity extends AppCompatActivity {
         final ProgressDialog pDialog = Utils.newProgressDialog(this, getString(R.string.event_detail_activity_load_categories));
         pDialog.show();
 
-        new GetCategoriesInteractor().execute(this, new GetCategoriesInteractor.GetCategoriesInteractorListener() {
+        new GetCategoriesInteractor().execute(new GetCategoriesInteractorListener() {
 
             @Override
-            public void onGetCategoriesFail(Exception e) {
+            public void onGetCategoriesFail(Throwable e) {
                 pDialog.dismiss();
                 finishActivity(new Error(e.getMessage()));
             }
