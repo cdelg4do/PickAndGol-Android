@@ -218,9 +218,10 @@ public class NewEventActivity extends AppCompatActivity {
     // Populates the spinner with the categories from the server
     private void setupCategorySpinner() {
 
-        new GetCategoriesInteractor().execute(this, new GetCategoriesInteractorListener() {
+        new GetCategoriesInteractor().execute(new GetCategoriesInteractorListener() {
+
             @Override
-            public void onGetCategoriesFail(Exception e) {
+            public void onGetCategoriesFail(Throwable e) {
                 Log.e(LOG_TAG, e.getMessage());
             }
 

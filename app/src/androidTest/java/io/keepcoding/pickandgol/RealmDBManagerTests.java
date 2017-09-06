@@ -14,13 +14,14 @@ import java.util.Arrays;
 import java.util.List;
 
 import io.keepcoding.pickandgol.manager.db.DBManager;
+import io.keepcoding.pickandgol.manager.db.DBManagerBuilder;
 import io.keepcoding.pickandgol.manager.db.DBManagerListener;
-import io.keepcoding.pickandgol.manager.db.realm.RealmDBManager;
 import io.keepcoding.pickandgol.model.Pub;
 import io.keepcoding.pickandgol.model.User;
 import io.keepcoding.pickandgol.util.MainThread;
+import io.realm.Realm;
 
-import static org.junit.Assert.assertEquals;
+import static io.keepcoding.pickandgol.manager.db.DBManagerBuilder.DatabaseType.REALM;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 
@@ -32,34 +33,52 @@ import static org.junit.Assert.fail;
  */
 @RunWith(AndroidJUnit4.class)
 public class RealmDBManagerTests {
+
+    // Test that, after removing a user, it cannot be retrieved again
     @Test
     public void testThatAfterRemoveAnUserCannotGetItAgain() {
+
         MainThread.run(new Runnable() {
             @Override
             public void run() {
-                final User user = createUser();
-                final DBManager manager = getDBManager();
-                manager.saveUser(user, new DBManagerListener() {
+
+                final User dummyUser = createDummyUser();
+                final DBManager dbMgr = getDBManager();
+
+                // 1- Save the dummy user to the database
+                dbMgr.saveUser(dummyUser, new DBManagerListener() {
                     @Override
                     public void onError(Throwable e) {
-                        fail("Error while saving object");
+                        fail("Error while saving a user to the database");
                     }
 
                     @Override
                     public void onSuccess(@Nullable Object result) {
-                        final User userSaved = manager.getUser(user.getId());
-                        assertEquals("The object recovered is not the same as the object saved", user, userSaved);
 
-                        manager.removeUser(user.getId(), new DBManagerListener() {
+                        // 2- Remove the user from the database
+                        dbMgr.removeUser(dummyUser.getId(), new DBManagerListener() {
                             @Override
                             public void onError(Throwable e) {
-                                fail("Error while removing a object");
+                                fail("Error while removing a user from the database");
                             }
 
                             @Override
                             public void onSuccess(@Nullable Object result) {
-                                final User userRemoved = manager.getUser(user.getId());
-                                assertNull("The object removed was recovered!", userRemoved);
+
+                                // 3- Try to retrieve the removed user from the database
+                                dbMgr.getUser(dummyUser.getId(), new DBManagerListener() {
+                                    @Override
+                                    public void onError(Throwable e) {
+                                        fail("Error while retrieving a removed user from the database");
+                                    }
+
+                                    @Override
+                                    public void onSuccess(@Nullable Object result) {
+
+                                        // 4- Make sure the result is null
+                                        assertNull("The removed user is still there!", result);
+                                    }
+                                });
                             }
                         });
                     }
@@ -68,34 +87,52 @@ public class RealmDBManagerTests {
         });
     }
 
+
+    // Test that, after removing a pub, it cannot be retrieved again
     @Test
     public void testThatAfterRemoveAPubCannotGetItAgain() {
+
         MainThread.run(new Runnable() {
             @Override
             public void run() {
-                final Pub pub = createPub();
-                final DBManager manager = getDBManager();
-                manager.savePub(pub, new DBManagerListener() {
+
+                final Pub dummyPub = createDummyPub();
+                final DBManager dbMgr = getDBManager();
+
+                // 1- Save the dummy pub to the database
+                dbMgr.savePub(dummyPub, new DBManagerListener() {
                     @Override
                     public void onError(Throwable e) {
-                        fail("Error while saving a pub");
+                        fail("Error while saving a pub to the database");
                     }
 
                     @Override
                     public void onSuccess(@Nullable Object result) {
-                        final Pub pubSaved = manager.getPub(pub.getId());
-                        assertEquals("The pub recovered is not the same as the pub saved", pub, pubSaved);
 
-                        manager.removePub(pub.getId(), new DBManagerListener() {
+                        // 2- Remove the pub from the database
+                        dbMgr.removePub(dummyPub.getId(), new DBManagerListener() {
                             @Override
                             public void onError(Throwable e) {
-                                fail("Error while removing a pub");
+                                fail("Error while removing a pub from the database");
                             }
 
                             @Override
                             public void onSuccess(@Nullable Object result) {
-                                final Pub pubRemoved = manager.getPub(pub.getId());
-                                assertNull("The pub removed was recovered!", pubRemoved);
+
+                                // 3- Try to retrieve the removed pub from the database
+                                dbMgr.getPub(dummyPub.getId(), new DBManagerListener() {
+                                    @Override
+                                    public void onError(Throwable e) {
+                                        fail("Error while retrieving a removed pub from the database");
+                                    }
+
+                                    @Override
+                                    public void onSuccess(@Nullable Object result) {
+
+                                        // 4- Make sure the result is null
+                                        assertNull("The removed pub is still there!", result);
+                                    }
+                                });
                             }
                         });
                     }
@@ -103,14 +140,21 @@ public class RealmDBManagerTests {
             }
         });
     }
+
+
+    /*************************************************************
+       Auxiliary methods to prepare the tests:
+     ************************************************************/
 
     private DBManager getDBManager() {
         Context appContext = InstrumentationRegistry.getTargetContext();
-        return RealmDBManager.getDefaultInstance();
+        Realm.init(appContext);
+
+        return new DBManagerBuilder().type(REALM).build();
     }
 
     @NonNull
-    private User createUser() {
+    private User createDummyUser() {
         String[] favorites = {"1111", "2222"};
         final User user = new User("58b2aef6d9f0163f6eee636e");
 
@@ -122,12 +166,12 @@ public class RealmDBManagerTests {
     }
 
     @NonNull
-    private Pub createPub() {
-        List<String> events = new ArrayList<String>();
+    private Pub createDummyPub() {
+        List<String> events = new ArrayList<>();
         events.add("58a058b633674f1e95cd411f");
         events.add("58a0288b8b00070cab093c62");
 
-        List<String> photos = new ArrayList<String>();
+        List<String> photos = new ArrayList<>();
         photos.add("https://pickandgol.s3.amazonaws.com/67e19952-2226-4718-bd83-cb62d89ff3cb.jpg");
 
         return new Pub("58b2aef6d9f0163f6eee656h",
