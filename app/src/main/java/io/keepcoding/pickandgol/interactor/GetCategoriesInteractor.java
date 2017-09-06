@@ -3,9 +3,11 @@ package io.keepcoding.pickandgol.interactor;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import io.keepcoding.pickandgol.PickAndGolApp;
 import io.keepcoding.pickandgol.manager.db.DBManager;
+import io.keepcoding.pickandgol.manager.db.DBManagerBuilder;
+import io.keepcoding.pickandgol.manager.db.DBManagerBuilder.DatabaseType;
 import io.keepcoding.pickandgol.manager.db.DBManagerListener;
-import io.keepcoding.pickandgol.manager.db.realm.RealmDBManager;
 import io.keepcoding.pickandgol.model.CategoryAggregate;
 
 
@@ -17,6 +19,8 @@ import io.keepcoding.pickandgol.model.CategoryAggregate;
  * - Second (in the main thread): pass the model object to the given GetUserInfoInteractorListener.
  */
 public class GetCategoriesInteractor {
+
+    private static final DatabaseType DB_TYPE = PickAndGolApp.DBTYPE;
 
     // This interface describes the behavior of a listener waiting for the the async operation
     public interface GetCategoriesInteractorListener {
@@ -36,7 +40,7 @@ public class GetCategoriesInteractor {
         if (listener == null)
             return;
 
-        final DBManager dbManager = RealmDBManager.getDefaultInstance();
+        final DBManager dbManager = new DBManagerBuilder().type(DB_TYPE).build();
 
         dbManager.getAllCategories(new DBManagerListener() {
             @Override

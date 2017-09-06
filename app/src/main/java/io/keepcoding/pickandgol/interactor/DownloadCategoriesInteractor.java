@@ -5,9 +5,11 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
+import io.keepcoding.pickandgol.PickAndGolApp;
 import io.keepcoding.pickandgol.manager.db.DBManager;
+import io.keepcoding.pickandgol.manager.db.DBManagerBuilder;
+import io.keepcoding.pickandgol.manager.db.DBManagerBuilder.DatabaseType;
 import io.keepcoding.pickandgol.manager.db.DBManagerListener;
-import io.keepcoding.pickandgol.manager.db.realm.RealmDBManager;
 import io.keepcoding.pickandgol.manager.net.NetworkManager;
 import io.keepcoding.pickandgol.manager.net.NetworkManager.NetworkRequestListener;
 import io.keepcoding.pickandgol.manager.net.ParsedData;
@@ -29,7 +31,8 @@ import static io.keepcoding.pickandgol.manager.net.NetworkManagerSettings.URL_CA
  */
 public class DownloadCategoriesInteractor {
 
-    private static final String LOG_TAG = "EditUserActivity";
+    private static final String LOG_TAG = "DownloadCategoriesInt";
+    private static final DatabaseType DB_TYPE = PickAndGolApp.DBTYPE;
 
     // This interface describes the behavior of a listener waiting for the the async operation
     public interface DownloadCategoriesInteractorListener {
@@ -52,7 +55,7 @@ public class DownloadCategoriesInteractor {
         if (listener == null)
             return;
 
-        final DBManager dbManager = RealmDBManager.getDefaultInstance();
+        final DBManager dbManager = new DBManagerBuilder().type(DB_TYPE).build();
 
         NetworkManager networkManager = new NetworkManager(context);
         RequestParams getCategoriesParams = new RequestParams();
