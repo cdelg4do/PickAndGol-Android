@@ -18,6 +18,7 @@ import android.view.ViewGroup;
 import io.keepcoding.pickandgol.R;
 import io.keepcoding.pickandgol.adapter.PubListAdapter;
 import io.keepcoding.pickandgol.model.PubAggregate;
+import io.keepcoding.pickandgol.view.CustomRecyclerDecorator;
 import io.keepcoding.pickandgol.view.EndlessRecyclerViewScrollListener;
 import io.keepcoding.pickandgol.view.PubListListener;
 import io.keepcoding.pickandgol.view.SpaceItemDecoration;
@@ -151,6 +152,9 @@ public class PubListFragment extends Fragment {
     private void setupRecyclerView(View rootView) {
 
         recyclerView = (RecyclerView) rootView.findViewById(R.id.fragment_pub_list_recycler);
+
+        // Decorator to tune the exact position of each cell
+        recyclerView.addItemDecoration( new CustomRecyclerDecorator(24, 32) );
 
         // If the list is represented in the form of a classic row list
         if (layoutType == ROWS || layoutType == ROWS_WITH_DETAIL_BUTTON) {
