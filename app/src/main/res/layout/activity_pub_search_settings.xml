@@ -10,121 +10,191 @@
     <!-- Toolbar for the actvity -->
     <include layout="@layout/toolbar_main"/>
 
-    <ScrollView
-        android:id="@+id/scrollView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:isScrollContainer="true">
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+        <ScrollView
+            android:id="@+id/scrollView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:isScrollContainer="true">
+
+            <LinearLayout
+                android:id="@+id/contentOfScrollView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingBottom="@dimen/activity_vertical_margin"
+                android:paddingLeft="@dimen/activity_horizontal_margin"
+                android:paddingRight="@dimen/activity_horizontal_margin"
+                android:paddingTop="@dimen/activity_vertical_margin">
+
+                <RelativeLayout
+                    android:id="@+id/activity_pub_search_keywords_layout"
+                    xmlns:android="http://schemas.android.com/apk/res/android"
+                    xmlns:tools="http://schemas.android.com/tools"
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:padding="10dp"
+                    android:background="#FFCACACA">
+
+                    <TextView
+                        android:id="@+id/activity_pub_search_keywords_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:text="@string/activity_pub_search_keywords_title"
+                        android:textStyle="normal|bold"
+                        android:textSize="16sp"/>
+
+                    <EditText
+                        android:id="@+id/activity_pub_search_keywords_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:layout_below="@+id/activity_pub_search_keywords_title"
+                        android:hint="@string/activity_pub_search_keywords_text"
+                        android:background="@android:color/white"/>
+
+                </RelativeLayout>
+
+                <!--
+                <RelativeLayout
+                    android:id="@+id/activity_pub_search_origin_layout"
+                    xmlns:android="http://schemas.android.com/apk/res/android"
+                    xmlns:tools="http://schemas.android.com/tools"
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:padding="10dp"
+                    android:background="#FFCACACA">
+
+                    <TextView
+                        android:id="@+id/activity_pub_search_origin_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:text="Where?"
+                        android:textStyle="normal|bold"
+                        android:textSize="16sp"/>
+
+                    <EditText
+                        android:id="@+id/activity_pub_search_keywords_text"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:layout_below="@+id/activity_pub_search_keywords_title"
+                        android:hint="@string/activity_pub_search_keywords_text"
+                        android:background="@android:color/white"/>
+
+                </RelativeLayout>
+                -->
+
+                <RelativeLayout
+                    android:id="@+id/activity_pub_search_distance_layout"
+                    xmlns:android="http://schemas.android.com/apk/res/android"
+                    xmlns:tools="http://schemas.android.com/tools"
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:padding="10dp"
+                    android:background="#FFCACACA">
+
+                    <TextView
+                        android:id="@+id/activity_pub_search_distance_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:text="@string/activity_pub_search_distance"
+                        android:textStyle="normal|bold"
+                        android:textSize="16sp"/>
+
+                    <TextView
+                        android:id="@+id/activity_pub_search_distance_label"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="end"
+                        android:padding="10dp"
+                        android:layout_below="@+id/activity_pub_search_distance_title"
+                        tools:text="Very close (1 km)"/>
+
+                    <SeekBar
+                        android:id="@+id/activity_pub_search_distance_bar"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/activity_pub_search_distance_label"
+                        android:padding="10dp"
+                        android:max="3"/>
+
+                </RelativeLayout>
+
+                <RelativeLayout
+                    android:id="@+id/activity_pub_search_sort_layout"
+                    android:orientation="vertical"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
+                    android:padding="10dp"
+                    android:background="#FFCACACA">
+
+                    <TextView
+                        android:id="@+id/activity_pub_search_sort_title"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginBottom="10dp"
+                        android:text="@string/activity_pub_search_sort"
+                        android:textStyle="normal|bold"
+                        android:textSize="16sp"/>
+
+                    <Spinner
+                        android:id="@+id/activity_pub_search_sort_spinner"
+                        android:layout_width="match_parent"
+                        android:layout_height="40dp"
+                        android:layout_below="@+id/activity_pub_search_sort_title"
+                        android:background="@android:color/white"/>
+
+                </RelativeLayout>
+
+            </LinearLayout>
+
+        </ScrollView>
 
         <LinearLayout
-            android:id="@+id/contentOfScrollView"
+            android:id="@+id/activity_pub_search_buttons_layout"
+            android:orientation="horizontal"
+            android:layout_alignParentBottom="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:paddingBottom="@dimen/activity_vertical_margin"
-            android:paddingLeft="@dimen/activity_horizontal_margin"
-            android:paddingRight="@dimen/activity_horizontal_margin"
-            android:paddingTop="@dimen/activity_vertical_margin">
+            android:padding="5dp"
+            android:gravity="center_horizontal"
+            android:background="#FFCACACA">
 
-            <RelativeLayout
-                android:id="@+id/activity_pub_search_keywords_layout"
-                xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:orientation="vertical"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:padding="10dp"
-                android:background="#FFCACACA">
+            <Button
+                android:id="@+id/activity_pub_search_button_cancel"
+                android:text="Cancel"
+                android:layout_width="100dp"
+                android:layout_height="50dp"/>
 
-                <TextView
-                    android:id="@+id/activity_pub_search_keywords_title"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:text="@string/activity_pub_search_keywords_title"
-                    android:textStyle="normal|bold"
-                    android:textSize="16sp"/>
+            <FrameLayout
+                android:layout_height="match_parent"
+                android:layout_width="10dp">
 
-                <EditText
-                    android:id="@+id/activity_pub_search_keywords_text"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="10dp"
-                    android:layout_below="@+id/activity_pub_search_keywords_title"
-                    android:hint="@string/activity_pub_search_keywords_text"
-                    android:background="@android:color/white"/>
+            </FrameLayout>
 
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:id="@+id/activity_pub_search_sort_layout"
-                android:orientation="vertical"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:padding="10dp"
-                android:background="#FFCACACA">
-
-                <TextView
-                    android:id="@+id/activity_pub_search_sort_title"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:text="@string/activity_pub_search_sort"
-                    android:textStyle="normal|bold"
-                    android:textSize="16sp"/>
-
-                <Spinner
-                    android:id="@+id/activity_pub_search_sort_spinner"
-                    android:layout_width="match_parent"
-                    android:layout_height="40dp"
-                    android:layout_below="@+id/activity_pub_search_sort_title"
-                    android:background="@android:color/white"/>
-
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:id="@+id/activity_pub_search_distance_layout"
-                xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:orientation="vertical"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:padding="10dp"
-                android:background="#FFCACACA">
-
-                <TextView
-                    android:id="@+id/activity_pub_search_distance_title"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:text="@string/activity_pub_search_distance"
-                    android:textStyle="normal|bold"
-                    android:textSize="16sp"/>
-
-                <TextView
-                    android:id="@+id/activity_pub_search_distance_label"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="right"
-                    android:padding="10dp"
-                    android:layout_below="@+id/activity_pub_search_distance_title"
-                    tools:text="Very close (1 km)"/>
-
-                <SeekBar
-                    android:id="@+id/activity_pub_search_distance_bar"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_below="@+id/activity_pub_search_distance_label"
-                    android:padding="10dp"
-                    android:max="3"/>
-
-            </RelativeLayout>
+            <Button
+                android:id="@+id/activity_pub_search_button_apply"
+                android:text="Apply"
+                android:layout_width="100dp"
+                android:layout_height="50dp"/>
 
         </LinearLayout>
 
-    </ScrollView>
+    </RelativeLayout>
 
 </LinearLayout>

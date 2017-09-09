@@ -300,17 +300,23 @@ public class Navigator {
      * sending back a new PubSearchParams object.
      *
      * @param pubSearchSettingsActivity   context for the intent created during the operation
-     * @param newSearchParams             the new search settings that have been set on the Activity
+     * @param newSearchParams             the new search settings that have been set on the Activity (if not null)
      * @return                            a reference to the intent created (useful for testing)
      */
     public static Intent backFromPubSearchActivity(final PubSearchSettingsActivity pubSearchSettingsActivity,
-                                                   @NonNull PubSearchParams newSearchParams) {
+                                                   @Nullable PubSearchParams newSearchParams) {
 
         Intent i = new Intent();
-        i.putExtra(MainActivity.NEW_PUB_SEARCH_PARAMS_KEY, newSearchParams);
-        pubSearchSettingsActivity.setResult(RESULT_OK, i);
-        pubSearchSettingsActivity.finish();
 
+        if (newSearchParams != null) {
+
+            i.putExtra(MainActivity.NEW_PUB_SEARCH_PARAMS_KEY, newSearchParams);
+            pubSearchSettingsActivity.setResult(RESULT_OK, i);
+        }
+        else
+            pubSearchSettingsActivity.setResult(RESULT_CANCELED, i); // The operation failed or was canceled
+
+        pubSearchSettingsActivity.finish();
         return i;
     }
 
