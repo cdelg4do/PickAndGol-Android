@@ -26,6 +26,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:adjustViewBounds="true"
+            android:maxHeight="380dp"
+            android:minHeight="215dp"
             android:scaleType="centerCrop"
             android:src="@drawable/default_placeholder"/>
 
@@ -46,7 +48,9 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:lineSpacingExtra="10sp"
-            android:padding="10dp"
+            android:paddingBottom="10dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
             tools:text="Item \ndate"/>
 
     </LinearLayout>
