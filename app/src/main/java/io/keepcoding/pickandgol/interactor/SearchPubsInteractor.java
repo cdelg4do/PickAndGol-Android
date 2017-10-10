@@ -62,33 +62,33 @@ public class SearchPubsInteractor {
 
 
         NetworkManager networkMgr = new NetworkManager(context);
-        RequestParams searchEventsParams = new RequestParams();
+        RequestParams searchPubsParams = new RequestParams();
 
         if (offset != null)
-            searchEventsParams.addParam(REQUEST_PARAM_KEY_OFFSET, offset.toString());
+            searchPubsParams.addParam(REQUEST_PARAM_KEY_OFFSET, offset.toString());
 
         if (limit != null)
-            searchEventsParams.addParam(REQUEST_PARAM_KEY_LIMIT, limit.toString());
+            searchPubsParams.addParam(REQUEST_PARAM_KEY_LIMIT, limit.toString());
 
         if (sort != null)
-            searchEventsParams.addParam(REQUEST_PARAM_KEY_SORT, sort);
+            searchPubsParams.addParam(REQUEST_PARAM_KEY_SORT, sort);
 
         if (keyWords != null)
-            searchEventsParams.addParam(REQUEST_PARAM_KEY_TEXT, keyWords);
+            searchPubsParams.addParam(REQUEST_PARAM_KEY_TEXT, keyWords);
 
         if (latitude != null && longitude != null && radius != null && radius > 0) {
 
-            searchEventsParams.addParam(REQUEST_PARAM_KEY_LATITUDE, latitude.toString());
-            searchEventsParams.addParam(REQUEST_PARAM_KEY_LONGITUDE, longitude.toString());
-            searchEventsParams.addParam(REQUEST_PARAM_KEY_RADIUS, radius.toString());
+            searchPubsParams.addParam(REQUEST_PARAM_KEY_LATITUDE, latitude.toString());
+            searchPubsParams.addParam(REQUEST_PARAM_KEY_LONGITUDE, longitude.toString());
+            searchPubsParams.addParam(REQUEST_PARAM_KEY_RADIUS, radius.toString());
         }
 
         if (eventId != null)
-            searchEventsParams.addParam(REQUEST_PARAM_KEY_EVENT, eventId);
+            searchPubsParams.addParam(REQUEST_PARAM_KEY_EVENT, eventId);
 
         String remoteUrl = getUrl();
 
-        networkMgr.launchGETStringRequest(remoteUrl, searchEventsParams, PUB_LIST, new NetworkManager.NetworkRequestListener() {
+        networkMgr.launchGETStringRequest(remoteUrl, searchPubsParams, PUB_LIST, new NetworkManager.NetworkRequestListener() {
 
             @Override
             public void onNetworkRequestFail(Exception e) {

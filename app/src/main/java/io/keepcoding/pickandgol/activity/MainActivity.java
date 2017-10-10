@@ -52,6 +52,8 @@ import io.keepcoding.pickandgol.util.Utils;
 import io.keepcoding.pickandgol.view.EventListListener;
 import io.keepcoding.pickandgol.view.PubListListener;
 
+import static io.keepcoding.pickandgol.activity.LocationPickerActivity.STANDARD_MAP_LATITUDE;
+import static io.keepcoding.pickandgol.activity.LocationPickerActivity.STANDARD_MAP_LONGITUDE;
 import static io.keepcoding.pickandgol.activity.MainActivity.ShowingFragment.EVENT_LIST;
 import static io.keepcoding.pickandgol.activity.MainActivity.ShowingFragment.PUB_LIST;
 import static io.keepcoding.pickandgol.interactor.LoginInteractor.LoginInteractorListener;
@@ -203,8 +205,7 @@ public class MainActivity extends AppCompatActivity implements EventListListener
 
                     Navigator.fromMainActivityToPubSearchActivity(
                             this,
-                            lastPubSearchParams,
-                            GeoManager.isLocationAccessGranted(this)
+                            lastPubSearchParams
                     );
 
                 return true;
@@ -371,23 +372,8 @@ public class MainActivity extends AppCompatActivity implements EventListListener
             final PubSearchParams newSearchParams =
                     (PubSearchParams) data.getSerializableExtra(NEW_PUB_SEARCH_PARAMS_KEY);
 
-            // Check if we have permission to access the device location, before performing a search
-            locationChecker.checkBeforeAsking(new CheckPermissionListener() {
-                @Override
-                public void onPermissionDenied() {
-                    String msg = getString(R.string.main_activity_location_denied);
-                    Utils.shortToast(MainActivity.this, msg);
-
-                    searchPubsFirstPage(newSearchParams, null);
-                    mainDrawer.closeDrawers();
-                }
-
-                @Override
-                public void onPermissionGranted() {
-                    searchPubsFirstPage(newSearchParams, null);
-                    mainDrawer.closeDrawers();
-                }
-            });
+            searchPubsFirstPage(newSearchParams, null);
+            mainDrawer.closeDrawers();
         }
 
         // If we come from the Edit User Activity, update the session info and the drawer header
@@ -460,6 +446,9 @@ public class MainActivity extends AppCompatActivity implements EventListListener
                 setTitle(actionBarTitle);
                 showNewPubButton();
 
+                // Set a default location for the search (used in case of Device location unavailable)
+                lastPubSearchParams.setCoordinates(STANDARD_MAP_LATITUDE, STANDARD_MAP_LONGITUDE);
+
                 // Check if we have permission to access the device location, before performing a search
                 locationChecker.checkBeforeAsking(new CheckPermissionListener() {
                     @Override
@@ -473,8 +462,24 @@ public class MainActivity extends AppCompatActivity implements EventListListener
 
                     @Override
                     public void onPermissionGranted() {
-                        searchPubsFirstPage(lastPubSearchParams, null);
-                        mainDrawer.closeDrawers();
+
+                        gm.requestLastLocation(new GeoManager.GeoDirectLocationListener() {
+                            @Override
+                            public void onLocationError(Throwable error) {
+
+                                searchPubsFirstPage(lastPubSearchParams, null);
+                                mainDrawer.closeDrawers();
+                            }
+
+                            @Override
+                            public void onLocationSuccess(double latitude, double longitude) {
+
+                                lastPubSearchParams.setCoordinates(latitude, longitude);
+
+                                searchPubsFirstPage(lastPubSearchParams, null);
+                                mainDrawer.closeDrawers();
+                            }
+                        });
                     }
                 });
 
@@ -657,30 +662,9 @@ public class MainActivity extends AppCompatActivity implements EventListListener
             }
         };
 
-
-        // The current location will be sent only if it is available
-        searchParams.setCoordinates(null, null);
-
-        if ( !GeoManager.isLocationAccessGranted(this) ) {
-            lastPubSearchParams = searchParams;
-            new SearchPubsInteractor().execute(MainActivity.this, searchParams, interactorListener);
-        }
-        else {
-            gm.requestLastLocation(new GeoManager.GeoDirectLocationListener() {
-                @Override
-                public void onLocationError(Throwable error) {
-                    lastPubSearchParams = searchParams;
-                    new SearchPubsInteractor().execute(MainActivity.this, searchParams, interactorListener);
-                }
-
-                @Override
-                public void onLocationSuccess(double latitude, double longitude) {
-                    searchParams.setCoordinates(latitude, longitude);
-                    lastPubSearchParams = searchParams;
-                    new SearchPubsInteractor().execute(MainActivity.this, searchParams, interactorListener);
-                }
-            });
-        }
+        // Save this search parameters for future use and launch the new search
+        lastPubSearchParams = searchParams;
+        new SearchPubsInteractor().execute(MainActivity.this, searchParams, interactorListener);
     }
 
     // Launches a Pub search for the next page of results, using the given search parameters

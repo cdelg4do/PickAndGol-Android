@@ -106,7 +106,7 @@
     <string name="activity_pub_search_keywords_title">Search by text:</string>
     <string name="activity_pub_search_keywords_text">What are you looking for?</string>
     <string name="activity_pub_search_sort">Sort by:</string>
-    <string name="activity_pub_search_distance">Distance from me:</string>
+    <string name="activity_pub_search_distance">Search radius:</string>
     <string name="pub_search_settings_activity_title">Pub Search Settings</string>
     <string name="pub_search_settings_activity_field_names_name">Pub name</string>
     <string name="pub_search_settings_activity_field_names_owner">Pub owner</string>

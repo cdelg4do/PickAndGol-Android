@@ -376,7 +376,7 @@ public class EventPubsActivity extends AppCompatActivity implements PubListListe
             return;
 
         lastPubSearchTotalResults = 0;
-        lastPubSearchParams = new PubSearchParams(null,null,MAX_DISTANCE_EARTH_KM,0,null,null);
+        lastPubSearchParams = new PubSearchParams(null,null,MAX_DISTANCE_EARTH_KM,0,null,null,false);
         lastPubSearchParams.setEventId( model.getId() );
 
         searchPubsFirstPage(lastPubSearchParams, null);

@@ -107,7 +107,7 @@
     <string name="activity_pub_search_keywords_title">Buscar por texto:</string>
     <string name="activity_pub_search_keywords_text">¿Qué estás buscando?</string>
     <string name="activity_pub_search_sort">Ordenar por:</string>
-    <string name="activity_pub_search_distance">Distancia de mí:</string>
+    <string name="activity_pub_search_distance">Radio de búsqueda:</string>
     <string name="pub_search_settings_activity_title">Configuración de la búsqueda de bares</string>
     <string name="pub_search_settings_activity_field_names_name">Nombre del bar</string>
     <string name="pub_search_settings_activity_field_names_owner">Propietario del bar</string>

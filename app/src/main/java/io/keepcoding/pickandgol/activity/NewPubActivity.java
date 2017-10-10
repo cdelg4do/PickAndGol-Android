@@ -266,7 +266,7 @@ public class NewPubActivity extends AppCompatActivity {
                 locationChecker.checkBeforeAsking(new PermissionChecker.CheckPermissionListener() {
                     @Override
                     public void onPermissionDenied() {
-                        Navigator.fromNewPubActivityToLocationPickerActivity(NewPubActivity.this, null, null);
+                        Navigator.fromAnyActivityToLocationPickerActivity(NewPubActivity.this, null, null);
                     }
 
                     @Override
@@ -275,12 +275,12 @@ public class NewPubActivity extends AppCompatActivity {
                         gm.requestLastLocation(new GeoManager.GeoDirectLocationListener() {
                             @Override
                             public void onLocationError(Throwable error) {
-                                Navigator.fromNewPubActivityToLocationPickerActivity(NewPubActivity.this, null, null);
+                                Navigator.fromAnyActivityToLocationPickerActivity(NewPubActivity.this, null, null);
                             }
 
                             @Override
                             public void onLocationSuccess(double latitude, double longitude) {
-                                Navigator.fromNewPubActivityToLocationPickerActivity(NewPubActivity.this, latitude, longitude);
+                                Navigator.fromAnyActivityToLocationPickerActivity(NewPubActivity.this, latitude, longitude);
                             }
                         });
                     }
