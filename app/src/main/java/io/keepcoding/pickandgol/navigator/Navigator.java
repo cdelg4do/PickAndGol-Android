@@ -1,5 +1,6 @@
 package io.keepcoding.pickandgol.navigator;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -166,26 +167,26 @@ public class Navigator {
     }
 
     /**
-     * Navigates from an instance of NewPubActivity to another of LocationPickerActivity
-     * (the NewPubActivity will wait for result LOCATION_PICKER_ACTIVITY_REQUEST_CODE)
+     * Navigates from an instance of an Activity to another of LocationPickerActivity
+     * (the caller activity will wait for result LOCATION_PICKER_ACTIVITY_REQUEST_CODE)
      *
-     * @param newPubActivity    context for the intent created during the operation
+     * @param activity          context for the intent created during the operation
      * @param initialLatitude   initial latitude to center the picker map
      * @param initialLongitude  initial longitude to center the picker map
      * @return                  a reference to the intent created (useful for testing)
      */
-    public static Intent fromNewPubActivityToLocationPickerActivity(final NewPubActivity newPubActivity,
-                                                                    @Nullable Double initialLatitude,
-                                                                    @Nullable Double initialLongitude) {
+    public static Intent fromAnyActivityToLocationPickerActivity(final Activity activity,
+                                                                 @Nullable Double initialLatitude,
+                                                                 @Nullable Double initialLongitude) {
 
-        Intent i = new Intent(newPubActivity, LocationPickerActivity.class);
+        Intent i = new Intent(activity, LocationPickerActivity.class);
 
         if (initialLatitude != null && initialLongitude != null) {
             i.putExtra(INITIAL_LOCATION_LATITUDE_KEY, initialLatitude);
             i.putExtra(INITIAL_LOCATION_LONGITUDE_KEY, initialLongitude);
         }
 
-        newPubActivity.startActivityForResult(i, LOCATION_PICKER_ACTIVITY_REQUEST_CODE);
+        activity.startActivityForResult(i, LOCATION_PICKER_ACTIVITY_REQUEST_CODE);
         return i;
     }
 
@@ -284,12 +285,10 @@ public class Navigator {
      * @return              a reference to the intent created (useful for testing)
      */
     public static Intent fromMainActivityToPubSearchActivity(final MainActivity mainActivity,
-                                                             @NonNull PubSearchParams currentSearchParams,
-                                                             boolean showDistanceSelector) {
+                                                             @NonNull PubSearchParams currentSearchParams) {
 
         Intent i = new Intent(mainActivity, PubSearchSettingsActivity.class);
         i.putExtra(MainActivity.CURRENT_PUB_SEARCH_PARAMS_KEY, currentSearchParams);
-        i.putExtra(MainActivity.SHOW_DISTANCE_SELECTOR_KEY, showDistanceSelector);
         mainActivity.startActivityForResult(i, PUB_SEARCH_ACTIVITY_REQUEST_CODE);
 
         return i;

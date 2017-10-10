@@ -232,8 +232,6 @@ public class PubListFragment extends Fragment {
     // Adds more pubs to the adapter data source, then refresh the list
     public void addMorePubs(PubAggregate morePubs) {
 
-        pubs.addElements(morePubs);
-
         adapter.addMoreItems(morePubs);
         adapter.notifyDataSetChanged();
     }

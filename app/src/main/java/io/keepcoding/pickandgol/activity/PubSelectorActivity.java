@@ -158,7 +158,7 @@ public class PubSelectorActivity extends AppCompatActivity implements PubListLis
 
     private PubSearchParams buildSearchParams(String queryString) {
 
-        return new PubSearchParams(null, queryString, null, 0, null, null);
+        return new PubSearchParams(null, queryString, null, 0, null, null, false);
     }
 
     // Creates the activity fragment and loads it with the given data

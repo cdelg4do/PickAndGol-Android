@@ -1,8 +1,10 @@
 package io.keepcoding.pickandgol.manager.geo;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.location.Address;
 import android.location.Location;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -18,6 +20,7 @@ import com.google.android.gms.location.LocationServices;
 import java.util.List;
 
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
+import static android.content.Context.LOCATION_SERVICE;
 import static android.support.v4.content.PermissionChecker.PERMISSION_GRANTED;
 
 
@@ -190,5 +193,50 @@ public class GeoManager {
     public static boolean isLocationAccessGranted(Context context) {
 
         return ContextCompat.checkSelfPermission(context, ACCESS_FINE_LOCATION) == PERMISSION_GRANTED;
+    }
+
+
+    /**
+     * Determines if the system has a Gps device present (static method).
+     *
+     * @param context   a context for the operation.
+     * @return          a boolean indicating if there is a Gps device present in the system.
+     */
+    public static boolean isGpsDevicePresent(Context context) {
+
+        return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_LOCATION_GPS);
+    }
+
+
+    /**
+     * Determines if the system Gps is enabled (static method).
+     *
+     * NOTE: this can never be true if the ACCESS_FINE_LOCATION permission is not granted
+     *       or the system has no Gps devices present.
+     *
+     * @param context   a context for the operation.
+     * @return          a boolean indicating if the system Gps is enabled.
+     */
+    public static boolean isGpsDeviceEnabled(Context context) {
+
+        LocationManager locationMgr = (LocationManager)context.getSystemService(LOCATION_SERVICE);
+        return locationMgr.isProviderEnabled(LocationManager.GPS_PROVIDER);
+    }
+
+
+    /**
+     * Determines if the system is currently able to provide the Gps location.
+     *
+     * Will return true only if the access fine location permission is granted, the system
+     * has a Gps device and it is currently enabled.
+     *
+     * @param context   a context for the operation.
+     * @return          a boolean indicating if the system is able to provide the Gps location.
+     */
+    public static boolean canGetLocationFromGps(Context context) {
+
+        return isLocationAccessGranted(context) &&
+               isGpsDevicePresent(context) &&
+               isGpsDeviceEnabled(context);
     }
 }

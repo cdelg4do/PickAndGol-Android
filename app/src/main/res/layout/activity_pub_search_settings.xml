@@ -10,37 +10,38 @@
     <!-- Toolbar for the actvity -->
     <include layout="@layout/toolbar_main"/>
 
-    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                    android:orientation="vertical"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
+    <RelativeLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
         <ScrollView
             android:id="@+id/scrollView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:layout_above="@+id/activity_pub_search_buttons_layout"
             android:isScrollContainer="true">
 
             <LinearLayout
-                android:id="@+id/contentOfScrollView"
+                android:id="@+id/activity_pub_search_scrollView_content"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:paddingBottom="@dimen/activity_vertical_margin"
                 android:paddingLeft="@dimen/activity_horizontal_margin"
                 android:paddingRight="@dimen/activity_horizontal_margin"
-                android:paddingTop="@dimen/activity_vertical_margin">
+                android:paddingTop="@dimen/activity_vertical_margin"
+                android:visibility="gone"
+                tools:visibility="visible">
 
                 <RelativeLayout
                     android:id="@+id/activity_pub_search_keywords_layout"
-                    xmlns:android="http://schemas.android.com/apk/res/android"
-                    xmlns:tools="http://schemas.android.com/tools"
-                    android:orientation="vertical"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
-                    android:padding="10dp"
-                    android:background="#FFCACACA">
+                    android:background="#FFCACACA"
+                    android:orientation="vertical"
+                    android:padding="10dp">
 
                     <TextView
                         android:id="@+id/activity_pub_search_keywords_title"
@@ -48,63 +49,84 @@
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="10dp"
                         android:text="@string/activity_pub_search_keywords_title"
-                        android:textStyle="normal|bold"
-                        android:textSize="16sp"/>
+                        android:textSize="16sp"
+                        android:textStyle="normal|bold"/>
 
                     <EditText
                         android:id="@+id/activity_pub_search_keywords_text"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:padding="10dp"
                         android:layout_below="@+id/activity_pub_search_keywords_title"
+                        android:background="@android:color/white"
                         android:hint="@string/activity_pub_search_keywords_text"
-                        android:background="@android:color/white"/>
+                        android:padding="10dp"/>
 
                 </RelativeLayout>
 
-                <!--
+
                 <RelativeLayout
-                    android:id="@+id/activity_pub_search_origin_layout"
-                    xmlns:android="http://schemas.android.com/apk/res/android"
-                    xmlns:tools="http://schemas.android.com/tools"
-                    android:orientation="vertical"
+                    android:id="@+id/activity_pub_search_location_layout"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
-                    android:padding="10dp"
-                    android:background="#FFCACACA">
+                    android:background="#FFCACACA"
+                    android:orientation="vertical"
+                    android:padding="10dp">
 
                     <TextView
-                        android:id="@+id/activity_pub_search_origin_title"
+                        android:id="@+id/activity_pub_search_location_label"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="10dp"
-                        android:text="Where?"
-                        android:textStyle="normal|bold"
-                        android:textSize="16sp"/>
+                        android:text="From where:"
+                        android:textSize="16sp"
+                        android:textStyle="normal|bold"/>
 
-                    <EditText
-                        android:id="@+id/activity_pub_search_keywords_text"
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:padding="10dp"
-                        android:layout_below="@+id/activity_pub_search_keywords_title"
-                        android:hint="@string/activity_pub_search_keywords_text"
-                        android:background="@android:color/white"/>
+                        android:layout_below="@+id/activity_pub_search_location_label"
+                        android:orientation="vertical">
+
+                        <CheckBox
+                            android:id="@+id/activity_pub_search_check_myLocation"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checked="true"
+                            android:onClick="onCheckboxClicked"
+                            android:text="My current location"/>
+
+                        <CheckBox
+                            android:id="@+id/activity_pub_search_check_mapLocation"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:checked="false"
+                            android:onClick="onCheckboxClicked"
+                            android:text="Map point: click below to change"/>
+
+                        <EditText
+                            android:id="@+id/activity_pub_search_location_text"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:background="@android:color/white"
+                            android:clickable="true"
+                            android:focusable="false"
+                            android:hint="Click to set"
+                            android:padding="10dp"/>
+
+                    </LinearLayout>
 
                 </RelativeLayout>
-                -->
+
 
                 <RelativeLayout
                     android:id="@+id/activity_pub_search_distance_layout"
-                    xmlns:android="http://schemas.android.com/apk/res/android"
-                    xmlns:tools="http://schemas.android.com/tools"
-                    android:orientation="vertical"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
-                    android:padding="10dp"
-                    android:background="#FFCACACA">
+                    android:background="#FFCACACA"
+                    android:orientation="vertical"
+                    android:padding="10dp">
 
                     <TextView
                         android:id="@+id/activity_pub_search_distance_title"
@@ -112,16 +134,16 @@
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="10dp"
                         android:text="@string/activity_pub_search_distance"
-                        android:textStyle="normal|bold"
-                        android:textSize="16sp"/>
+                        android:textSize="16sp"
+                        android:textStyle="normal|bold"/>
 
                     <TextView
                         android:id="@+id/activity_pub_search_distance_label"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
+                        android:layout_below="@+id/activity_pub_search_distance_title"
                         android:gravity="end"
                         android:padding="10dp"
-                        android:layout_below="@+id/activity_pub_search_distance_title"
                         tools:text="Very close (1 km)"/>
 
                     <SeekBar
@@ -129,19 +151,19 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_below="@+id/activity_pub_search_distance_label"
-                        android:padding="10dp"
-                        android:max="3"/>
+                        android:max="3"
+                        android:padding="10dp"/>
 
                 </RelativeLayout>
 
                 <RelativeLayout
                     android:id="@+id/activity_pub_search_sort_layout"
-                    android:orientation="vertical"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="10dp"
-                    android:padding="10dp"
-                    android:background="#FFCACACA">
+                    android:background="#FFCACACA"
+                    android:orientation="vertical"
+                    android:padding="10dp">
 
                     <TextView
                         android:id="@+id/activity_pub_search_sort_title"
@@ -149,8 +171,8 @@
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="10dp"
                         android:text="@string/activity_pub_search_sort"
-                        android:textStyle="normal|bold"
-                        android:textSize="16sp"/>
+                        android:textSize="16sp"
+                        android:textStyle="normal|bold"/>
 
                     <Spinner
                         android:id="@+id/activity_pub_search_sort_spinner"
@@ -177,9 +199,9 @@
 
             <Button
                 android:id="@+id/activity_pub_search_button_cancel"
-                android:text="Cancel"
-                android:layout_width="100dp"
-                android:layout_height="50dp"/>
+                android:layout_width="150dp"
+                android:layout_height="50dp"
+                android:text="Cancel"/>
 
             <FrameLayout
                 android:layout_height="match_parent"
@@ -189,9 +211,9 @@
 
             <Button
                 android:id="@+id/activity_pub_search_button_apply"
-                android:text="Apply"
-                android:layout_width="100dp"
-                android:layout_height="50dp"/>
+                android:layout_width="150dp"
+                android:layout_height="50dp"
+                android:text="Apply"/>
 
         </LinearLayout>
 

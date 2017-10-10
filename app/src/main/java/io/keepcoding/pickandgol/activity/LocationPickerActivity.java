@@ -49,8 +49,8 @@ public class LocationPickerActivity extends AppCompatActivity {
     private static final String SAVED_STATE_MAP_ZOOM_KEY = "SAVED_STATE_MAP_ZOOM_KEY";
 
     // Map settings in case no initial location is provided in the intent
-    private static final double STANDARD_MAP_LATITUDE = 40.41665;
-    private static final double STANDARD_MAP_LONGITUDE = -3.70381;
+    public static final double STANDARD_MAP_LATITUDE = 40.41665;
+    public static final double STANDARD_MAP_LONGITUDE = -3.70381;
     private static final int STANDARD_MAP_ZOOM = 5;
 
     // Map settings in case an initial location is provided in the intent
