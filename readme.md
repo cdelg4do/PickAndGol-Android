@@ -30,6 +30,12 @@ Future features include: integration with some major social network so that you 
 &nbsp;
 <kbd> <img alt="screenshot 10" src="https://user-images.githubusercontent.com/18370149/31582205-bd964c60-b17d-11e7-9954-9a413a8fe10a.jpg" width="256"> </kbd> &nbsp; <kbd> <img alt="screenshot 11" src="https://user-images.githubusercontent.com/18370149/31582206-bdb657e4-b17d-11e7-91f0-6213d4b09147.jpg" width="256"> </kbd> &nbsp; <kbd> <img alt="screenshot 12" src="https://user-images.githubusercontent.com/18370149/31582207-bdcecfe0-b17d-11e7-8029-0aa592e234d9.jpg" width="256"> </kbd>
 
+&nbsp;
+<kbd> <img alt="screenshot 13" src="https://user-images.githubusercontent.com/18370149/31586809-df35d2ec-b1d6-11e7-9b80-0d5cf300ae98.jpg" width="768"> </kbd>
+
+&nbsp;
+<kbd> <img alt="screenshot 14" src="https://user-images.githubusercontent.com/18370149/31586810-df50b94a-b1d6-11e7-87b6-7b5cd334d3cf.jpg" width="768"> </kbd>
+
 ### **Architectural considerations**
 The app has been designed following the **SOLID** principles and implementing a **Clean Architecture**, organizing it in several layers where the code dependencies point inwards only, and the inner layers do not know anything about the outer layers. This way a separation of concerns (presentation, businnes rules, data persistence, etc) is achieved while elements in each level can be tested relying on the tests of the previous level.
 
