@@ -43,7 +43,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
-                    android:text="Search by text:"
+                    android:text="@string/activity_event_search_text"
                     android:textStyle="normal|bold"
                     android:textSize="16sp"/>
 
@@ -53,7 +53,7 @@
                     android:layout_height="wrap_content"
                     android:padding="10dp"
                     android:layout_below="@+id/activity_event_search_keywords_title"
-                    android:hint="What are you looking for?"
+                    android:hint="@string/activity_event_search_hint"
                     android:background="@android:color/white"/>
 
             </RelativeLayout>
@@ -74,7 +74,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
-                    android:text="Event category:"
+                    android:text="@string/activity_event_search_category"
                     android:textStyle="normal|bold"
                     android:textSize="16sp"/>
 
@@ -103,7 +103,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="10dp"
-                    android:text="Distance from me:"
+                    android:text="@string/activity_event_search_distance"
                     android:textStyle="normal|bold"
                     android:textSize="16sp"/>
 

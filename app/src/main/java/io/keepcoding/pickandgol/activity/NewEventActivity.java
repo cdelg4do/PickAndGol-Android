@@ -218,9 +218,10 @@ public class NewEventActivity extends AppCompatActivity {
     // Populates the spinner with the categories from the server
     private void setupCategorySpinner() {
 
-        new GetCategoriesInteractor().execute(this, new GetCategoriesInteractorListener() {
+        new GetCategoriesInteractor().execute(new GetCategoriesInteractorListener() {
+
             @Override
-            public void onGetCategoriesFail(Exception e) {
+            public void onGetCategoriesFail(Throwable e) {
                 Log.e(LOG_TAG, e.getMessage());
             }
 
@@ -241,7 +242,7 @@ public class NewEventActivity extends AppCompatActivity {
                         NewEventActivity.this,
                         categoryIDs,
                         categoryNames,
-                        "< Choose one >");
+                        getString(R.string.new_event_activity_choose_one));
 
                 spnCategory.setAdapter(adapter);
             }
@@ -349,8 +350,8 @@ public class NewEventActivity extends AppCompatActivity {
         picturesChecker.checkBeforeAsking(new PermissionChecker.CheckPermissionListener() {
             @Override
             public void onPermissionDenied() {
-                String title = "Pictures access denied";
-                String msg = "Pick And Gol might not be able to take pictures from your camera or gallery.";
+                String title = getString(R.string.permission_denied_title);
+                String msg = getString(R.string.new_event_activity_permission_denied_message);
                 Utils.simpleDialog(NewEventActivity.this, title, msg, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
@@ -376,7 +377,8 @@ public class NewEventActivity extends AppCompatActivity {
 
             @Override
             public void onProcessError(Exception error) {
-                Utils.simpleDialog(NewEventActivity.this, "Unable to process image", error.toString());
+                Utils.simpleDialog(NewEventActivity.this, getString(R.string.unable_process_image),
+                        error.toString());
 
                 imageFileToUpload = null;
                 btnRemoveImage.setVisibility(View.INVISIBLE);
@@ -399,7 +401,8 @@ public class NewEventActivity extends AppCompatActivity {
 
         if ( !sm.hasSessionStored() ) {
 
-            Utils.simpleDialog(this, "Event Creation Error", "You are not logged in.");
+            Utils.simpleDialog(this, getString(R.string.new_event_activity_not_logged_in_title),
+                    getString(R.string.new_event_activity_not_logged_in_message));
             return null;
         }
 
@@ -412,17 +415,20 @@ public class NewEventActivity extends AppCompatActivity {
         int selectedCategoryIndex = spnCategory.getSelectedItemPosition();
 
         if (eventName.equals("")) {
-            Utils.simpleDialog(this, "Invalid data", "You must specify a name for the event.");
+            Utils.simpleDialog(this, getString(R.string.invalid_data),
+                    getString(R.string.new_event_activity_must_name));
             txtName.requestFocus();
         }
 
         else if (selectedCategoryIndex == 0) {
-            Utils.simpleDialog(this, "Invalid data", "You must select a category for the event.");
+            Utils.simpleDialog(this, getString(R.string.invalid_data),
+                    getString(R.string.new_event_activity_must_category));
             spnCategory.requestFocus();
         }
 
         else if (yyyy == null || mm == null || dd == null || hh == null || mins == null) {
-            Utils.simpleDialog(this, "Invalid data", "You must specify date & hour for the event.");
+            Utils.simpleDialog(this, getString(R.string.invalid_data),
+                    getString(R.string.new_event_activity_must_date));
             txtDate.requestFocus();
         }
 
@@ -464,8 +470,8 @@ public class NewEventActivity extends AppCompatActivity {
         doUploadImage(sourcePath, remoteFileName, new ErrorSuccessListener() {
             @Override
             public void onError(@Nullable Object result) {
-                Utils.simpleDialog(NewEventActivity.this, "Image Upload error",
-                        "The selected image could not be uploaded. Please try again.");
+                Utils.simpleDialog(NewEventActivity.this, getString(R.string.new_event_activity_upload_error_title),
+                        getString(R.string.new_event_activity_upload_error_message));
             }
 
             @Override
@@ -480,8 +486,8 @@ public class NewEventActivity extends AppCompatActivity {
 
         if( ! new File(filePath).isFile() ) {
             Log.e(LOG_TAG, "An error occurred: '"+ filePath +"' does not exist or is not a file");
-            Utils.simpleDialog(NewEventActivity.this, "Image Upload error",
-                    "The selected image could not be uploaded. Please try again.");
+            Utils.simpleDialog(NewEventActivity.this, getString(R.string.new_event_activity_upload_error_title),
+                    getString(R.string.new_event_activity_upload_error_message));
             return;
         }
 
@@ -492,7 +498,8 @@ public class NewEventActivity extends AppCompatActivity {
 
         Log.d(LOG_TAG, "Uploading file '"+ filePath +"' ("+ fileSize +")...");
         final ProgressDialog pDialog =
-                Utils.newProgressBarDialog(this, kbTotal, "Uploading image ("+ fileSize +")...");
+                Utils.newProgressBarDialog(this, kbTotal, getString(R.string.new_event_activity_uploading_image)
+                        + fileSize + getString(R.string.new_event_activity_three_dots));
         pDialog.show();
 
 
@@ -533,7 +540,7 @@ public class NewEventActivity extends AppCompatActivity {
         String photoUrl = im.getRemoteImageUrl( event.getPhotoUrl() );
         String token = sm.getSessionToken();
 
-        final ProgressDialog pDialog = Utils.newProgressDialog(this, "Registering event...");
+        final ProgressDialog pDialog = Utils.newProgressDialog(this, getString(R.string.new_event_activity_registering_event));
         pDialog.show();
 
         new CreateEventInteractor().execute(this, name, date, pubId, categoryId,
@@ -544,7 +551,8 @@ public class NewEventActivity extends AppCompatActivity {
                     public void onCreateEventFail(Exception e) {
                         pDialog.dismiss();
 
-                        Utils.simpleDialog(NewEventActivity.this, "Error registering new event", e.getMessage());
+                        Utils.simpleDialog(NewEventActivity.this, getString(R.string.new_event_activity_error_new_event_title),
+                                e.getMessage());
                     }
 
                     @Override
@@ -552,8 +560,9 @@ public class NewEventActivity extends AppCompatActivity {
                         pDialog.dismiss();
 
                         Utils.simpleDialog(NewEventActivity.this,
-                                "New Event",
-                                "The event '"+ createdEvent.getName() +"' has been created.",
+                                getString(R.string.new_event_activity_new_event),
+                                getString(R.string.new_event_activity_the_event) + createdEvent.getName()
+                                        + getString(R.string.new_event_activity_event_created),
                                 new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialogInterface, int i) {

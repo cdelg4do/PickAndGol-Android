@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:inputType="textEmailAddress"
         android:maxLines="1"
-        android:hint="Email">
+        android:hint="@string/dialog_login_email_hint">
 
         <requestFocus />
 
@@ -24,6 +24,6 @@
         android:layout_height="wrap_content"
         android:inputType="textPassword"
         android:maxLines="1"
-        android:hint="Password"/>
+        android:hint="@string/dialog_login_password_hint"/>
 
 </LinearLayout>

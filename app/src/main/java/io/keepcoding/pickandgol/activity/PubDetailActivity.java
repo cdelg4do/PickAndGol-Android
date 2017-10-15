@@ -20,6 +20,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.List;
+import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -127,7 +128,7 @@ public class PubDetailActivity extends AppCompatActivity {
         // If we are coming from the new event activity
         if (requestCode == NEW_EVENT_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK) {
 
-            Utils.shortSnack(PubDetailActivity.this, "The new event has been created.");
+            Utils.shortSnack(PubDetailActivity.this, getString(R.string.pub_detail_activity_event_created));
         }
     }
 
@@ -138,8 +139,8 @@ public class PubDetailActivity extends AppCompatActivity {
     private void attemptToCreateEvent() {
 
         if ( !sm.hasSessionStored() ) {
-            Utils.simpleDialog(this, "You are not logged in",
-                               "Only registered users can create new events.");
+            Utils.simpleDialog(this, getString(R.string.pub_detail_activity_create_event_title),
+                               getString(R.string.pub_detail_activity_create_event_message));
             return;
         }
 
@@ -149,7 +150,7 @@ public class PubDetailActivity extends AppCompatActivity {
     // Set the layout toolbar as the activity action bar and show the home button
     private void setupActionBar() {
 
-        setTitle("Pub Detail");
+        setTitle(getString(R.string.pub_detail_activity_title));
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -189,7 +190,7 @@ public class PubDetailActivity extends AppCompatActivity {
         // Show the pub name and url (if any)
         txtName.setText( model.getName() );
 
-        String url = (model.getUrl() != null) ? model.getUrl() : "< No website defined >";
+        String url = (model.getUrl() != null) ? model.getUrl() : getString(R.string.pub_detail_activity_no_web_site);
         txtUrl.setText(url);
 
         // Data that requires additional async operations to show on screen
@@ -253,9 +254,9 @@ public class PubDetailActivity extends AppCompatActivity {
     // Shows the pub address
     private void showPubAddress() {
 
-        txtAddress.setText("< Resolving address... >");
+        txtAddress.setText(R.string.pub_detail_activity_resolving_address);
 
-        final String undefinedAddress = "< Undefined address >";
+        final String undefinedAddress = getString(R.string.pub_detail_activity_undefined_address);
 
         if ( !model.hasLocation() ) {
             txtAddress.setText(undefinedAddress);
@@ -282,7 +283,7 @@ public class PubDetailActivity extends AppCompatActivity {
     // and (if there is any future event) show the events button as well
     private void showEventCounter() {
 
-        txtEventCounter.setText("< Fetching events... >");
+        txtEventCounter.setText(R.string.pub_detail_activity_fetching_events);
         btnEvents.setVisibility(INVISIBLE);
 
         final String pubId = model.getId();
@@ -293,18 +294,19 @@ public class PubDetailActivity extends AppCompatActivity {
             public void onSearchEventsFail(Exception e) {
                 Log.e(LOG_TAG, "Failed to load events for pub '" + pubId + "': " + e.toString() );
 
-                txtEventCounter.setText("< Unable to retrieve events for this pub >");
+                txtEventCounter.setText(R.string.pub_detail_activity_search_events_fail);
             }
 
             @Override
             public void onSearchEventsSuccess(EventAggregate events) {
 
                 if (events.getTotalResults() > 0) {
-                    txtEventCounter.setText(events.getTotalResults() +" event(s).");
+                    txtEventCounter.setText(String.format(Locale.getDefault(), "%d %s",
+                            events.getTotalResults(), getString(R.string.pub_detail_activity_total_results)));
                     btnEvents.setVisibility(VISIBLE);
                 }
                 else
-                    txtEventCounter.setText("This pub has no events yet.");
+                    txtEventCounter.setText(R.string.pub_detail_activity_no_events);
             }
         });
     }
@@ -326,10 +328,10 @@ public class PubDetailActivity extends AppCompatActivity {
                 Log.e(LOG_TAG, "Failed to change favorite status to '"+ !isFavorite +"' for pub '" + pubId + "': " + e.getMessage() );
 
                 String errorMsg;
-                if (isFavorite) errorMsg = "Unable to remove the pub from your favorites.";
-                else            errorMsg = "Unable to add the pub to your favorites.";
+                if (isFavorite) errorMsg = getString(R.string.pub_detail_activity_toggle_favorite_fail_message_if_favorite);
+                else            errorMsg = getString(R.string.pub_detail_activity_toggle_favorite_fail_message_if_not_favorite);
 
-                Utils.simpleDialog(PubDetailActivity.this, "Toggle Favorite error", errorMsg);
+                Utils.simpleDialog(PubDetailActivity.this, getString(R.string.pub_detail_activity_toggle_favorite_fail_title), errorMsg);
             }
 
             @Override
@@ -341,8 +343,8 @@ public class PubDetailActivity extends AppCompatActivity {
                 else            favoriteStatusIndicator.setImageResource(R.drawable.empty_star);
 
                 String msg;
-                if (isFavorite) msg = "Pub added to your favorites";
-                else            msg = "Pub removed from your favorites";
+                if (isFavorite) msg = getString(R.string.pub_detail_activity_pub_added);
+                else            msg = getString(R.string.pub_detail_activity_pub_removed);
 
                 Utils.shortSnack(PubDetailActivity.this, msg);
             }

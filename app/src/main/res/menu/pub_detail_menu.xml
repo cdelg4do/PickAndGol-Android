@@ -6,7 +6,7 @@
 
     <item
         android:id="@+id/pub_detail_menu_new_event"
-        android:title="Create event"
+        android:title="@string/pub_detail_menu_new_event_title"
         app:showAsAction="never"/>
 
 </menu>

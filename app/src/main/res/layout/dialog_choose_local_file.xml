@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:inputType="text"
         android:maxLines="1"
-        android:hint="Folder Path (ended without '/')">
+        android:hint="@string/dialog_choose_local_file_folder_hint">
 
         <requestFocus />
 
@@ -24,6 +24,6 @@
         android:layout_height="wrap_content"
         android:inputType="text"
         android:maxLines="1"
-        android:hint="File Name"/>
+        android:hint="@string/dialog_choose_local_file_file_hint"/>
 
 </LinearLayout>

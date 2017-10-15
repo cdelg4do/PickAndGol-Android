@@ -38,9 +38,9 @@ public class LoginDialog {
         this.dialog = new AlertDialog.Builder(context)
                 .setView(contentView)
                 .setCancelable(false)
-                .setTitle("Login to Pick And Gol")
-                .setPositiveButton("Login", null)   // Will be set after dialog creation
-                .setNegativeButton("Cancel", null)
+                .setTitle(R.string.login_dialog_login_title)
+                .setPositiveButton(R.string.login_dialog_login_button, null)   // Will be set after dialog creation
+                .setNegativeButton(R.string.login_dialog_cancel_button, null)
                 .create();
 
         // Do this to prevent the dialog from closing immediately after clicking login/cancel button
@@ -58,12 +58,14 @@ public class LoginDialog {
                         String password = txtPwd.getText().toString();
 
                         if ( !Utils.isValidEmail(email) ) {
-                            Utils.simpleDialog(context, "Invalid email", "Please insert a valid email address");
+                            Utils.simpleDialog(context, context.getString(R.string.login_dialog_invalid_email_title),
+                                    context.getString(R.string.login_dialog_invalid_email_message));
                             txtEmail.requestFocus();
                         }
 
                         else if ( !Utils.isValidPassword(password) ) {
-                            Utils.simpleDialog(context, "Invalid password", "Password length must be between 6-30 characters");
+                            Utils.simpleDialog(context, context.getString(R.string.login_dialog_invalid_password_title),
+                                    context.getString(R.string.login_dialog_invalid_password_message));
                             txtPwd.requestFocus();
                         }
 

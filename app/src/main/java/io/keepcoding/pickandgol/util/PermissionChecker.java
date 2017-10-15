@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.keepcoding.pickandgol.R;
+
 import static android.Manifest.permission.ACCESS_FINE_LOCATION;
 import static android.Manifest.permission.CAMERA;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
@@ -34,6 +36,18 @@ import static io.keepcoding.pickandgol.util.PermissionChecker.PermissionTag.RW_S
  *
  * 3- In the onRequestPermissionsResult() of the activity, check the appropriate request code and
  *      call checkAfterAsking(). The previous CheckPermissionListener code will be used.
+ *
+ *      If you need to use a different request code than the default, just add it as the first
+ *      parameter of checkBeforeAsking() in step 2.
+ *
+ * 4- If you just want to check if the permissions are already granted (without asking),
+ *      ignore steps 2 & 3 and call arePermissionsGranted() instead.
+ *
+ *      Alternatively, you can check if some specific permission set is already granted without
+ *      instantiating a PermissionChecker. To do so, ignore all the previous steps and
+ *      just call the isThisPermissionSetGranted() static method.
+ *
+ *      You will need to provide the permission set you want to check and the caller activity.
  */
 public class PermissionChecker {
 
@@ -82,21 +96,18 @@ public class PermissionChecker {
         switch (tag) {
 
             case RW_STORAGE_SET:
-                explanationTitle = "Storage access required";
-                explanationMsg = "Pick And Gol will request access to your device storage " +
-                        "in order to store temporary files.";
+                explanationTitle = activity.getString(R.string.permission_checker_storage_title);
+                explanationMsg = activity.getString(R.string.permission_checker_storage_message);
                 break;
 
             case PICTURES_SET:
-                explanationTitle = "Pictures permissions required";
-                explanationMsg = "Pick And Gol will request access to your device camera " +
-                        "and/or gallery in order to take pictures.";
+                explanationTitle = activity.getString(R.string.permission_checker_pictures_title);
+                explanationMsg = activity.getString(R.string.permission_checker_pictures_message);
                 break;
 
             case LOCATION_SET:
-                explanationTitle = "Access to device's location";
-                explanationMsg = "In order to perform searches based on your location, " +
-                        "Pick And Gol will ask you for access to the device location.";
+                explanationTitle = activity.getString(R.string.permission_checker_location_title);
+                explanationMsg = activity.getString(R.string.permission_checker_location_message);
                 break;
 
             default:
@@ -124,7 +135,7 @@ public class PermissionChecker {
                                    shouldShowExplanatoryMessage(permissionsToCheck)
         );
 
-        if ( allPermissionsAreGranted(permissionsToCheck) )
+        if ( allPermissionsAreGranted(permissionsToCheck, activity) )
             listener.onPermissionGranted();
 
         else
@@ -146,7 +157,8 @@ public class PermissionChecker {
      * This method allows to specify a different request code than the default one.
      * This is useful if you need different callbacks in an Activity for the same permission request.
      *
-     * @param listener a listener for the operation.
+     * @param requestCode   the request code value that will be used in onRequestPermissionsResult()
+     * @param listener      a listener for the operation.
      */
     public void checkBeforeAsking(final int requestCode, @NonNull CheckPermissionListener listener) {
 
@@ -161,7 +173,7 @@ public class PermissionChecker {
                                    shouldShowExplanatoryMessage(permissionsToCheck)
         );
 
-        if ( allPermissionsAreGranted(permissionsToCheck) )
+        if ( allPermissionsAreGranted(permissionsToCheck, activity) )
             listener.onPermissionGranted();
 
         else
@@ -188,8 +200,30 @@ public class PermissionChecker {
 
         String[] permissionsToCheck = permissionMap.get(tag).getPermissionArray();
 
-        if ( allPermissionsAreGranted(permissionsToCheck) )     listener.onPermissionGranted();
+        if ( allPermissionsAreGranted(permissionsToCheck, activity) )     listener.onPermissionGranted();
         else                                                    listener.onPermissionDenied();
+    }
+
+    /**
+     * Tells whether this checker's permission set has been already granted or not.
+     */
+    public boolean arePermissionsGranted() {
+
+        final String[] permissionsToCheck = permissionMap.get(tag).getPermissionArray();
+        return allPermissionsAreGranted(permissionsToCheck, activity);
+    }
+
+    /**
+     * Tells whether the given permission set has been already granted or not.
+     * (Static method).
+     *
+     * @param tag       the tag that identifies the set of permissions to check.
+     * @param activity  the activity in where the operation takes place.
+     */
+    public static boolean arePermissionsGranted(@NonNull PermissionTag tag, Activity activity) {
+
+        final String[] permissionsToCheck = permissionMap.get(tag).getPermissionArray();
+        return allPermissionsAreGranted(permissionsToCheck, activity);
     }
 
 
@@ -238,7 +272,7 @@ public class PermissionChecker {
     }
 
     // Determines if all the given permissions have been granted
-    private boolean allPermissionsAreGranted(String[] permissionsToCheck) {
+    private static boolean allPermissionsAreGranted(String[] permissionsToCheck, Activity activity) {
 
         boolean allGranted = true;
 

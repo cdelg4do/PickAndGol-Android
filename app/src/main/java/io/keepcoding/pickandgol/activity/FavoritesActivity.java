@@ -53,8 +53,8 @@ public class FavoritesActivity extends AppCompatActivity implements PubListListe
         if (!sm.hasSessionStored()) {
 
             Utils.simpleDialog(this,
-                               "You are not logged in",
-                               "First you must log in to the system.",
+                               getString(R.string.favorites_activity_session_error_title),
+                               getString(R.string.favorites_activity_session_error_message),
                                new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
@@ -88,7 +88,7 @@ public class FavoritesActivity extends AppCompatActivity implements PubListListe
     // Set the layout toolbar as the activity action bar and show the home button
     private void setupActionBar() {
 
-        setTitle("My Favorite Pubs");
+        setTitle(getString(R.string.activity_favorites_title));
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -120,7 +120,7 @@ public class FavoritesActivity extends AppCompatActivity implements PubListListe
             return;
 
         // If we didn't come from a swipe gesture, show a progress dialog
-        final ProgressDialog pDialog = Utils.newProgressDialog(this, "Searching favorites...");
+        final ProgressDialog pDialog = Utils.newProgressDialog(this, getString(R.string.favorites_activity_progress_searching));
         if ( swipeCaller == null )
             pDialog.show();
 
@@ -140,7 +140,7 @@ public class FavoritesActivity extends AppCompatActivity implements PubListListe
                         else                        pDialog.dismiss();
 
                         Log.e(LOG_TAG, "Failed to retrieve favorites for user '" + userId + "': " + e.getMessage() );
-                        Utils.simpleDialog(FavoritesActivity.this, "Favorite listing error", e.getMessage());
+                        Utils.simpleDialog(FavoritesActivity.this, getString(R.string.favorites_activity_favorite_error_title), e.getMessage());
                     }
 
                     @Override
@@ -149,7 +149,10 @@ public class FavoritesActivity extends AppCompatActivity implements PubListListe
                         if (swipeCaller != null)    swipeCaller.setRefreshing(false);
                         else                        pDialog.dismiss();
 
-                        Utils.shortSnack(FavoritesActivity.this, "Showing "+ favorites.getTotalResults() +" pub(s)");
+                        Utils.shortSnack(FavoritesActivity.this,
+                                getString(R.string.favorites_activity_favorite_success_message1)
+                                        + " " + favorites.getTotalResults()
+                                        + " " + getString(R.string.favorites_activity_favorite_success_message2));
                         initActivityFragment(favorites, 0);
                     }
                 });

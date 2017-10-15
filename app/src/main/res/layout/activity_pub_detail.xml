@@ -102,7 +102,7 @@
                         android:id="@+id/activity_pub_detail_address_label"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Address:"
+                        android:text="@string/activity_pub_detail_address"
                         android:textSize="17sp"
                         android:textStyle="normal|bold"/>
 
@@ -128,7 +128,7 @@
                         android:id="@+id/activity_pub_detail_url_label"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Website:"
+                        android:text="@string/activity_pub_detail_website"
                         android:textSize="17sp"
                         android:textStyle="normal|bold"/>
 
@@ -155,7 +155,7 @@
                         android:id="@+id/activity_pub_detail_events_label"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Future events in this pub:"
+                        android:text="@string/activity_pub_detail_events"
                         android:textSize="17sp"
                         android:textStyle="normal|bold"/>
 
@@ -171,7 +171,7 @@
                         android:id="@+id/activity_pub_detail_events_button"
                         android:layout_width="match_parent"
                         android:layout_height="60dp"
-                        android:text="Show future events in this pub"/>
+                        android:text="@string/activity_pub_detail_events_button_text"/>
 
                 </LinearLayout>
 

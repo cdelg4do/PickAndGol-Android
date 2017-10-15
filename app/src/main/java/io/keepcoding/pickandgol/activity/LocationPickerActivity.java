@@ -49,8 +49,8 @@ public class LocationPickerActivity extends AppCompatActivity {
     private static final String SAVED_STATE_MAP_ZOOM_KEY = "SAVED_STATE_MAP_ZOOM_KEY";
 
     // Map settings in case no initial location is provided in the intent
-    private static final double STANDARD_MAP_LATITUDE = 40.41665;
-    private static final double STANDARD_MAP_LONGITUDE = -3.70381;
+    public static final double STANDARD_MAP_LATITUDE = 40.41665;
+    public static final double STANDARD_MAP_LONGITUDE = -3.70381;
     private static final int STANDARD_MAP_ZOOM = 5;
 
     // Map settings in case an initial location is provided in the intent
@@ -155,7 +155,7 @@ public class LocationPickerActivity extends AppCompatActivity {
     // Set the layout toolbar as the activity action bar and show the home button
     private void setupActionBar() {
 
-        setTitle("Select a location on the map");
+        setTitle(getString(R.string.location_picker_activity_location_on_the_map));
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -190,7 +190,7 @@ public class LocationPickerActivity extends AppCompatActivity {
             initialZoom = STANDARD_MAP_ZOOM;
 
             if (savedInstanceState == null)
-                Utils.shortToast(this, "Unable to determine your location");
+                Utils.shortToast(this, getString(R.string.location_picker_activity_unable_determine_location));
         }
 
         // Set the map type, user cannot rotate it, and show the zoom buttons and the my-location button

@@ -8,24 +8,24 @@ import io.keepcoding.pickandgol.manager.db.DBManager;
 import io.keepcoding.pickandgol.manager.db.DBManagerBuilder;
 import io.keepcoding.pickandgol.manager.db.DBManagerBuilder.DatabaseType;
 import io.keepcoding.pickandgol.manager.db.DBManagerListener;
-import io.keepcoding.pickandgol.model.CategoryAggregate;
+import io.keepcoding.pickandgol.model.Category;
 
 
 /**
  * This class is an interactor in charge of:
  *
- * - First (in background): retrieve the existing categories from the local database and builds
+ * - First (in background): retrieve the category for a given id from the local database and builds
  *   a new model object with the retrieved info.
- * - Second (in the main thread): pass the model object to the given GetUserInfoInteractorListener.
+ * - Second (in the main thread): pass the model object to the given GetCategoryInteractorListener.
  */
-public class GetCategoriesInteractor {
+public class GetCategoryInteractor {
 
     private static final DatabaseType DB_TYPE = PickAndGolApp.DBTYPE;
 
     // This interface describes the behavior of a listener waiting for the the async operation
-    public interface GetCategoriesInteractorListener {
-        void onGetCategoriesFail(Throwable e);
-        void onGetCategoriesSuccess(CategoryAggregate categories);
+    public interface GetCategoryInteractorListener {
+        void onGetCategoryFail(Throwable e);
+        void onGetCategorySuccess(Category category);
     }
 
 
@@ -33,30 +33,32 @@ public class GetCategoriesInteractor {
      * Sends the request, gets the response and then builds a model object with the retrieved data,
      * then passes it to the listener.
      *
+     * @param id        id of the category we are asking for
      * @param listener  listener that will process the result of the operation.
      */
-    public void execute(final @NonNull GetCategoriesInteractorListener listener) {
+    public void execute(final @NonNull String id,
+                        final @NonNull GetCategoryInteractorListener listener) {
 
         if (listener == null)
             return;
 
         final DBManager dbManager = new DBManagerBuilder().type(DB_TYPE).build();
 
-        dbManager.getAllCategories(new DBManagerListener() {
+        dbManager.getCategory(id, new DBManagerListener() {
             @Override
             public void onError(Throwable e) {
-                listener.onGetCategoriesFail(e);
+                listener.onGetCategoryFail(e);
             }
 
             @Override
             public void onSuccess(@Nullable Object result) {
 
-                CategoryAggregate categories = null;
+                Category category = null;
 
-                if (result != null && result instanceof CategoryAggregate)
-                    categories = (CategoryAggregate) result;
+                if (result != null && result instanceof Category)
+                    category = (Category) result;
 
-                listener.onGetCategoriesSuccess(categories);
+                listener.onGetCategorySuccess(category);
             }
         });
     }

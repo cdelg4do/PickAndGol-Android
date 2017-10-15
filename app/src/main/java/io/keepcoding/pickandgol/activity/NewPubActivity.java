@@ -164,7 +164,8 @@ public class NewPubActivity extends AppCompatActivity {
                         new GeoReverseLocationListener() {
                             @Override
                             public void onReverseLocationError(Throwable error) {
-                                txtLocation.setText("Undefined location ("+ latitude +", "+ longitude +")");
+                                txtLocation.setText(getString(R.string.new_pub_activity_undefined_location)
+                                        + latitude + ", " + longitude + ")");
                             }
 
                             @Override
@@ -218,7 +219,7 @@ public class NewPubActivity extends AppCompatActivity {
     // Set the layout toolbar as the activity action bar and show the home button
     private void setupActionBar() {
 
-        setTitle("Create a Pub");
+        setTitle(getString(R.string.new_pub_activity_title));
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -265,7 +266,7 @@ public class NewPubActivity extends AppCompatActivity {
                 locationChecker.checkBeforeAsking(new PermissionChecker.CheckPermissionListener() {
                     @Override
                     public void onPermissionDenied() {
-                        Navigator.fromNewPubActivityToLocationPickerActivity(NewPubActivity.this, null, null);
+                        Navigator.fromAnyActivityToLocationPickerActivity(NewPubActivity.this, null, null);
                     }
 
                     @Override
@@ -274,12 +275,12 @@ public class NewPubActivity extends AppCompatActivity {
                         gm.requestLastLocation(new GeoManager.GeoDirectLocationListener() {
                             @Override
                             public void onLocationError(Throwable error) {
-                                Navigator.fromNewPubActivityToLocationPickerActivity(NewPubActivity.this, null, null);
+                                Navigator.fromAnyActivityToLocationPickerActivity(NewPubActivity.this, null, null);
                             }
 
                             @Override
                             public void onLocationSuccess(double latitude, double longitude) {
-                                Navigator.fromNewPubActivityToLocationPickerActivity(NewPubActivity.this, latitude, longitude);
+                                Navigator.fromAnyActivityToLocationPickerActivity(NewPubActivity.this, latitude, longitude);
                             }
                         });
                     }
@@ -341,8 +342,8 @@ public class NewPubActivity extends AppCompatActivity {
             @Override
             public void onPermissionDenied() {
 
-                String title = "Pictures access denied";
-                String msg = "Pick And Gol might not be able to take pictures from your camera or gallery.";
+                String title = getString(R.string.permission_denied_title);
+                String msg = getString(R.string.image_picked_permission_denied_message);
                 Utils.simpleDialog(NewPubActivity.this, title, msg, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
@@ -375,7 +376,7 @@ public class NewPubActivity extends AppCompatActivity {
         im.processImage(sourceImageFile, randomFileName, new ImageProcessingListener() {
             @Override
             public void onProcessError(Exception error) {
-                Utils.simpleDialog(NewPubActivity.this, "Unable to process image", error.toString());
+                Utils.simpleDialog(NewPubActivity.this, getString(R.string.unable_process_image), error.toString());
 
                 imageFilesToUpload[index] = null;
                 imageButtons[index].setVisibility(INVISIBLE);
@@ -402,7 +403,8 @@ public class NewPubActivity extends AppCompatActivity {
 
         if ( !sm.hasSessionStored() ) {
 
-            Utils.simpleDialog(this, "Pub Creation Error", "You are not logged in.");
+            Utils.simpleDialog(this, getString(R.string.new_pub_activity_no_session_title),
+                    getString(R.string.not_logged_in));
             return null;
         }
 
@@ -412,12 +414,13 @@ public class NewPubActivity extends AppCompatActivity {
         String pubUrl = txtUrl.getText().toString();
 
         if (pubName.equals("")) {
-            Utils.simpleDialog(this, "Invalid data", "You must specify a name for the pub.");
+            Utils.simpleDialog(this, getString(R.string.invalid_data), getString(R.string.new_pub_activity_must_name));
             txtName.requestFocus();
         }
 
         else if (latitude == null || longitude == null) {
-            Utils.simpleDialog(this, "Invalid location", "You must select a location from the map.");
+            Utils.simpleDialog(this, getString(R.string.new_pub_activity_invalid_location),
+                    getString(R.string.new_pub_activity_invalid_location_message));
             txtLocation.requestFocus();
         }
 
@@ -447,8 +450,8 @@ public class NewPubActivity extends AppCompatActivity {
         doUploadImages(imageFilesToUpload, pub.getPhotos(), new ErrorSuccessListener() {
             @Override
             public void onError(@Nullable Object result) {
-                Utils.simpleDialog(NewPubActivity.this, "Image Upload error",
-                        "There were errors uploading the pictures. The new pub was NOT registered, please try again.");
+                Utils.simpleDialog(NewPubActivity.this, getString(R.string.image_upload_error_title),
+                        getString(R.string.new_pub_activity_upload_image_error_message));
             }
 
             @Override
@@ -470,7 +473,7 @@ public class NewPubActivity extends AppCompatActivity {
 
         Log.d(LOG_TAG, "Attempting to upload "+ remoteFilenames.size() +" image(s)");
 
-        ProgressDialog pDialog = Utils.newProgressBarDialog(this, 100, "Uploading images...");
+        ProgressDialog pDialog = Utils.newProgressBarDialog(this, 100, getString(R.string.new_pub_activity_uploading_images));
         pDialog.show();
 
         uploadNextImage(0, imageFiles, remoteFilenames, pDialog, listener);
@@ -499,7 +502,8 @@ public class NewPubActivity extends AppCompatActivity {
 
             Log.d(LOG_TAG, "Uploading file '"+ filePath +"' ("+ fileSize +")...");
 
-            pDialog.setMessage("Uploading pictures ("+ (1+current) +"/"+ remoteFilenames.size() +")...");
+            pDialog.setMessage(getString(R.string.new_pub_activity_uploading_pictures)
+                    + (1+current) + "/"+ remoteFilenames.size() +")...");
             pDialog.setProgress(0);
             pDialog.setMax(kbTotal);
 
@@ -552,7 +556,7 @@ public class NewPubActivity extends AppCompatActivity {
             photoUrls.add(newPhotoUrl);
         }
 
-        final ProgressDialog pDialog = Utils.newProgressDialog(this, "Registering pub...");
+        final ProgressDialog pDialog = Utils.newProgressDialog(this, getString(R.string.new_pub_activity_registering_pub));
         pDialog.show();
 
         new CreatePubInteractor().execute(this, name, latitude, longitude, url, photoUrls, token, new CreatePubInteractorListener() {
@@ -561,7 +565,8 @@ public class NewPubActivity extends AppCompatActivity {
                     public void onCreatePubFail(Exception e) {
                         pDialog.dismiss();
 
-                        Utils.simpleDialog(NewPubActivity.this, "Error registering new pub", e.getMessage());
+                        Utils.simpleDialog(NewPubActivity.this, getString(R.string.new_pub_activity_create_pub_fail_title),
+                                e.getMessage());
                     }
 
                     @Override
@@ -569,8 +574,9 @@ public class NewPubActivity extends AppCompatActivity {
                         pDialog.dismiss();
 
                         Utils.simpleDialog(NewPubActivity.this,
-                                "New Pub",
-                                "The pub '"+ createdPub.getName() +"' has been registered.",
+                                getString(R.string.new_pub_activity_new_pub),
+                                getString(R.string.new_pub_activity_the_pub)
+                                        + createdPub.getName() + getString(R.string.new_pub_activity_pub_registered),
                                 new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialogInterface, int i) {

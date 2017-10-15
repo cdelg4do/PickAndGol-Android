@@ -20,7 +20,7 @@ public class ImageManagerSettings {
     public static final String CACHE_DIR = "picasso-cache";
     public static final int CACHE_SIZE_MB = 75;
     public static final boolean ENABLE_LOGGING = false;
-    public static final boolean DEBUG_INDICATORS = true;
+    public static final boolean DEBUG_INDICATORS = false;
 
     // Settings for AWS SDK:
     public static final String S3_BUCKET = "pickandgol";

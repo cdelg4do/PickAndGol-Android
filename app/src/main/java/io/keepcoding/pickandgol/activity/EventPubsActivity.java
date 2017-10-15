@@ -196,7 +196,7 @@ public class EventPubsActivity extends AppCompatActivity implements PubListListe
     // Set the layout toolbar as the activity action bar and show the home button
     private void setupActionBar() {
 
-        setTitle("Pubs showing this event");
+        setTitle(getString(R.string.events_pubs_activity_title));
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -376,7 +376,7 @@ public class EventPubsActivity extends AppCompatActivity implements PubListListe
             return;
 
         lastPubSearchTotalResults = 0;
-        lastPubSearchParams = new PubSearchParams(null,null,MAX_DISTANCE_EARTH_KM,0,null,null);
+        lastPubSearchParams = new PubSearchParams(null,null,MAX_DISTANCE_EARTH_KM,0,null,null,false);
         lastPubSearchParams.setEventId( model.getId() );
 
         searchPubsFirstPage(lastPubSearchParams, null);
@@ -402,7 +402,7 @@ public class EventPubsActivity extends AppCompatActivity implements PubListListe
         searchParams.setOffset(0);
 
         // If we didn't come from a swipe gesture, show a progress dialog
-        final ProgressDialog pDialog = Utils.newProgressDialog(this, "Searching pubs...");
+        final ProgressDialog pDialog = Utils.newProgressDialog(this, getString(R.string.event_pubs_activity_searching_pubs));
         if ( swipeCaller == null )
             pDialog.show();
 
@@ -417,7 +417,7 @@ public class EventPubsActivity extends AppCompatActivity implements PubListListe
                 else                        pDialog.dismiss();
 
                 Log.e(LOG_TAG, "Failed to search pubs: "+ e.toString() );
-                Utils.simpleDialog(EventPubsActivity.this, "Pub search error", e.getMessage());
+                Utils.simpleDialog(EventPubsActivity.this, getString(R.string.event_pubs_activity_search_pub_fail_title), e.getMessage());
             }
 
             @Override
@@ -426,7 +426,8 @@ public class EventPubsActivity extends AppCompatActivity implements PubListListe
                 if (swipeCaller == null)    pDialog.dismiss();
                 else                        swipeCaller.setRefreshing(false);
 
-                Utils.shortSnack(EventPubsActivity.this, pubs.getTotalResults() +" pub(s) found");
+                Utils.shortSnack(EventPubsActivity.this, pubs.getTotalResults() + " "
+                        + getString(R.string.event_pubs_activity_pubs_found));
 
                 lastPubSearchTotalResults = pubs.getTotalResults();
                 initActivityFragments(pubs, null, null, null, null, null);
@@ -491,7 +492,7 @@ public class EventPubsActivity extends AppCompatActivity implements PubListListe
             public void onSearchPubsFail(Exception e) {
 
                 Log.e(LOG_TAG, "Failed to search more pubs: "+ e.toString() );
-                Utils.shortSnack(EventPubsActivity.this, "Error: "+ e.getMessage());
+                Utils.shortSnack(EventPubsActivity.this, getString(R.string.error_prefix)+ e.getMessage());
             }
 
             @Override

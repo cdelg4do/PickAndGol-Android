@@ -19,6 +19,7 @@ import io.keepcoding.pickandgol.adapter.EventListAdapter;
 import io.keepcoding.pickandgol.model.EventAggregate;
 import io.keepcoding.pickandgol.view.EndlessRecyclerViewScrollListener;
 import io.keepcoding.pickandgol.view.EventListListener;
+import io.keepcoding.pickandgol.view.CustomRecyclerDecorator;
 import io.keepcoding.pickandgol.view.SpaceItemDecoration;
 
 import static android.R.color.holo_blue_bright;
@@ -136,10 +137,13 @@ public class EventListFragment extends Fragment {
         return rootView;
     }
 
-    // Configures the fragment RecyclerView
+    // Configures the RecyclerView
     private void setupRecyclerView(View rootView) {
 
         recyclerView = (RecyclerView) rootView.findViewById(R.id.fragment_event_list_recycler);
+
+        // Decorator to tune the exact position of each cell
+        recyclerView.addItemDecoration( new CustomRecyclerDecorator(24, 32) );
 
         // If the list is represented in the form of a classic row list
         if (useRowLayout) {

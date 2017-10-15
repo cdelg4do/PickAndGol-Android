@@ -6,7 +6,7 @@
 
     <item
         android:id="@+id/pub_search_menu_reset"
-        android:title="Reset filters"
+        android:title="@string/menu_reset_filters"
         app:showAsAction="never"/>
 
 </menu>

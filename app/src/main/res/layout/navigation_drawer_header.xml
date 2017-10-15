@@ -30,7 +30,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="@style/TextAppearance.AppCompat.Body1"
         android:textStyle="bold"
-        android:text="Please register or log in"/>
+        android:text="@string/navigation_drawer_header_username_text"/>
 
     <TextView
         android:id="@+id/drawer_profile_email"

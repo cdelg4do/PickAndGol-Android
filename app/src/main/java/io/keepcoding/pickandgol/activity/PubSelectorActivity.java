@@ -95,7 +95,7 @@ public class PubSelectorActivity extends AppCompatActivity implements PubListLis
     // Set the layout toolbar as the activity action bar and show the home button
     private void setupActionBar() {
 
-        setTitle("Search Pub by name");
+        setTitle(getString(R.string.pub_selector_activity_title));
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -113,7 +113,7 @@ public class PubSelectorActivity extends AppCompatActivity implements PubListLis
         if (searchView == null)
             return;
 
-        searchView.setQueryHint("Enter Pub name");
+        searchView.setQueryHint(getString(R.string.pub_selector_activity_search_hint));
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
 
@@ -158,7 +158,7 @@ public class PubSelectorActivity extends AppCompatActivity implements PubListLis
 
     private PubSearchParams buildSearchParams(String queryString) {
 
-        return new PubSearchParams(null, queryString, null, 0, null, null);
+        return new PubSearchParams(null, queryString, null, 0, null, null, false);
     }
 
     // Creates the activity fragment and loads it with the given data
@@ -231,7 +231,7 @@ public class PubSelectorActivity extends AppCompatActivity implements PubListLis
         searchParams.setOffset(0);
 
         // If we didn't come from a swipe gesture, show a progress dialog
-        final ProgressDialog pDialog = Utils.newProgressDialog(this, "Searching pubs...");
+        final ProgressDialog pDialog = Utils.newProgressDialog(this, getString(R.string.searching_pubs));
         if ( swipeCaller == null )
             pDialog.show();
 
@@ -245,7 +245,8 @@ public class PubSelectorActivity extends AppCompatActivity implements PubListLis
                         else                        pDialog.dismiss();
 
                         Log.e(LOG_TAG, "Failed to search pubs: "+ e.getMessage() );
-                        Utils.simpleDialog(PubSelectorActivity.this, "Pub search error", e.getMessage());
+                        Utils.simpleDialog(PubSelectorActivity.this, getString(R.string.pub_search_error),
+                                e.getMessage());
                     }
 
                     @Override
@@ -253,7 +254,8 @@ public class PubSelectorActivity extends AppCompatActivity implements PubListLis
                         if (swipeCaller == null)    pDialog.dismiss();
                         else                        swipeCaller.setRefreshing(false);
 
-                        Utils.shortSnack(PubSelectorActivity.this, pubs.getTotalResults() +" pub(s) found");
+                        Utils.shortSnack(PubSelectorActivity.this, pubs.getTotalResults() + " "
+                                + getString(R.string.pubs_found));
 
                         lastPubSearchTotalResults = pubs.getTotalResults();
                         initActivityFragment(pubs, 0);
@@ -315,7 +317,8 @@ public class PubSelectorActivity extends AppCompatActivity implements PubListLis
                     @Override
                     public void onSearchPubsFail(Exception e) {
                         Log.e(LOG_TAG, "Failed to search more events: "+ e.getMessage() );
-                        Utils.shortSnack(PubSelectorActivity.this, "Error: "+ e.getMessage());
+                        Utils.shortSnack(PubSelectorActivity.this, getString(R.string.error_prefix)
+                                + " " + e.getMessage());
                     }
 
                     @Override

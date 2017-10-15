@@ -96,7 +96,7 @@ public class PubEventsActivity extends AppCompatActivity implements EventListLis
         // If we are coming from the new event activity
         if (requestCode == NEW_EVENT_ACTIVITY_REQUEST_CODE && resultCode == RESULT_OK) {
 
-            Utils.shortSnack(PubEventsActivity.this, "Refresh the list to see the new event.");
+            Utils.shortSnack(PubEventsActivity.this, getString(R.string.pub_events_activity_refresh_list));
         }
     }
 
@@ -106,7 +106,7 @@ public class PubEventsActivity extends AppCompatActivity implements EventListLis
     // Set the layout toolbar as the activity action bar and show the home button
     private void setupActionBar() {
 
-        setTitle("Future events in this pub");
+        setTitle(getString(R.string.pub_events_activity_title));
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -177,7 +177,7 @@ public class PubEventsActivity extends AppCompatActivity implements EventListLis
         searchParams.setOffset(0);
 
         // If we didn't come from a swipe gesture, show a progress dialog
-        final ProgressDialog pDialog = Utils.newProgressDialog(this, "Searching events...");
+        final ProgressDialog pDialog = Utils.newProgressDialog(this, getString(R.string.pub_events_activity_searching_events));
         if ( swipeCaller == null )
             pDialog.show();
 
@@ -191,7 +191,8 @@ public class PubEventsActivity extends AppCompatActivity implements EventListLis
                 else                        pDialog.dismiss();
 
                 Log.e(LOG_TAG, "Failed to search events: "+ e.toString() );
-                Utils.simpleDialog(PubEventsActivity.this, "Event search error", e.getMessage());
+                Utils.simpleDialog(PubEventsActivity.this,
+                        getString(R.string.pub_events_activity_search_events_fail_title), e.getMessage());
             }
 
             @Override
@@ -199,7 +200,8 @@ public class PubEventsActivity extends AppCompatActivity implements EventListLis
                 if (swipeCaller == null)    pDialog.dismiss();
                 else                        swipeCaller.setRefreshing(false);
 
-                Utils.shortSnack(PubEventsActivity.this, events.getTotalResults() +" event(s) found");
+                Utils.shortSnack(PubEventsActivity.this, events.getTotalResults() + " "
+                        + getString(R.string.pub_events_activity_search_events_success));
 
                 lastEventSearchTotalResults = events.getTotalResults();
                 initActivityFragment(events);
@@ -261,7 +263,8 @@ public class PubEventsActivity extends AppCompatActivity implements EventListLis
                     @Override
                     public void onSearchEventsFail(Exception e) {
                         Log.e(LOG_TAG, "Failed to search more events: "+ e.toString() );
-                        Utils.shortSnack(PubEventsActivity.this, "Error: "+ e.getMessage());
+                        Utils.shortSnack(PubEventsActivity.this, getString(R.string.pub_events_activity_error)
+                                + " " + e.getMessage());
                     }
 
                     @Override

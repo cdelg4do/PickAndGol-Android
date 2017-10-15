@@ -22,6 +22,7 @@ public class PubSearchParams implements Serializable {
     // General filtering params (set at object creation only)
     private @Nullable String sort;
     private @Nullable String keyWords;
+    private boolean useCurrentLocation; // used only to restore previous search settings
     private @Nullable Integer radiusKm;
 
     // Specific filtering params (can be set after the object is created)
@@ -41,10 +42,13 @@ public class PubSearchParams implements Serializable {
      * @param offset        the search should return pubs only from this result.
      * @param latitude      latitude of the location used as center for the search.
      * @param longitude     longitude of the location used as center for the search.
+     * @param useCurrentLocation    tells if the device current location must be used as search center
+     *                              (this param is used only when showing on screen the settings of the last search)
      */
     public PubSearchParams(@Nullable String sort, @Nullable String keyWords,
                            @Nullable Integer radiusKm, @Nullable Integer offset,
-                           @Nullable Double latitude, @Nullable Double longitude) {
+                           @Nullable Double latitude, @Nullable Double longitude,
+                           boolean useCurrentLocation) {
 
         this.sort = sort;
         this.keyWords = keyWords;
@@ -53,6 +57,7 @@ public class PubSearchParams implements Serializable {
         this.limit = DEFAULT_LIMIT;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.useCurrentLocation = useCurrentLocation;
         this.eventId = null;
     }
 
@@ -64,7 +69,7 @@ public class PubSearchParams implements Serializable {
      */
     public static @NonNull PubSearchParams buildEmptyParams() {
 
-        return new PubSearchParams(null, null, DEFAULT_RADIUS, 0, null, null);
+        return new PubSearchParams(null, null, DEFAULT_RADIUS, 0, null, null, true);
     }
 
 
@@ -96,6 +101,10 @@ public class PubSearchParams implements Serializable {
 
     public @Nullable Integer getRadiusKm() {
         return radiusKm;
+    }
+
+    public boolean isUsingCurrentLocation() {
+        return useCurrentLocation;
     }
 
     public @Nullable String getEventId() {

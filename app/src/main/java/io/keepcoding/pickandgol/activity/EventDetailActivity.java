@@ -23,14 +23,14 @@ import java.util.Date;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.keepcoding.pickandgol.R;
-import io.keepcoding.pickandgol.interactor.GetCategoriesInteractor;
+import io.keepcoding.pickandgol.interactor.GetCategoryInteractor;
+import io.keepcoding.pickandgol.interactor.GetCategoryInteractor.GetCategoryInteractorListener;
 import io.keepcoding.pickandgol.interactor.LinkEventToPubInteractor;
 import io.keepcoding.pickandgol.interactor.LinkEventToPubInteractor.LinkEventToPubInteractorListener;
 import io.keepcoding.pickandgol.manager.geo.GeoManager;
 import io.keepcoding.pickandgol.manager.image.ImageManager;
 import io.keepcoding.pickandgol.manager.session.SessionManager;
 import io.keepcoding.pickandgol.model.Category;
-import io.keepcoding.pickandgol.model.CategoryAggregate;
 import io.keepcoding.pickandgol.model.Event;
 import io.keepcoding.pickandgol.model.Pub;
 import io.keepcoding.pickandgol.navigator.Navigator;
@@ -51,7 +51,6 @@ public class EventDetailActivity extends AppCompatActivity {
     public final static String EVENT_MODEL_KEY = "EVENT_MODEL_KEY";
 
     private Event model;
-    private CategoryAggregate categories;
 
     private SessionManager sm;
     private ImageManager im;
@@ -79,7 +78,7 @@ public class EventDetailActivity extends AppCompatActivity {
         setupActionBar();
         setupButtons();
 
-        loadCategoriesThenLoadModel();
+        loadModel();
     }
 
     @Override
@@ -123,9 +122,9 @@ public class EventDetailActivity extends AppCompatActivity {
 
                 Utils.questionDialog(
                         EventDetailActivity.this,
-                        "Link to Pub",
-                        "You are about to link this event to the pub '"
-                            + selectedPub.getName() + "'\n\nDo you want to proceed?",
+                        getString(R.string.event_detail_activity_link_pub_title),
+                        getString(R.string.event_detail_activity_message_1)
+                            + selectedPub.getName() + getString(R.string.event_detail_activity_message_2),
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
@@ -146,8 +145,8 @@ public class EventDetailActivity extends AppCompatActivity {
     private void attemptToLinkEvent() {
 
         if ( !sm.hasSessionStored() ) {
-            Utils.simpleDialog(this, "You are not logged in",
-                               "Only registered users can link events to pubs.");
+            Utils.simpleDialog(this, getString(R.string.not_logged_in),
+                               getString(R.string.event_detail_activity_session_error_message));
             return;
         }
 
@@ -157,7 +156,7 @@ public class EventDetailActivity extends AppCompatActivity {
     // Set the layout toolbar as the activity action bar and show the home button
     private void setupActionBar() {
 
-        setTitle("Event Detail");
+        setTitle(getString(R.string.event_detail_activity_title));
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -178,32 +177,8 @@ public class EventDetailActivity extends AppCompatActivity {
         });
     }
 
-    // Loads the categories from the server, if succeeds then loads the model
-    private void loadCategoriesThenLoadModel() {
-
-        final ProgressDialog pDialog = Utils.newProgressDialog(this, "Loading categories...");
-        pDialog.show();
-
-        new GetCategoriesInteractor().execute(this, new GetCategoriesInteractor.GetCategoriesInteractorListener() {
-
-            @Override
-            public void onGetCategoriesFail(Exception e) {
-                pDialog.dismiss();
-                finishActivity(new Error(e.getMessage()));
-            }
-
-            @Override
-            public void onGetCategoriesSuccess(CategoryAggregate categories) {
-                pDialog.dismiss();
-
-                EventDetailActivity.this.categories = categories;
-                loadModel();
-            }
-        });
-    }
-
     // Gets the event passed from the intent and shows its data on screen
-    // (first make sure categories is not null)
+    // (image, category name, description, date, time and num. of pubs where it is shown)
     private void loadModel() {
 
         Intent i = getIntent();
@@ -219,18 +194,23 @@ public class EventDetailActivity extends AppCompatActivity {
         else
             im.loadImage(model.getPhotoUrl(), imgPhoto, R.drawable.error_placeholder);
 
-        String categoryName;
-        Category cat = categories.search(model.getCategory());
-        if (cat != null)
-            categoryName = cat.getName();
-        else
-            categoryName = "Unspecified category.";
+        new GetCategoryInteractor().execute(model.getCategory(), new GetCategoryInteractorListener() {
+            @Override
+            public void onGetCategoryFail(Throwable e) {
+                txtCategory.setText(R.string.event_detail_activity_unspecified_category);
+            }
 
-        txtCategory.setText(categoryName);
+            @Override
+            public void onGetCategorySuccess(Category category) {
+
+                if (category == null)   txtCategory.setText(R.string.event_detail_activity_unspecified_category);
+                else                    txtCategory.setText( category.getName() );
+            }
+        });
 
         String description = model.getDescription();
         if (description == null)
-            description = "No description available.";
+            description = getString(R.string.event_detail_activity_no_description);
 
         txtDescription.setText(description);
 
@@ -241,9 +221,9 @@ public class EventDetailActivity extends AppCompatActivity {
         String strPubCount;
         int pubCount = model.getPubs().size();
         if (pubCount > 0)
-            strPubCount = pubCount +" pub(s)";
+            strPubCount = pubCount + " " + getString(R.string.event_detail_activity_pub);
         else {
-            strPubCount = "No pubs are showing this event yet.";
+            strPubCount = getString(R.string.event_detail_activity_no_pubs);
             btnMap.setVisibility(View.GONE);
         }
 
@@ -260,7 +240,7 @@ public class EventDetailActivity extends AppCompatActivity {
     // Associates the given pub to the model
     private void linkToPub(final @NonNull Pub pub) {
 
-        final ProgressDialog pDialog = Utils.newProgressDialog(this, "Linking Event...");
+        final ProgressDialog pDialog = Utils.newProgressDialog(this, getString(R.string.event_detail_activity_linking_event));
         pDialog.show();
 
         String eventId = model.getId();
@@ -274,14 +254,16 @@ public class EventDetailActivity extends AppCompatActivity {
                 pDialog.dismiss();
 
                 Log.e(LOG_TAG, "Failed to link event to pub '" + pubId + "': " + e.getMessage() );
-                Utils.simpleDialog(EventDetailActivity.this, "Link Event error", e.getMessage());
+                Utils.simpleDialog(EventDetailActivity.this, getString(R.string.event_detail_activity_link_event_fail_title), e.getMessage());
             }
 
             @Override
             public void onLinkEventPubSuccess(Pub updatedPub, Event updatedEvent) {
                 pDialog.dismiss();
 
-                Utils.simpleDialog(EventDetailActivity.this, "Link Event", "This event has been linked to '"+ updatedPub.getName() +"'");
+                Utils.simpleDialog(EventDetailActivity.this,
+                        getString(R.string.event_detail_activity_link_event_success_title),
+                        getString(R.string.event_detail_activity_link_event_success_message) + updatedPub.getName() +"'");
             }
         });
     }

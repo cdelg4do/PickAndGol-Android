@@ -58,7 +58,7 @@
                         android:layout_height="wrap_content"
                         android:padding="10dp"
                         android:layout_below="@+id/activity_new_event_name_label"
-                        android:hint="Enter a name for the new event"
+                        android:hint="@string/activity_new_event_name_hint"
                         android:background="@android:color/white"/>
 
                 </RelativeLayout>
@@ -128,7 +128,7 @@
                             android:layout_height="wrap_content"
                             android:padding="10dp"
                             android:layout_below="@+id/activity_new_event_date_label"
-                            android:hint="Click to set"
+                            android:hint="@string/activity_new_event_click_to_set"
                             android:background="@android:color/white"
                             android:focusable="false"
                             android:clickable="true"/>
@@ -161,7 +161,7 @@
                             android:layout_height="wrap_content"
                             android:padding="10dp"
                             android:layout_below="@+id/activity_new_event_time_label"
-                            android:hint="Click to set"
+                            android:hint="@string/activity_new_event_click_to_set"
                             android:background="@android:color/white"
                             android:focusable="false"
                             android:clickable="true"/>
@@ -196,7 +196,7 @@
                         android:layout_height="wrap_content"
                         android:padding="10dp"
                         android:layout_below="@+id/activity_new_event_description_label"
-                        android:hint="Description for the new event"
+                        android:hint="@string/activity_new_event_description"
                         android:background="@android:color/white"/>
 
                 </RelativeLayout>
@@ -241,7 +241,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginLeft="10dp"
-                            android:text="Remove"
+                            android:text="@string/activity_new_event_remove"
                             android:layout_centerVertical="true"
                             android:layout_toRightOf="@+id/activity_new_event_image_holder"
                             android:visibility="invisible"
@@ -268,7 +268,7 @@
 
             <Button
                 android:id="@+id/activity_new_event_button_cancel"
-                android:text="Cancel"
+                android:text="@string/activity_new_event_cancel"
                 android:layout_width="100dp"
                 android:layout_height="50dp"/>
 
@@ -280,7 +280,7 @@
 
             <Button
                 android:id="@+id/activity_new_event_button_create"
-                android:text="Create"
+                android:text="@string/activity_new_event_create"
                 android:layout_width="100dp"
                 android:layout_height="50dp"/>
 

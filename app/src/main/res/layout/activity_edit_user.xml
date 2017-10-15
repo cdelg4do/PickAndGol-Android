@@ -69,7 +69,7 @@
                         android:layout_height="wrap_content"
                         android:padding="10dp"
                         android:layout_below="@+id/edit_user_name_label"
-                        android:hint="Enter a name for the user"
+                        android:hint="@string/edit_user_name_hint"
                         android:background="@android:color/white"/>
                 </RelativeLayout>
 
@@ -99,7 +99,7 @@
                         android:layout_height="wrap_content"
                         android:padding="10dp"
                         android:layout_below="@+id/edit_user_email_label"
-                        android:hint="Enter a name for the email"
+                        android:hint="@string/edit_user_email_hint"
                         android:background="@android:color/white"
                         android:inputType="textEmailAddress" />
                 </RelativeLayout>
@@ -130,7 +130,7 @@
                         android:layout_height="wrap_content"
                         android:padding="10dp"
                         android:layout_below="@+id/edit_user_old_password_label"
-                        android:hint="Enter the old password of the user"
+                        android:hint="@string/edit_user_old_password_hint"
                         android:background="@android:color/white"
                         android:inputType="textPassword" />
                 </RelativeLayout>
@@ -151,7 +151,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="10dp"
-                        android:text="@string/edit_user_old_password"
+                        android:text="@string/edit_user_new_password"
                         android:textStyle="normal|bold"
                         android:textSize="16sp"/>
 
@@ -161,7 +161,7 @@
                         android:layout_height="wrap_content"
                         android:padding="10dp"
                         android:layout_below="@+id/edit_user_new_password_label"
-                        android:hint="Enter the new password of the user"
+                        android:hint="@string/edit_user_new_password_hint"
                         android:background="@android:color/white"
                         android:inputType="textPassword" />
                 </RelativeLayout>
@@ -179,7 +179,7 @@
 
             <Button
                 android:id="@+id/edit_user_button_cancel"
-                android:text="Cancel"
+                android:text="@string/edit_user_cancel"
                 android:layout_width="100dp"
                 android:layout_height="50dp"/>
 
@@ -190,7 +190,7 @@
 
             <Button
                 android:id="@+id/edit_user_button_save"
-                android:text="Save"
+                android:text="@string/edit_user_save"
                 android:layout_width="100dp"
                 android:layout_height="50dp"/>
 
