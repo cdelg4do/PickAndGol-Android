@@ -1,3 +1,5 @@
+<img alt="App logo" src="https://avatars0.githubusercontent.com/u/25353537?s=70"/>
+
 # Android Client for PickAndGol
 
 This is the Android client for the **PickAndGol** platform, a pet project I am working on along a small group of fellow developers. PickAndGol is also available on iOS devices and has a web version, at **www.pickandgol.com**.
