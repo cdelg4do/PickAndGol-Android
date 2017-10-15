@@ -1,16 +1,16 @@
 # Android Client for PickAndGol
 
-This is the Android client for the **PickAndGol** platform, a pet project I am working on among a small group of fellow developers. PickAndGol is also available on iOS devices and has a web version, at **www.pickandgol.com**.
+This is the Android client for the **PickAndGol** platform, a pet project I am working on along a small group of fellow developers. PickAndGol is also available on iOS devices and has a web version, at **www.pickandgol.com**.
 
 #### **- Notes:**
 - This repository is just a 'screenshot' of the original working repository, made to show visitors some of my progress on this project. The development is still in progress so this repo does not necessarily represent the last updated version.
 
-- For security reasons, the code in this repo does not contain some private API keys, necessary to fully compile the project. In order to try the app on your device, you can still do it by generating your own keys (see the **"Missing settings and API keys"** section below), or by using <a href="http://bit.ly/pickandgol_r20171010"> **THIS** </a> installer package.
+- For security and privacy reasons, the code in this repo does not contain some private API keys, necessary to fully compile the project. In order to try the app on your device, you can still do it by generating your own keys (see the **"Missing project files"** section below), or by using <a href="http://bit.ly/pickandgol_r20171010"> **THIS** </a> installer package.
 
 ### **Description**
 PickAndGol is a social app that enables people to find where their favorite sport events are broadcasted in their nearby. You can search events by name, category or location, and also add new ones to the system so that they can be checked by other users.
 
-Every event in the system is tied to one or more pubs where it is being broadcasted, so you can also search by pubs and see what events are coming on each pub. New pubs can be added as well, and you can populate a favorite list in order to receive notifications when new events are added on some of your favorite pubs.
+Every event in the system is tied to one or more pubs where it is being broadcasted, so you can also search by pubs and see what events are coming on each pub. New pubs can be added as well, and you can keep a favorite list in order to receive notifications when new events are added on some of your favorite pubs.
 
 Future features include: integration with some major social network so that you can tell all your contacts you are attending to an event at some pub, and a review system where users can publish and evaluate the free bites of food served on the pub (typically Spanish!) during the event broadcasts.
 
@@ -31,7 +31,7 @@ Future features include: integration with some major social network so that you 
 ### **Architectural considerations**
 The app has been designed following the **SOLID** principles and implementing a **Clean Architecture**, organizing it in several layers where the code dependencies point inwards only, and the inner layers do not know anything about the outer layers. This way a separation of concerns (presentation, businnes rules, data persistence, etc) is achieved while elements in each level can be tested relying on the tests of the previous level.
 
-Also, each layer uses its own data model so that they are independent of the specific implementation used in the other layers, as long as the interfaces between them remain unchanged. This specially afects the app database manager, whose implementation could be easily replaced from Realm to another engine without affecting the rest of the application.
+Also, each layer uses its own data model so that they are independent of the specific implementation used in the other layers, as long as the interfaces between them remain unchanged. This specially afects the app database manager, for instance, whose implementation could be easily replaced from Realm to another engine without affecting the rest of the application.
 
 You can find additional information about Clean Architectures <a href="https://8thlight.com/blog/uncle-bob/2012/08/13/the-clean-architecture.html">**here**</a>.
 
@@ -44,7 +44,7 @@ The following third-party libraries/frameworks are used in this project:
 - OkHttp3Downloader (used as network manager and disk cache for Picasso)
 - Butterknife (to easily manage view dependencies)
 - Google Maps (for showing maps on screen and choosing locations)
-- CircleImageView (for the circle profile images)
+- CircleImageView (for the circular profile images)
 - ArcNavigationView (to show the curved navigation drawer)
 - Secure-preferences (to store a locally encrypted preferences file)
 - Amazon AWS Mobile SDK: Core + S3 (to upload images to the Amazon cloud)
@@ -52,9 +52,9 @@ The following third-party libraries/frameworks are used in this project:
 - CircleIndicator (a lightweight viewpager indicator)
 - Firebase: Core + Cloud Messaging (to support push notifications)
 
-### **Missing settings and API keys**
+### **Missing project files**
 
-The repository does not include the API key to use the **Google Maps for Android** services and the Identity Pool Id for the **Amazon AWS Mobile SDK**. In order to complile the project, it is mandatory to obtain (or generate) these values from their respective admin/developer consoles. Then, they must be added to a file **/res/values/api_keys.xml** with the following content:
+The repository does not include the API key to use the **Google Maps for Android** services and the Identity Pool Id for the **Amazon AWS Mobile SDK**. In order to compile the project, it is mandatory to obtain (or generate) these values from their respective admin/developer consoles. Then, they must be added to a file **/res/values/api_keys.xml** with the following content:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
